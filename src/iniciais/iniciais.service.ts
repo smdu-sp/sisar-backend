@@ -12,6 +12,7 @@ export class IniciaisPaginado {
 @Injectable()
 export class IniciaisService {
   constructor (private prisma: PrismaService) {}
+  
   async create(createInicialDto: CreateInicialDto): Promise<Inicial> {
     const novo_inicial = await this.prisma.inicial.create({ data: { ... createInicialDto }});
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');

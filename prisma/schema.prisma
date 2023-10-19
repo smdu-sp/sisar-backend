@@ -99,6 +99,7 @@ model Coordenadoria {
   nome              String @unique
   sigla             String @unique
   admissibilidades  Admissibilidade[]
+  diretorias        Diretoria[]
 
   @@map("coordenadorias")
 }
@@ -123,9 +124,10 @@ model Decisao {
 }
 
 model Diretoria {
-  id    String @id @default(uuid())
-  nome  String @unique
-  //relacao com coordenadoria 1:n
+  id                String @id @default(uuid())
+  nome              String @unique
+  coordenadoria_id  String
+  coordenadoria     Coordenadoria @relation(fields: [coordenadoria_id], references: [id])
   admissibilidades  Admissibilidade[]
 
   @@map("diretorias")
@@ -151,7 +153,6 @@ model Inicial {
   id                              Int     @id @default(autoincrement())
   decreto                         Boolean @default(false)
   sei                             String
-  num_sql                         String
   tipo_requerimento               String
   requerimento                    String
   aprova_digital                  String?
@@ -169,6 +170,7 @@ model Inicial {
   pedidos                         Pedido_Inicial[]
   reunioes                        Reuniao_Processo[]
   suspensoes_prazo                Suspensao_Prazo[]
+  iniciais_sqls                   Inicial_Sqls[]
   admissibilidade                 Admissibilidade?
   conclusao                       Conclusao?
   distribuicao                    Distribuicao?
@@ -176,6 +178,15 @@ model Inicial {
   secretaria                      Secretaria?
 
   @@map("iniciais")
+}
+
+model Inicial_Sqls {
+  id            String      @id @default(uuid())
+  inicial       Inicial     @relation(fields: [inicial_id], references: [id])
+  inicial_id    Int
+  data_cadastro DateTime    @default(now())
+
+  @@map("iniciais_sqls")
 }
 
 model Motivo_Inadmissao {
