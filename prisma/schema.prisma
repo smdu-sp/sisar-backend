@@ -30,9 +30,14 @@ model Admissibilidade {
 }
 
 model Alvara_Tipo {
-  id                    String @id @default(uuid())
-  nome                  String @unique
-  prazo_admissibilidade Int
+  id                    String  @id @default(uuid())
+  nome                  String  @unique
+  prazo_admissibilidade Int     @default(15)
+  prazo_analise_smul1   Int     @default(30)
+  prazo_analise_smul2   Int     @default(30)
+  prazo_analise_multi1  Int     @default(45)
+  prazo_analise_multi2  Int     @default(40)
+  iniciais              Inicial[]
 
   @@map("alvara_tipos")
 }
@@ -159,7 +164,8 @@ model Inicial {
   processo_fisico                 String?
   data_protocolo                  DateTime
   envio_admissibilidade           DateTime?
-  tipo_alvara                     String
+  alvara_tipo                     Alvara_Tipo @relation(fields: [alvara_tipo_id], references: [id])
+  alvara_tipo_id                  String
   tipo_processo                   String
   obs                             String?
   status                          String

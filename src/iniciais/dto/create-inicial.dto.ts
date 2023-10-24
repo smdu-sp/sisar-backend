@@ -20,7 +20,7 @@ export class CreateInicialDto {
     @ApiProperty()
     envio_admissibilidade: string;
     @ApiProperty()
-    tipo_alvara: string;
+    alvara_tipo_id: string;
     @ApiProperty()
     tipo_processo: string;
     @ApiProperty()
