@@ -6,6 +6,13 @@ import { Usuario } from '@prisma/client';
 
 @Injectable()
 export class UsuarioService {
+  async buscarPorLogin(login: string) {
+    return await this.prisma.usuario.findUnique({ where: { login } });
+  }
+
+  async retornaPermissao(id: string) {
+    return await this.prisma.usuario.findUnique({ where: { id } }).permissao;	
+  }
   constructor (private prisma: PrismaService) {
 
   }

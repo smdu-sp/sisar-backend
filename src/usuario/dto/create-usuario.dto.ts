@@ -1,14 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { $Enums } from '@prisma/client';
+import { IsEnum, IsNotEmpty, IsNumber, Length, MinLength } from 'class-validator';
 
 export class CreateUsuarioDto {
     @ApiProperty()
+    @IsNotEmpty({ message: 'Nome deve ser informado' })
+    @MinLength(10, { message: 'Nome deve ter pelo menos 10 caracteres' })
     nome: string;
+
     @ApiProperty()
+    @IsNotEmpty({ message: 'Login deve ser informado' })
+    @Length(7, 7, { message: 'Login deve ter 7 digitos' })
     login: string;
+
     @ApiProperty()
-    cargo: string;
+    @IsEnum($Enums.Cargo)
+    cargo: $Enums.Cargo = 'ADM';
+
     @ApiProperty()
-    permissao?: string = "USR";
+    @IsEnum($Enums.Permissao)
+    permissao?: $Enums.Permissao = 'USR';
+
     @ApiProperty()
+    @IsNumber(
+        { maxDecimalPlaces: 0 }, 
+        { message: 'Status deve ser numérico' }
+    )
     status?: number = 1;
 }

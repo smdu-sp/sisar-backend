@@ -301,13 +301,25 @@ model Suspensao_Prazo {
 model Usuario {
   id              String          @id @default(uuid())
   nome            String
-  login           String
-  cargo           String          @default("ADM")
-  permissao       String          @default("USR")
+  login           String          @unique
+  cargo           Cargo           @default(ADM)
+  permissao       Permissao       @default(USR)
   status          Int             @default(1)
   tecnico         Distribuicao[]  @relation(name: "tecnico")
   administrativo  Distribuicao[]  @relation(name: "administrativo")
   secretaria      Secretaria[]
 
   @@map("usuarios")
+}
+
+enum Cargo {
+  ADM
+  TEC
+}
+
+enum Permissao {
+  DEV
+  SUP
+  ADM
+  USR
 }
