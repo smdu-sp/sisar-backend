@@ -1,10 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsuarioService } from 'src/usuario/usuario.service';
-import * as argon from 'argon2';
 import { Usuario } from '@prisma/client';
 import { UsuarioPayload } from './models/UsuarioPayload';
 import { JwtService } from '@nestjs/jwt';
 import { UsuarioToken } from './models/UsuarioToken';
+import { Client, createClient } from 'ldapjs';
 
 @Injectable()
 export class AuthService {
@@ -23,17 +23,18 @@ export class AuthService {
         return { access_token }
     }
 
-    async validateUser(login: string, password: string) {
+    async validateUser(login: string, senha: string) {
         const usuario = await this.usuariosService.buscarPorLogin(login);
-        if (usuario && usuario.status){
-            const verificaSenha = await argon.verify(usuario.senha, password);
-            if (verificaSenha) {
-                return {
-                    ...usuario,
-                    senha: undefined
-                };
-            }
-        }
-        throw new UnauthorizedException("Credenciais incorretas!");
+        if (!usuario) throw new UnauthorizedException("Credenciais incorretas!");
+        const client: Client = createClient({
+            url: process.env.LDAP_SERVER,
+        });
+        await new Promise<void>((resolve, reject) => {
+            client.bind(`${login}${process.env.LDAP_DOMAIN}`, senha, (err) => {
+                if (err) reject(new UnauthorizedException("Credenciais incorretas."));
+                else resolve();
+            });
+        });
+        return usuario;
     }
 }

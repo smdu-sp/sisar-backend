@@ -6,19 +6,23 @@ import { Usuario } from '@prisma/client';
 
 @Injectable()
 export class UsuarioService {
+  constructor (private prisma: PrismaService) {}
+
   async buscarPorLogin(login: string) {
     return await this.prisma.usuario.findUnique({ where: { login } });
   }
 
   async retornaPermissao(id: string) {
-    return await this.prisma.usuario.findUnique({ where: { id } }).permissao;	
+    const usuario = await this.prisma.usuario.findUnique({ where: { id } });
+    return usuario.permissao;
   }
-  constructor (private prisma: PrismaService) {
 
+  async validaPermissaoCriador(permissao: string, permissaoCriador: string) {
+    
   }
-  create(createUsuarioDto: CreateUsuarioDto) {
+  async create(criador: Usuario, createUsuarioDto: CreateUsuarioDto) {
     const { nome, login, cargo, permissao, status } = createUsuarioDto;
-    const usuario = this.prisma.usuario.create({
+    const usuario = await this.prisma.usuario.create({
       data: {
         nome,
         login,

@@ -1,8 +1,7 @@
 import { IsEmail, IsString, Length } from 'class-validator';
 
 export class LoginRequestBody {
-  @IsString({ message: "Login precisa ser um texto." })
-  @Length(7, 7, { message: "Login precisa ter 7 caracteres." })
+  @IsString({ message: "O login precisa ser um texto." })
   login: string;
 
   @IsString({ message: "A senha precisa ser um texto." })
