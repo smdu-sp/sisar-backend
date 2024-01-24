@@ -25,6 +25,9 @@ model Admissibilidade {
   categoria         Categoria @relation(fields: [categoria_id], references: [id])
   categoria_id      String
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@unique(inicial_id)
   @@map("admissibilidades")
 }
@@ -39,6 +42,9 @@ model Alvara_Tipo {
   prazo_analise_multi2  Int     @default(40)
   iniciais              Inicial[]
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@map("alvara_tipos")
 }
 
@@ -49,6 +55,9 @@ model Categoria {
   divisao           String @default("")
   competencia       String @default("")
   admissibilidades  Admissibilidade[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("categorias")
 }
@@ -62,6 +71,9 @@ model Comunique_se {
   etapa         Int
   graproem      Int?
   data_resposta DateTime?
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("comunique_ses")
 }
@@ -78,6 +90,9 @@ model Conclusao {
   num_alvara            String
   obs                   String
   outorga               Boolean @default(false)
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@unique(inicial_id)
   @@map("conclusoes")  
@@ -96,6 +111,9 @@ model Controle_Prazo {
   graproem          Int
   status            Int
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@map("controles_prazo")
 }
 
@@ -105,6 +123,9 @@ model Coordenadoria {
   sigla             String @unique
   admissibilidades  Admissibilidade[]
   diretorias        Diretoria[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("coordenadorias")
 }
@@ -125,6 +146,9 @@ model Decisao {
   etapa               Int?
   graproem            Int?
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@map("decisoes")
 }
 
@@ -134,6 +158,9 @@ model Diretoria {
   coordenadoria_id  String
   coordenadoria     Coordenadoria @relation(fields: [coordenadoria_id], references: [id])
   admissibilidades  Admissibilidade[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("diretorias")
 }
@@ -149,6 +176,9 @@ model Distribuicao {
   assunto_processo_relacionado_incomum  String?
   baixa_pagamento                       Int     @default(0)
   obs                                   String?
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@unique(inicial_id)
   @@map("distribuicoes")
@@ -183,6 +213,9 @@ model Inicial {
   reconsideracao_admissibilidade  Reconsideracao_Admissibilidade?
   secretaria                      Secretaria?
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@map("iniciais")
 }
 
@@ -192,6 +225,9 @@ model Inicial_Sqls {
   inicial_id    Int
   data_cadastro DateTime    @default(now())
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@map("iniciais_sqls")
 }
 
@@ -199,6 +235,9 @@ model Motivo_Inadmissao {
   id        String @id @default(uuid())
   descricao String
   iniciais  Motivo_Inadmissao_Inicial[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("motivos_inadmissao")
 }
@@ -210,6 +249,9 @@ model Motivo_Inadmissao_Inicial {
   motivo_inadmissao     Motivo_Inadmissao @relation(fields: [motivo_inadmissao_id], references: [id])
   descricao             String?
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@unique([inicial_id, motivo_inadmissao_id])
   @@map("motivos_inadmissao_inicial")
 }
@@ -218,6 +260,9 @@ model Pedido {
   id        String           @id @default(uuid())
   descricao String           @unique
   iniciais  Pedido_Inicial[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("pedidos")
 }
@@ -229,6 +274,9 @@ model Pedido_Inicial {
   pedido     Pedido  @relation(fields: [pedido_id], references: [id])
   quantidade Int
   medida     String
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@unique([inicial_id, pedido_id])
   @@map("pedidos_inicial")
@@ -242,6 +290,9 @@ model Reconsideracao_Admissibilidade {
   pedido_reconsideracao    DateTime?
   parecer           Boolean @default(false)
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@unique(inicial_id)
   @@map("reconsideracoes_admissibilidade")
 
@@ -254,6 +305,9 @@ model Reuniao_Processo {
   data_reuniao              DateTime
   nova_data_reuniao         DateTime?
   justificativa_remarcacao  String?
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("reuniao_processos")
 }
@@ -274,6 +328,9 @@ model Secretaria {
   tecnico_smul_id   String
   tecnico_smul      Usuario @relation(fields: [tecnico_smul_id], references: [id])
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@unique(inicial_id)
   @@map("secretarias")
 }
@@ -282,6 +339,9 @@ model Subprefeitura {
   id                String @id @default(uuid())
   nome              String @unique
   admissibilidades  Admissibilidade[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("subprefeituras")
 }
@@ -295,6 +355,9 @@ model Suspensao_Prazo {
   motivo      Int
   etapa       Int
 
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
+
   @@map("suspensoes_prazo")
 }
 
@@ -302,12 +365,16 @@ model Usuario {
   id              String          @id @default(uuid())
   nome            String
   login           String          @unique
+  email           String          @unique
   cargo           Cargo           @default(ADM)
   permissao       Permissao       @default(USR)
-  status          Int             @default(1)
+  status          Int             @default(3)
   tecnico         Distribuicao[]  @relation(name: "tecnico")
   administrativo  Distribuicao[]  @relation(name: "administrativo")
   secretaria      Secretaria[]
+
+  criado_em       DateTime        @default(now())
+  alterado_em     DateTime        @updatedAt @default(now())
 
   @@map("usuarios")
 }

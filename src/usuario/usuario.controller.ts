@@ -1,36 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
+import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 
 @Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
-  @Post()
-  create(@UsuarioAtual() usuario: Usuario, @Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuarioService.create(usuario, createUsuarioDto);
+  @Permissoes('SUP', 'ADM')
+  @Post('criar')
+  criar(@Body() createUsuarioDto: CreateUsuarioDto, @UsuarioAtual() usuario: Usuario) {
+    return this.usuarioService.criar(createUsuarioDto, usuario);
   }
 
-  @Get()
-  findAll() {
-    return this.usuarioService.findAll();
+  @Permissoes('SUP', 'ADM')
+  @Get('buscar-tudo')
+  buscarTudo(
+    @Query('pagina') pagina: number,
+    @Query('limite') limite: number,
+    @Query('status') status?: number,
+    @Query('busca') busca?: string
+  ) {
+    return this.usuarioService.buscarTudo(pagina, limite, status, busca);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuarioService.findOne(id);
+  @Permissoes('SUP', 'ADM')
+  @Get('buscar-por-id/:id')
+  buscarPorId(@Param('id') id: string) {
+    return this.usuarioService.buscarPorId(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuarioService.update(id, updateUsuarioDto);
+  @Permissoes('SUP', 'ADM')
+  @Patch('atualizar/:id')
+  atualizar(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UsuarioAtual() usuario: Usuario) {
+    return this.usuarioService.atualizar(id, updateUsuarioDto, usuario);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usuarioService.remove(id);
+  @Permissoes('SUP')
+  @Delete('desativar/:id')
+  desativar(@Param('id') id: string) {
+    return this.usuarioService.desativar(id);
+  }
+
+  @Permissoes('SUP', 'ADM')
+  @Patch('autorizar/:id')
+  autorizarUsuario(@Param('id') id: string) {
+    return this.usuarioService.autorizaUsuario(id);
   }
 }

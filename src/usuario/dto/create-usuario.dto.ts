@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { $Enums } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsNumber, Length, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, Length, MinLength } from 'class-validator';
 
 export class CreateUsuarioDto {
     @ApiProperty()
@@ -14,8 +14,13 @@ export class CreateUsuarioDto {
     login: string;
 
     @ApiProperty()
+    @IsEmail({ message: 'Email inválido' })
+    @IsNotEmpty({ message: 'Email deve ser informado' })
+    email: string;
+
+    @ApiProperty()
     @IsEnum($Enums.Cargo)
-    cargo: $Enums.Cargo = 'ADM';
+    cargo?: $Enums.Cargo = 'ADM';
 
     @ApiProperty()
     @IsEnum($Enums.Permissao)
@@ -26,5 +31,5 @@ export class CreateUsuarioDto {
         { maxDecimalPlaces: 0 }, 
         { message: 'Status deve ser numérico' }
     )
-    status?: number = 1;
+    status?: number = 3;
 }
