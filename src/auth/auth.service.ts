@@ -29,7 +29,6 @@ export class AuthService {
         let usuario = await this.usuariosService.buscarPorLogin(login);
         if (usuario && usuario.status === 3) throw new UnauthorizedException("Usuário aguardando aprovação de acesso ao sistema.");
         if (usuario && usuario.status === 2) throw new UnauthorizedException("Usuário inativo.");
-        console.log(process.env.ENVIRONMENT);
         if (process.env.ENVIRONMENT == "local"){
             if (usuario) return usuario;
         }
@@ -38,11 +37,14 @@ export class AuthService {
         });
         await new Promise<void>((resolve, reject) => {
             client.bind(`${login}${process.env.LDAP_DOMAIN}`, senha, (err) => {
-                if (err) reject(new UnauthorizedException("Credenciais incorretas."));
+                if (err) {
+                    client.destroy();
+                    reject(new UnauthorizedException("Credenciais incorretas."));
+                }
                 resolve();
             });
         });
-        if (!usuario)
+        if (!usuario) {
             usuario = await new Promise<any>((resolve, reject) => {
                 client.search(process.env.LDAP_BASE, {
                     filter: `(samaccountname=${login})`,
@@ -70,6 +72,8 @@ export class AuthService {
                     });
                 })
             });
+        }
+        client.destroy();
         return usuario;
     }
 }

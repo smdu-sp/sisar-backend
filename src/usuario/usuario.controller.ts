@@ -19,12 +19,12 @@ export class UsuarioController {
   @Permissoes('SUP', 'ADM')
   @Get('buscar-tudo')
   buscarTudo(
-    @Query('pagina') pagina: number,
-    @Query('limite') limite: number,
+    @Query('pagina') pagina?: string,
+    @Query('limite') limite?: string,
     @Query('status') status?: string,
     @Query('busca') busca?: string
   ) {
-    return this.usuarioService.buscarTudo(pagina, limite, +status, busca);
+    return this.usuarioService.buscarTudo(+pagina, +limite, +status, busca);
   }
 
   @Permissoes('SUP', 'ADM')

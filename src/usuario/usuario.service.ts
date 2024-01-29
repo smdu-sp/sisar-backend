@@ -75,6 +75,7 @@ export class UsuarioService {
     status: number = 1,
     busca?: string
   ) {
+    console.log(pagina);
     [ pagina, limite ] = this.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca ? {nome: { contains: busca }} : {}),
