@@ -29,6 +29,10 @@ export class AuthService {
         let usuario = await this.usuariosService.buscarPorLogin(login);
         if (usuario && usuario.status === 3) throw new UnauthorizedException("Usuário aguardando aprovação de acesso ao sistema.");
         if (usuario && usuario.status === 2) throw new UnauthorizedException("Usuário inativo.");
+        console.log(process.env.ENVIRONMENT);
+        if (process.env.ENVIRONMENT == "local"){
+            if (usuario) return usuario;
+        }
         const client: Client = createClient({
             url: process.env.LDAP_SERVER,
         });

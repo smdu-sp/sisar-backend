@@ -21,10 +21,10 @@ export class UsuarioController {
   buscarTudo(
     @Query('pagina') pagina: number,
     @Query('limite') limite: number,
-    @Query('status') status?: number,
+    @Query('status') status?: string,
     @Query('busca') busca?: string
   ) {
-    return this.usuarioService.buscarTudo(pagina, limite, status, busca);
+    return this.usuarioService.buscarTudo(pagina, limite, +status, busca);
   }
 
   @Permissoes('SUP', 'ADM')

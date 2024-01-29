@@ -21,7 +21,9 @@ export class UsuarioService {
   }
 
   async autorizaUsuario(id: string) {
-    await this.prisma.usuario.update({ where: { id }, data: { status: 1 } });
+    const autorizado = await this.prisma.usuario.update({ where: { id }, data: { status: 1 } });
+    if (autorizado && autorizado.status === 1) return { autorizado: true };
+    throw new ForbiddenException("Erro ao autorizar o usuário.");
   }
 
   async criar(createUsuarioDto: CreateUsuarioDto, criador?: Usuario) {
