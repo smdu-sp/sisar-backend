@@ -13,6 +13,13 @@ export class UsuarioService {
     return usuario.permissao;
   }
 
+  async validaUsuario(id: string) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id } });
+    if (!usuario) throw new ForbiddenException("Usuário não encontrado.");
+    if (usuario.status !== 1) throw new ForbiddenException("Usuário inativo.");
+    return usuario;
+  }
+
   validaPermissaoCriador(permissao: $Enums.Permissao, permissaoCriador: $Enums.Permissao) {
     console.log({permissao, permissaoCriador});
     if (permissao === $Enums.Permissao.DEV && permissaoCriador === $Enums.Permissao.SUP) permissao = $Enums.Permissao.SUP;
@@ -64,7 +71,7 @@ export class UsuarioService {
   }
 
   verificaLimite(pagina: number, limite: number, total: number) {
-    if (limite > total) limite = total;
+    // if (limite > total) limite = total;
     if ((pagina - 1) * limite >= total) pagina = Math.ceil(total / limite);
     return [ pagina, limite ];
   }
@@ -75,7 +82,6 @@ export class UsuarioService {
     status: number = 1,
     busca?: string
   ) {
-    console.log(pagina);
     [ pagina, limite ] = this.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca ? {nome: { contains: busca }} : {}),

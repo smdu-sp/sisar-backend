@@ -50,4 +50,9 @@ export class UsuarioController {
   autorizarUsuario(@Param('id') id: string) {
     return this.usuarioService.autorizaUsuario(id);
   }
+
+  @Get('valida-usuario')
+  validaUsuario(@UsuarioAtual() usuario: Usuario) {
+    return this.usuarioService.validaUsuario(usuario.id);
+  }
 }
