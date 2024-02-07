@@ -18,6 +18,7 @@ export class AuthService {
             sub:        usuario.id,
             nome:       usuario.nome,
             login:      usuario.login,
+            email:      usuario.email,
             cargo:      usuario.cargo,
             permissao:  usuario.permissao
         };

@@ -37,7 +37,7 @@ export class UsuarioService {
     var { nome, login, cargo, permissao, status, email } = createUsuarioDto;
     const loguser = await this.buscarPorLogin(login);
     if (loguser) throw new ForbiddenException("Login já cadastrado.");
-    const emailuser = await this.buscarPorLogin(login);
+    const emailuser = await this.buscarPorEmail(email);
     if (emailuser) throw new ForbiddenException("Email já cadastrado.");
     if (!criador){
       permissao = 'USR';
