@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  //Delete,
+  Query,
+} from '@nestjs/common';
 import { AlvaraTipoService } from './alvara_tipo.service';
 import { CreateAlvaraTipoDto } from './dto/create-alvara_tipo.dto';
 import { UpdateAlvaraTipoDto } from './dto/update-alvara_tipo.dto';
@@ -19,7 +28,7 @@ export class AlvaraTipoController {
   buscarTudo(
     @Query('pagina') pagina: number,
     @Query('limite') limite: number,
-    @Query('busca') busca?: string
+    @Query('busca') busca?: string,
   ) {
     return this.alvaraTipoService.buscarTudo(pagina, limite, busca);
   }
@@ -32,7 +41,10 @@ export class AlvaraTipoController {
 
   @Permissoes('SUP', 'ADM')
   @Patch('atualizar/:id')
-  atualizar(@Param('id') id: string, @Body() updateAlvaraTipoDto: UpdateAlvaraTipoDto) {
+  atualizar(
+    @Param('id') id: string,
+    @Body() updateAlvaraTipoDto: UpdateAlvaraTipoDto,
+  ) {
     return this.alvaraTipoService.atualizar(id, updateAlvaraTipoDto);
   }
 

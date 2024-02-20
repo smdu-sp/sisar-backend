@@ -11,14 +11,24 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 
 @Module({
-  imports: [UsuarioModule, PrismaModule, AuthModule, IniciaisModule, AlvaraTipoModule],
+  imports: [
+    UsuarioModule,
+    PrismaModule,
+    AuthModule,
+    IniciaisModule,
+    AlvaraTipoModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard
-  }, {
-    provide: APP_GUARD,
-    useClass: RoleGuard
-  }]
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+  ],
 })
 export class AppModule {}

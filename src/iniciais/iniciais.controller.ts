@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  //Delete,
+  Query,
+} from '@nestjs/common';
 import { IniciaisService } from './iniciais.service';
 import { CreateInicialDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
@@ -13,10 +22,7 @@ export class IniciaisController {
   }
 
   @Get()
-  findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
-  ) {
+  findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
     return this.iniciaisService.findAll(+page, +limit);
   }
 

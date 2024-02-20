@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -12,7 +21,10 @@ export class UsuarioController {
 
   @Permissoes('SUP', 'ADM')
   @Post('criar')
-  criar(@Body() createUsuarioDto: CreateUsuarioDto, @UsuarioAtual() usuario: Usuario) {
+  criar(
+    @Body() createUsuarioDto: CreateUsuarioDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
     return this.usuarioService.criar(createUsuarioDto, usuario);
   }
 
@@ -22,7 +34,7 @@ export class UsuarioController {
     @Query('pagina') pagina?: string,
     @Query('limite') limite?: string,
     @Query('status') status?: string,
-    @Query('busca') busca?: string
+    @Query('busca') busca?: string,
   ) {
     return this.usuarioService.buscarTudo(+pagina, +limite, +status, busca);
   }
@@ -35,7 +47,11 @@ export class UsuarioController {
 
   @Permissoes('SUP', 'ADM')
   @Patch('atualizar/:id')
-  atualizar(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UsuarioAtual() usuario: Usuario) {
+  atualizar(
+    @Param('id') id: string,
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
     return this.usuarioService.atualizar(id, updateUsuarioDto, usuario);
   }
 

@@ -11,10 +11,12 @@ export class IniciaisPaginado {
 
 @Injectable()
 export class IniciaisService {
-  constructor (private prisma: PrismaService) {}
-  
+  constructor(private prisma: PrismaService) {}
+
   async create(createInicialDto: CreateInicialDto): Promise<Inicial> {
-    const novo_inicial = await this.prisma.inicial.create({ data: { ... createInicialDto }});
+    const novo_inicial = await this.prisma.inicial.create({
+      data: { ...createInicialDto },
+    });
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');
     return novo_inicial;
   }
@@ -31,7 +33,7 @@ export class IniciaisService {
     return {
       data: iniciais,
       totalCount,
-    }
+    };
   }
 
   async findOne(id: number): Promise<Inicial> {
@@ -41,12 +43,19 @@ export class IniciaisService {
     return inicial;
   }
 
-  async update(id: number, updateInicialDto: UpdateInicialDto): Promise<Inicial> {
-      const inicial = await this.prisma.inicial.findUnique({ where: { id } });
-      if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
-      const inicial_atualizado = await this.prisma.inicial.update({ where: { id }, data: { ... updateInicialDto } });
-      if (!inicial_atualizado) throw new ForbiddenException('Erro ao atualizar processo');
-      return inicial_atualizado;
+  async update(
+    id: number,
+    updateInicialDto: UpdateInicialDto,
+  ): Promise<Inicial> {
+    const inicial = await this.prisma.inicial.findUnique({ where: { id } });
+    if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
+    const inicial_atualizado = await this.prisma.inicial.update({
+      where: { id },
+      data: { ...updateInicialDto },
+    });
+    if (!inicial_atualizado)
+      throw new ForbiddenException('Erro ao atualizar processo');
+    return inicial_atualizado;
   }
 
   // async remove(id: number) {
