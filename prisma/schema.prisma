@@ -41,6 +41,7 @@ model Alvara_Tipo {
   prazo_analise_multi1  Int     @default(45)
   prazo_analise_multi2  Int     @default(40)
   iniciais              Inicial[]
+  status                Boolean @default(true)
 
   criado_em       DateTime        @default(now())
   alterado_em     DateTime        @updatedAt @default(now())
@@ -223,6 +224,7 @@ model Inicial_Sqls {
   id            String      @id @default(uuid())
   inicial       Inicial     @relation(fields: [inicial_id], references: [id])
   inicial_id    Int
+  sql           String
   data_cadastro DateTime    @default(now())
 
   criado_em       DateTime        @default(now())

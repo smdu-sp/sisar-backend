@@ -1,29 +1,41 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsuarioService } from 'src/usuario/usuario.service';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { Usuario } from '@prisma/client';
 import { UsuarioPayload } from './models/UsuarioPayload';
 import { JwtService } from '@nestjs/jwt';
 import { UsuarioToken } from './models/UsuarioToken';
 import { Client, createClient } from 'ldapjs';
+import { UsuarioJwt } from './models/UsuarioJwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usuariosService: UsuarioService,
+    private readonly usuariosService: UsuariosService,
     private readonly jwtService: JwtService,
   ) {}
 
-  login(usuario: Usuario): UsuarioToken {
-    const payload: UsuarioPayload = {
-      sub: usuario.id,
-      nome: usuario.nome,
-      login: usuario.login,
-      email: usuario.email,
-      cargo: usuario.cargo,
-      permissao: usuario.permissao,
-    };
-    const access_token = this.jwtService.sign(payload);
-    return { access_token };
+  async login(usuario: Usuario): Promise<UsuarioToken> {
+    const { access_token, refresh_token } = await this.getTokens(usuario);
+    return { access_token, refresh_token };
+  }
+
+  async refresh(usuario: Usuario) {
+    const { access_token, refresh_token } = await this.getTokens(usuario);
+    return { access_token, refresh_token };
+  }
+
+  async getTokens(usuario: UsuarioJwt) {
+    const { id, login, nome, email, permissao, status } = usuario;
+    const payload: UsuarioPayload = { sub: id, login, nome, email, permissao, status };
+    const access_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: process.env.JWT_SECRET,
+    });
+    const refresh_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d',
+      secret: process.env.RT_SECRET,
+    });
+    return { access_token, refresh_token };
   }
 
   async validateUser(login: string, senha: string) {
@@ -41,7 +53,7 @@ export class AuthService {
       url: process.env.LDAP_SERVER,
     });
     await new Promise<void>((resolve, reject) => {
-      client.bind(`${login}${process.env.LDAP_DOMAIN}`, senha, (err) => {
+      client.bind(`${login}${process.env.LDAP_DOMAIN}`, senha, (err: any) => {
         if (err) {
           client.destroy();
           reject(new UnauthorizedException('Credenciais incorretas.'));
@@ -54,7 +66,7 @@ export class AuthService {
         client.search(
           process.env.LDAP_BASE,
           {
-            filter: `(samaccountname=${login})`,
+            filter: `(&(samaccountname=${login}))`,
             scope: 'sub',
             attributes: ['name', 'mail'],
           },
@@ -63,26 +75,21 @@ export class AuthService {
               client.destroy();
               reject();
             }
-            res.on('searchEntry', (entry) => {
-              const nome = JSON.stringify(
-                entry.pojo.attributes[0].values[0],
-              ).replaceAll('"', '');
-              const email = JSON.stringify(
-                entry.pojo.attributes[1].values[0],
-              ).replaceAll('"', '');
-              const novoUsuario = this.usuariosService.criar({
-                nome,
+            res.on('searchEntry', async (entry) => {
+              const { name, mail } = Object.fromEntries(entry.pojo.attributes.map(({ type, values }) => [type, values[0]]));
+              const novoUsuario = await this.usuariosService.criar({
+                nome: name,
                 login,
-                email,
-                cargo: 'ADM',
+                email: mail,
                 permissao: 'USR',
+                cargo: 'ADM',
                 status: 3,
               });
               client.destroy();
               if (novoUsuario)
                 reject(
-                  new UnauthorizedException(
-                    'Usuário cadastrado, aguarde aprovação para fazer login.',
+                  new ForbiddenException(
+                    'Usuário criado, aguardando aprovação.',
                   ),
                 );
               reject(

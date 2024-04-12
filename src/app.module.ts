@@ -1,23 +1,19 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsuarioModule } from './usuario/usuario.module';
-import { PrismaModule } from './prisma/prisma.module';
+import { UsuariosModule } from './usuarios/usuarios.module';
 import { AuthModule } from './auth/auth.module';
-import { IniciaisModule } from './iniciais/iniciais.module';
-import { AlvaraTipoModule } from './alvara_tipo/alvara_tipo.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
+import { PrismaModule } from './prisma/prisma.module';
+import { Prisma2Module } from './prisma2/prisma2.module';
+import { AlvaraTipoModule } from './alvara-tipo/alvara-tipo.module';
+import { InicialModule } from './inicial/inicial.module';
 
+@Global()
 @Module({
-  imports: [
-    UsuarioModule,
-    PrismaModule,
-    AuthModule,
-    IniciaisModule,
-    AlvaraTipoModule,
-  ],
+  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, AlvaraTipoModule, InicialModule],
   controllers: [AppController],
   providers: [
     AppService,
@@ -30,5 +26,6 @@ import { RoleGuard } from './auth/guards/role.guard';
       useClass: RoleGuard,
     },
   ],
+  exports: [AppService],
 })
 export class AppModule {}

@@ -13,7 +13,7 @@ export class IniciaisPaginado {
 }
 
 @Injectable()
-export class IniciaisService {
+export class InicialService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
@@ -46,7 +46,7 @@ export class IniciaisService {
     return novo_sql;
   }
 
-  async create(createInicialDto: CreateInicialDto): Promise<Inicial> {
+  async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
     const novo_inicial = await this.prisma.inicial.create({
       data: { ...createInicialDto },
     });
@@ -54,7 +54,7 @@ export class IniciaisService {
     return novo_inicial;
   }
 
-  async findAll(pagina: number, limite: number): Promise<IniciaisPaginado> {
+  async buscarTudo(pagina: number, limite: number): Promise<IniciaisPaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const total = await this.prisma.inicial.count();
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
@@ -75,14 +75,14 @@ export class IniciaisService {
     };
   }
 
-  async findOne(id: number): Promise<Inicial> {
+  async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({ where: { id } });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     return inicial;
   }
 
-  async update(
+  async atualizar(
     id: number,
     updateInicialDto: UpdateInicialDto,
   ): Promise<Inicial> {
