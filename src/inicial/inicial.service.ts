@@ -47,6 +47,8 @@ export class InicialService {
   }
 
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
+    console.log({ alvara_tipo_id: createInicialDto.alvara_tipo_id });
+    const alvara_tipo = await this.prisma.alvara_Tipo.findFirst({ where: { id: createInicialDto.alvara_tipo_id }});
     const novo_inicial = await this.prisma.inicial.create({
       data: { ...createInicialDto },
     });

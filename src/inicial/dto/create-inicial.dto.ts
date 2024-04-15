@@ -22,9 +22,9 @@ export class CreateInicialDto {
     @ApiProperty()
     alvara_tipo_id: string;
     @ApiProperty()
-    tipo_processo: string;
+    tipo_processo: number;
     @ApiProperty()
     obs?: string;
     @ApiProperty()
-    status: string;
+    status: number;
 }

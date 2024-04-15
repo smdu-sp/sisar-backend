@@ -197,9 +197,9 @@ model Inicial {
   envio_admissibilidade           DateTime?
   alvara_tipo                     Alvara_Tipo @relation(fields: [alvara_tipo_id], references: [id])
   alvara_tipo_id                  String
-  tipo_processo                   String
+  tipo_processo                   Int
   obs                             String?
-  status                          String
+  status                          Int
   comunique_ses                   Comunique_se[]
   controles_prazo                 Controle_Prazo[]
   decisoes                        Decisao[]
