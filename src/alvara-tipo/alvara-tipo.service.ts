@@ -72,7 +72,7 @@ export class AlvaraTipoService {
     });
     if (!alvara_tipo)
       throw new ForbiddenException('Tipo de alvará não encontrado');
-    await this.verificaSeExiste(updateAlvaraTipoDto.nome, id);
+    // await this.verificaSeExiste(updateAlvaraTipoDto.nome, id);
     const alvara_tipo_atualizado = await this.prisma.alvara_Tipo.update({
       where: { id },
       data: { ...updateAlvaraTipoDto },
