@@ -41,7 +41,7 @@ model Alvara_Tipo {
   prazo_analise_multi1  Int     @default(45)
   prazo_analise_multi2  Int     @default(40)
   iniciais              Inicial[]
-  status                Boolean @default(true)
+  status                Int     @default(1)
 
   criado_em       DateTime        @default(now())
   alterado_em     DateTime        @updatedAt @default(now())

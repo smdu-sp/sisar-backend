@@ -14,5 +14,5 @@ export class CreateAlvaraTipoDto {
     @ApiProperty()
     prazo_analise_multi2: number;
     @ApiProperty()
-    status?: boolean;
+    status?: number;
 }
