@@ -17,7 +17,7 @@ export class InicialController {
     return this.inicialService.buscarTudo(+pagina, +limite);
   }
 
-  @Get(':id')
+  @Get('buscar-por-id/:id')
   buscarPorId(@Param('id') id: string) {
     return this.inicialService.buscarPorId(+id);
   }
