@@ -199,7 +199,7 @@ model Inicial {
   alvara_tipo_id                  String
   tipo_processo                   Int
   obs                             String?
-  status                          Int
+  status                          Int? @default(1)
   comunique_ses                   Comunique_se[]
   controles_prazo                 Controle_Prazo[]
   decisoes                        Decisao[]

@@ -26,5 +26,7 @@ export class CreateInicialDto {
     @ApiProperty()
     obs?: string;
     @ApiProperty()
-    status: number;
+    status?: number;
+    @ApiProperty()
+    nums_sql?: string[];
 }

@@ -47,12 +47,17 @@ export class InicialService {
   }
 
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
-    console.log({ alvara_tipo_id: createInicialDto.alvara_tipo_id });
-    const alvara_tipo = await this.prisma.alvara_Tipo.findFirst({ where: { id: createInicialDto.alvara_tipo_id }});
+    const { nums_sql } = createInicialDto;
+    delete createInicialDto.nums_sql;
     const novo_inicial = await this.prisma.inicial.create({
       data: { ...createInicialDto },
     });
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');
+    if (nums_sql && nums_sql.length > 0) {
+      await this.prisma.inicial_Sqls.createMany({
+        data: nums_sql.map(sql => ({ sql, inicial_id: novo_inicial.id })),
+      });
+    }
     return novo_inicial;
   }
 
@@ -79,7 +84,12 @@ export class InicialService {
 
   async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');
-    const inicial = await this.prisma.inicial.findUnique({ where: { id } });
+    const inicial = await this.prisma.inicial.findUnique({ 
+      where: { id },
+      include: {
+        iniciais_sqls: true,
+      }
+    });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     return inicial;
   }

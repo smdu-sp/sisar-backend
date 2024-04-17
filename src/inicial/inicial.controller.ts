@@ -22,7 +22,7 @@ export class InicialController {
     return this.inicialService.buscarPorId(+id);
   }
 
-  @Patch(':id')
+  @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateInicialDto: UpdateInicialDto) {
     return this.inicialService.atualizar(+id, updateInicialDto);
   }
