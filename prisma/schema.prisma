@@ -225,7 +225,6 @@ model Inicial_Sqls {
   inicial       Inicial     @relation(fields: [inicial_id], references: [id])
   inicial_id    Int
   sql           String
-  data_cadastro DateTime    @default(now())
 
   criado_em       DateTime        @default(now())
   alterado_em     DateTime        @updatedAt @default(now())

@@ -27,6 +27,11 @@ export class InicialController {
     return this.inicialService.atualizar(+id, updateInicialDto);
   }
 
+  @Patch('adiciona-sql/:inicial_id')
+  adicionaSql(@Param('inicial_id') inicial_id: string, @Body() { sql }: { sql: string }) {
+    return this.inicialService.adicionaSql(+inicial_id, sql);
+  }
+
   @Get('valida-sql/:sql')
   validaSql(@Param('sql') sql: string) {
     return this.inicialService.validaSql(sql);

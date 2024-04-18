@@ -24,14 +24,14 @@ export class InicialService {
     dataBusca.setDate(dataBusca.getDate() - 90);
     const sqlBusca = await this.prisma.inicial_Sqls.findMany({ where: { 
       sql,
-      data_cadastro: { gte: new Date() },
+      criado_em: { gte: dataBusca },
     }});
     if (!sqlBusca) return new ForbiddenException('Erro ao buscar sql.');
     if (sqlBusca.length > 0) return true;
     return false;
   }
 
-  async adicionaSql(sql: string, inicial_id: number) {
+  async adicionaSql(inicial_id: number, sql: string) {
     const existe = await this.prisma.inicial_Sqls.findFirst({
       where: {
         sql,
