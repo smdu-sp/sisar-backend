@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
+import { AddFeriasDto, CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { $Enums, Usuario } from '@prisma/client';
@@ -183,6 +183,16 @@ export class UsuariosService {
     if (!usuario) throw new ForbiddenException('Usuário não encontrado.');
     if (usuario.status !== 1) throw new ForbiddenException('Usuário inativo.');
     return usuario;
+  }
+
+  async adicionaFerias(id: string, addFeriasDto: AddFeriasDto) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id } });
+    if (!usuario) throw new ForbiddenException('Usuário não encontrado.');
+    if (usuario.status !== 1) throw new ForbiddenException('Usuário inativo.');
+    const ferias = await this.prisma.ferias.create({
+      data: { ...addFeriasDto, usuario_id: id },
+    });
+    return ferias;
   }
 
   async buscarNovo(login: string){

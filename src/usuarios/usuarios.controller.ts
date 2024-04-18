@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
+import { AddFeriasDto, CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
@@ -73,6 +73,12 @@ export class UsuariosController {
   @Patch('autorizar/:id')
   autorizarUsuario(@Param('id') id: string) {
     return this.usuariosService.autorizaUsuario(id);
+  }
+
+  @Permissoes('ADM', 'SUP')
+  @Patch('adiciona-ferias/:id')
+  adicionaFerias(@Param('id') id: string, @Body() addFeriasDto: AddFeriasDto) {
+    return this.usuariosService.adicionaFerias(id, addFeriasDto);
   }
 
   @Get('valida-usuario')
