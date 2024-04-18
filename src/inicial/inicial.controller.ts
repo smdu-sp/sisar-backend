@@ -32,9 +32,9 @@ export class InicialController {
     return this.inicialService.adicionaSql(+inicial_id, sql);
   }
 
-  @Delete('remove-sql/:id')
-  excluir(@Param('id') id: string) {
-    return this.inicialService.removeSql(id);
+  @Delete('remove-sql/:inicial_id/:sql')
+  removeSql(@Param('inicial_id') inicial_id: string, @Param('sql') sql: string) {
+    return this.inicialService.removeSql(+inicial_id, sql);
   }
 
   @Get('valida-sql/:sql')
