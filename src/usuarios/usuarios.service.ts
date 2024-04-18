@@ -119,6 +119,16 @@ export class UsuariosService {
   async buscarPorId(id: string) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { id },
+      include: {
+        ferias: {
+          where: {
+            OR: [
+              { inicio: { gte: new Date() } },
+              { final:  { lte: new Date() } },
+            ]
+          }
+        }
+      }
     });
     return usuario;
   }
@@ -192,6 +202,7 @@ export class UsuariosService {
     const ferias = await this.prisma.ferias.create({
       data: { ...addFeriasDto, usuario_id: id },
     });
+    if (!ferias) throw new ForbiddenException('Erro ao adicionar ferias.');
     return ferias;
   }
 
