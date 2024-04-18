@@ -46,6 +46,14 @@ export class InicialService {
     return novo_sql;
   }
 
+  async removeSql(id: string) {
+    console.log(id);
+    await this.prisma.inicial_Sqls.delete({
+      where: { id }
+    });
+    return true;
+  }
+
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
     const { nums_sql } = createInicialDto;
     delete createInicialDto.nums_sql;
