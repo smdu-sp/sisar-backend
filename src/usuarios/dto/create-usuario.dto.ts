@@ -1,5 +1,6 @@
 import { $Enums } from '@prisma/client';
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsNumber,
@@ -28,4 +29,12 @@ export class CreateUsuarioDto {
 
   @IsNumber({}, { message: 'Status inválido!' })
   status?: number;
+}
+
+export class AddFeriasDto {
+  @IsDate({ message: 'Tem de ser uma data válida.' })
+  inicio: Date;
+
+  @IsDate({ message: 'Tem de ser uma data válida.' })
+  final: Date;
 }
