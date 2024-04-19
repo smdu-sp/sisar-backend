@@ -14,6 +14,11 @@ export class AlvaraTipoController {
     return this.alvaraTipoService.criar(createAlvaraTipoDto);
   }
 
+  @Get('lista-completa')
+  listaCompleta() {
+    return this.alvaraTipoService.listaCompleta();
+  }
+
   @Permissoes('SUP', 'ADM')
   @Get('buscar-tudo')
   buscarTudo(

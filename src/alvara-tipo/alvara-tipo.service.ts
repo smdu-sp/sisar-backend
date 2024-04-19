@@ -33,6 +33,12 @@ export class AlvaraTipoService {
     return novo_alvara_tipo;
   }
 
+  async listaCompleta() {
+    const tipos = await this.prisma.alvara_Tipo.findMany({ where: { status: 1 }});
+    if (!tipos) throw new ForbiddenException('Não foi possível listar os tipos de alvará.');
+    return tipos;
+  }
+
   async buscarTudo(pagina: number = 1, limite: number = 10, busca?: string) {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
