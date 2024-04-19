@@ -46,10 +46,16 @@ export class InicialService {
     return novo_sql;
   }
 
-  async removeSql(id: string) {
-    console.log(id);
+  async removeSql(inicial_id: number, sql: string) {
+    const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
+      where: {
+        sql,
+        inicial_id
+      }
+    });
+    if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
     await this.prisma.inicial_Sqls.delete({
-      where: { id }
+      where: { id: sqlBusca.id }
     });
     return true;
   }
