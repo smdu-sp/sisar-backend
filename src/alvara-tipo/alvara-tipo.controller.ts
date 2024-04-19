@@ -39,6 +39,15 @@ export class AlvaraTipoController {
     return this.alvaraTipoService.atualizar(id, updateAlvaraTipoDto);
   }
 
+  @Permissoes('SUP', 'ADM')
+  @Patch('auterar-status/:id')
+  auterarStatus(
+    @Param('id') id: string,
+    @Body() updateAlvaraTipoDto: UpdateAlvaraTipoDto,
+  ) {
+    return this.alvaraTipoService.atualizar(id, updateAlvaraTipoDto);
+  }
+
   // @Delete(':id')
   // remove(@Param('id') id: string) {
   //   return this.alvaraTipoService.remove(id);

@@ -82,6 +82,21 @@ export class AlvaraTipoService {
     return alvara_tipo_atualizado;
   }
 
+  async alterarStatus(id: string, status: number) {
+    const alvaraTipo = await this.prisma.alvara_Tipo.findFirst({
+      where: { id },
+    });
+    if (!alvaraTipo)
+      throw new ForbiddenException('Tipo de alvara não encontrado');
+    const alvaraTipo_alterado = await this.prisma.alvara_Tipo.update({
+      where: { id },
+      data: { status },
+    });
+    if (!alvaraTipo_alterado)
+      throw new ForbiddenException('Erro ao alterar status do tipo de alvara');
+    return alvaraTipo_alterado;
+  }
+
   // remove(id: number) {
   //   return `This action removes a #${id} alvaraTipo`;
   // }
