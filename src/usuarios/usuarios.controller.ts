@@ -91,4 +91,22 @@ export class UsuariosController {
   buscarNovo(@Query('login') login: string) {
     return this.usuariosService.buscarNovo(login);
   }
+
+  @Permissoes('ADM', 'SUP')
+  @Get('buscar-administrativos')
+  buscarAdministrativos() {
+    return this.usuariosService.buscarAdministrativos();
+  }
+
+  @Permissoes('ADM', 'SUP')
+  @Post('adicionar-substituto')
+  adicionarSubstituto(@Body() { usuario_id, substituto_id }: { usuario_id: string; substituto_id: string }) {
+    return this.usuariosService.adicionarSubstituto(usuario_id, substituto_id);
+  }
+
+  @Permissoes('ADM', 'SUP')
+  @Delete('remover-substituto/:id')
+  removerSubstituto(@Param('id') id: string) {
+    return this.usuariosService.removerSubstituto(id);
+  }
 }

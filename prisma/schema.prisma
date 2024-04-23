@@ -386,11 +386,24 @@ model Usuario {
   administrativo Distribuicao[] @relation(name: "administrativo")
   secretaria     Secretaria[]
   ferias         Ferias[]
+  substitutos    Substituto[]   @relation(name: "substituto")
+  usuarios       Substituto[]   @relation(name: "usuario")
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
 
   @@map("usuarios")
+}
+
+model Substituto {
+  id            String @id @default(uuid())
+  usuario_id    String
+  usuario       Usuario @relation(fields: [usuario_id], references: [id], name: "usuario")
+  substituto_id String
+  substituto    Usuario @relation(fields: [substituto_id], references: [id], name: "substituto")
+
+  criado_em   DateTime @default(now())
+  alterado_em DateTime @default(now()) @updatedAt
 }
 
 enum Cargo {
