@@ -10,10 +10,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { Prisma2Module } from './prisma2/prisma2.module';
 import { AlvaraTipoModule } from './alvara-tipo/alvara-tipo.module';
 import { InicialModule } from './inicial/inicial.module';
+import { UnidadesModule } from './unidades/unidades.module';
 
 @Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, AlvaraTipoModule, InicialModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, AlvaraTipoModule, InicialModule, UnidadesModule],
   controllers: [AppController],
   providers: [
     AppService,
