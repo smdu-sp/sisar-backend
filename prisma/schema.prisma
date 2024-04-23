@@ -386,11 +386,27 @@ model Usuario {
   administrativo Distribuicao[] @relation(name: "administrativo")
   secretaria     Secretaria[]
   ferias         Ferias[]
+  
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
 
+  unidade     Unidade?   @relation(fields: [unidade_id], references: [id])
+  unidade_id  String?
+
   @@map("usuarios")
+}
+
+model Unidade {
+  id        String    @id @default(uuid())
+  nome      String    @unique
+  sigla     String    @unique
+  codigo    String    @unique
+  status    Boolean   @default(true)
+
+  usuarios  Usuario[]
+
+  @@map("unidades")
 }
 
 enum Cargo {
