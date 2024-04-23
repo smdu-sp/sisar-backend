@@ -127,6 +127,20 @@ export class UsuariosService {
               { final:  { lte: new Date() } },
             ]
           }
+        },
+        substitutos: {
+          include: {
+            substituto: true,
+            usuario: true
+          },
+          orderBy: { criado_em: 'asc' }
+        },
+        usuarios: {
+          include: {
+            substituto: true,
+            usuario: true
+          },
+          orderBy: { criado_em: 'asc' }
         }
       }
     });
@@ -265,5 +279,35 @@ export class UsuariosService {
       nome: usuario_ldap.nome,
       email: usuario_ldap.email
     };
+  }
+
+  async adicionarSubstituto(usuario_id: string, substituto_id: string) {
+    if (usuario_id === substituto_id) throw new ForbiddenException('Substituto não pode ser o usuário.');
+    const substituto = await this.prisma.substituto.findFirst({
+      where: { substituto_id, usuario_id },
+    });
+    if (substituto) throw new ForbiddenException('Substituto ja adicionado.');
+    const novo_substituto = await this.prisma.substituto.create({
+      data: {
+        substituto_id,
+        usuario_id,
+      },
+    });
+    return novo_substituto;
+  }
+
+  async removerSubstituto(id: string) {
+    const substituto = await this.prisma.substituto.findUnique({ where: { id } });
+    if (!substituto) throw new ForbiddenException('Substituto não cadastrado.');
+    await this.prisma.substituto.delete({ where: { id } });
+    return true;
+  }
+
+  async buscarAdministrativos() {
+    const administrativos = await this.prisma.usuario.findMany({
+      where: { cargo: 'ADM' },
+    });
+    if (!administrativos) throw new ForbiddenException('Nenhum administrativo encontrado.');
+    return administrativos;
   }
 }
