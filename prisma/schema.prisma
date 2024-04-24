@@ -338,6 +338,8 @@ model Secretaria {
 model Subprefeitura {
   id               String            @id @default(uuid())
   nome             String            @unique
+  status           Int?              @default(1)
+  
   admissibilidades Admissibilidade[]
 
   criado_em   DateTime @default(now())

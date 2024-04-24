@@ -44,6 +44,12 @@ export class SubprefeituraController {
   }
 
   // @Permissoes('ADM')
+  // @Patch('desativar/:id')
+  // desativar(@Param('id') id: string) {
+  //   return this.unidadesService.desativar(id);
+  // }
+
+  // @Permissoes('ADM')
   // @Delete('desativar/:id')
   // desativar(@Param('id') id: string) {
   //   return this.unidadesService.desativar(id);

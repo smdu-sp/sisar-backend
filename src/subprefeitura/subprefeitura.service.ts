@@ -88,4 +88,17 @@ export class SubprefeituraService {
     if (!updatedsubprefeitura) throw new InternalServerErrorException('Não foi possível atualizar a subprefeitura. Tente novamente.');
     return updatedsubprefeitura;
   }
+
+  async desativar(id: string) {
+    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
+    if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
+    const updatedUnidade = await this.prisma.unidade.update({
+      where: { id },
+      data: { status: false }
+    });
+    if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
+    return {
+      message: 'Unidade desativada com sucesso.'
+    }
+  }
 }
