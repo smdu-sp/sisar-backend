@@ -21,6 +21,9 @@ export class CreateUsuarioDto {
   @IsEmail({}, { message: 'Login tem de ter ao menos 7 caracteres.' })
   email: string;
 
+  @IsString({ message: 'Unidade inválida!' })
+  unidade_id?: string;
+
   @IsEnum($Enums.Permissao, { message: 'Escolha uma permissão válida.' })
   permissao?: $Enums.Permissao;
 

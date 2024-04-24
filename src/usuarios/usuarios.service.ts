@@ -68,9 +68,7 @@ export class UsuariosService {
         );
     }
     const usuario = await this.prisma.usuario.create({
-      data: { 
-        ...createUsuarioDto
-      }
+      data: { ...createUsuarioDto }
     });
     if (!usuario)
       throw new InternalServerErrorException(
@@ -105,6 +103,9 @@ export class UsuariosService {
     const usuarios = await this.prisma.usuario.findMany({
       where: searchParams,
       orderBy: { nome: 'asc' },
+      include: {
+        unidade: true
+      },
       skip: (pagina - 1) * limite,
       take: limite,
     });
@@ -220,6 +221,21 @@ export class UsuariosService {
     return ferias;
   }
 
+  async buscaUnidade(login: string){
+    var unidade_id = '';
+    const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
+      where: {
+        cpRF: { startsWith: login.substring(1) },
+      },
+    });
+    if (usuario_sgu){
+      const codigo = usuario_sgu.cpUnid;
+      const unidade = await this.prisma.unidade.findUnique({ where: { codigo } });
+      unidade_id = unidade ? unidade.id : '';
+    }
+    return unidade_id;
+  }
+
   async buscarNovo(login: string){
     const usuarioExiste = await this.buscarPorLogin(login);
     if (usuarioExiste && usuarioExiste.status === 1) throw new ForbiddenException('Login já cadastrado.');
@@ -230,6 +246,7 @@ export class UsuariosService {
     const client: Client = createClient({
       url: process.env.LDAP_SERVER,
     });
+    var unidade_id = this.buscaUnidade(login);
     await new Promise<void>((resolve, reject) => {
       client.bind(`${process.env.USER_LDAP}${process.env.LDAP_DOMAIN}`, process.env.PASS_LDAP, (err) => {
         if (err) {
@@ -277,7 +294,8 @@ export class UsuariosService {
     return {
       login,
       nome: usuario_ldap.nome,
-      email: usuario_ldap.email
+      email: usuario_ldap.email,
+      unidade_id,
     };
   }
 

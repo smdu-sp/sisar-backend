@@ -80,7 +80,7 @@ export class AuthService {
               const novoUsuario = await this.usuariosService.criar({
                 nome: name,
                 login,
-                email: mail,
+                email: mail.toLowerCase(),
                 permissao: 'USR',
                 cargo: 'ADM',
                 status: 3,
