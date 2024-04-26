@@ -46,6 +46,44 @@ export class InicialService {
     return novo_sql;
   }
 
+  adicionaDiasData(dataInicial: Date, dias: number) {
+    return new Date(dataInicial.valueOf() + (dias * 24 * 60 * 60 * 1000));
+  }
+
+  pegaQuarta(data: Date) {
+    switch (data.getDay()) {
+      case 2: return data;
+      case 3: 
+        return this.adicionaDiasData(data, -1);
+      case 4:
+        return this.adicionaDiasData(data, -2);
+      case 5:
+        return this.adicionaDiasData(data, -3);
+      case 6:
+        return this.adicionaDiasData(data, -4);
+      case 0:
+        return this.adicionaDiasData(data, -5);
+      case 1:
+        return this.adicionaDiasData(data, -6);
+    }
+  }
+
+  async geraReuniaoData(inicial: Inicial) {
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id }})
+    if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvara.');
+    const { prazo_admissibilidade, prazo_analise_multi1 } = tipoAlvara;
+    const prazo = prazo_admissibilidade + prazo_analise_multi1;
+    const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
+    var data_reuniao = this.pegaQuarta(data_original);
+    const reuniao = await this.prisma.reuniao_Processo.create({
+      data: {
+        data_reuniao,
+        inicial_id: inicial.id
+      }
+    });
+    if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
+  }
+
   async removeSql(inicial_id: number, sql: string) {
     const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
       where: {
@@ -67,6 +105,10 @@ export class InicialService {
       data: { ...createInicialDto },
     });
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');
+    console.log(novo_inicial.tipo_processo);
+    if (novo_inicial.tipo_processo === 2){
+      await this.geraReuniaoData(novo_inicial);
+    }
     if (nums_sql && nums_sql.length > 0) {
       await this.prisma.inicial_Sqls.createMany({
         data: nums_sql.map(sql => ({ sql, inicial_id: novo_inicial.id })),
@@ -118,6 +160,9 @@ export class InicialService {
       where: { id },
       data: { ...updateInicialDto },
     });
+    if (inicial_atualizado.tipo_processo === 2){
+      await this.geraReuniaoData(inicial_atualizado);
+    }
     if (!inicial_atualizado)
       throw new ForbiddenException('Erro ao atualizar processo');
     return inicial_atualizado;

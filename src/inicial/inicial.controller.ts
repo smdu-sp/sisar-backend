@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { InicialService } from './inicial.service';
 import { CreateInicialDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('inicial')
 export class InicialController {

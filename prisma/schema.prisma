@@ -212,7 +212,7 @@ model Inicial {
   conclusao                      Conclusao?
   distribuicao                   Distribuicao?
   reconsideracao_admissibilidade Reconsideracao_Admissibilidade?
-  secretaria                     Secretaria?
+  interfaces                     Interface?
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -244,11 +244,11 @@ model Motivo_Inadmissao {
 }
 
 model Motivo_Inadmissao_Inicial {
-  inicial_id           Int
-  inicial              Inicial           @relation(fields: [inicial_id], references: [id])
-  motivo_inadmissao_id String
-  motivo_inadmissao    Motivo_Inadmissao @relation(fields: [motivo_inadmissao_id], references: [id])
-  descricao            String?
+  inicial_id            Int
+  inicial               Inicial @relation(fields: [inicial_id], references: [id])
+  motivo_inadmissao_id  String
+  motivo_inadmissao     Motivo_Inadmissao @relation(fields: [motivo_inadmissao_id], references: [id])
+  descricao             String?
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -312,7 +312,7 @@ model Reuniao_Processo {
   @@map("reuniao_processos")
 }
 
-model Secretaria {
+model Interface {
   inicial_id      Int
   inicial         Inicial @relation(fields: [inicial_id], references: [id])
   interface_sehab Boolean @default(false)
@@ -325,14 +325,12 @@ model Secretaria {
   num_smc         String?
   num_smt         String?
   num_svma        String?
-  tecnico_smul_id String
-  tecnico_smul    Usuario @relation(fields: [tecnico_smul_id], references: [id])
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
 
   @@unique(inicial_id)
-  @@map("secretarias")
+  @@map("interfaces")
 }
 
 model Subprefeitura {
@@ -386,7 +384,6 @@ model Usuario {
   status         Int            @default(3)
   tecnico        Distribuicao[] @relation(name: "tecnico")
   administrativo Distribuicao[] @relation(name: "administrativo")
-  secretaria     Secretaria[]
   ferias         Ferias[]
   substitutos    Substituto[]   @relation(name: "substituto")
   usuarios       Substituto[]   @relation(name: "usuario")
