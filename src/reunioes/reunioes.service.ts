@@ -10,7 +10,7 @@ export class ReunioesService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) {}
+  ) { }
 
   async listaCompleta() {
     const lista = await this.prisma.reuniao_Processo.findMany({
@@ -21,11 +21,7 @@ export class ReunioesService {
   }
 
 
-  async buscarPorId(id: string) {
-    const reuniao = await this.prisma.reuniao_Processo.findUnique({ where: { id } });
-    if (!reuniao) throw new ForbiddenException('subprefeitura não encontrada.');
-    return reuniao;
-  }
+
 
   // async buscarPorMes_ano(mes_ano: Date) {
   //   const reuniao = await this.prisma.reuniao_Processo.findMany({ where: { data_reuniao: mes_ano } });
@@ -38,19 +34,45 @@ export class ReunioesService {
     const ultimoDiaMes = new Date(ano, mes, 0);
 
     const reunioes = await this.prisma.reuniao_Processo.findMany({
-        where: {
-            AND: [
-                { data_reuniao: { gte: primeiroDiaMes } },
-                { data_reuniao: { lte: ultimoDiaMes } }
-            ]
-        }
+      where: {
+        AND: [
+          { data_reuniao: { gte: primeiroDiaMes } },
+          { data_reuniao: { lte: ultimoDiaMes } }
+        ]
+      }
     });
 
     if (!reunioes || reunioes.length === 0) {
-        throw new ForbiddenException('Nenhuma reunião encontrada para o mês/ano especificado.');
+      throw new ForbiddenException('Nenhuma reunião encontrada para o mês/ano especificado.');
     }
 
     return reunioes;
-}
+  }
+
+  async buscarPorId(id: string) {
+    const reuniao = await this.prisma.reuniao_Processo.findUnique({ where: { id } });
+    if (!reuniao) throw new ForbiddenException('subprefeitura não encontrada.');
+    return reuniao;
+  }
+
+  async buscarPorData(data: Date) {
+    console.log(data);
+    
+    const reuniao = await this.prisma.reuniao_Processo.findMany({
+      where: {
+        data_reuniao: {
+          equals: new Date(data).toISOString()
+        }
+      }
+    });
+
+    if (!reuniao) {
+      throw new ForbiddenException('Nenhuma reunião encontrada para a data especificada.');
+    } 
+
+    return reuniao;
+  }
+
+
 
 }

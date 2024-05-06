@@ -23,4 +23,10 @@ export class ReunioesController {
   buscarPorMesAno(@Param('mes') mes: string, @Param('ano') ano: string) {
     return this.unidadesService.buscarPorMesAno(parseInt(mes), parseInt(ano)); // Passando os parâmetros corretos
   }
+
+
+  @Get('buscar-data/:date')
+  buscarPorData(@Param('date') data: Date) {
+    return this.unidadesService.buscarPorData(data)
+  }
 }

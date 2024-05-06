@@ -9,4 +9,6 @@ export class CreateReunioesDto {
     justificativa_remarcacao: string;
     @IsNumber()
     id_inicial: number;
+    @IsDate()
+    data: Date;
 }
