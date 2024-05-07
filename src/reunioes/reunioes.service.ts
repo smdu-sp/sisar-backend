@@ -56,8 +56,6 @@ export class ReunioesService {
   }
 
   async buscarPorData(data: Date) {
-    console.log(data);
-    
     const reuniao = await this.prisma.reuniao_Processo.findMany({
       where: {
         data_reuniao: {
