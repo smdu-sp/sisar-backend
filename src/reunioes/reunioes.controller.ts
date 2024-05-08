@@ -29,4 +29,9 @@ export class ReunioesController {
   buscarPorData(@Param('date') data: Date) {
     return this.unidadesService.buscarPorData(data)
   }
+
+  @Get('buscar-inicial/:id')
+  buscarPorId(@Param('id') id: string) {
+    return this.unidadesService.buscarPorId(id)
+  }
 }

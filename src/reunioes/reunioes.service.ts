@@ -49,10 +49,11 @@ export class ReunioesService {
     return reunioes;
   }
 
-  async buscarPorId(id: string) {
-    const reuniao = await this.prisma.reuniao_Processo.findUnique({ where: { id } });
-    if (!reuniao) throw new ForbiddenException('subprefeitura não encontrada.');
-    return reuniao;
+  async buscarPorId(idInt: string) {
+    var id = parseInt(idInt.toString());
+    const inicial = await this.prisma.inicial.findUnique({ where: { id } });
+    if (!inicial) throw new ForbiddenException('Inicial não encontrada.');
+    return inicial;
   }
 
   async buscarPorData(data: Date) {
@@ -61,6 +62,9 @@ export class ReunioesService {
         data_reuniao: {
           equals: new Date(data).toISOString()
         }
+      },
+      include: {
+        inicial: true
       }
     });
 
@@ -70,7 +74,6 @@ export class ReunioesService {
 
     return reuniao;
   }
-
 
 
 }
