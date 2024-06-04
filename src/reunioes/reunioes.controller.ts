@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { ReunioesService } from './reunioes.service';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
+import { UpdateReunioesDto } from './dto/update-reunioes.dto';
 
 @Controller('reunioes')
 export class ReunioesController {
@@ -33,5 +34,10 @@ export class ReunioesController {
   @Get('buscar-inicial/:id')
   buscarPorId(@Param('id') id: string) {
     return this.unidadesService.buscarPorId(id)
+  }
+
+  @Patch('atualizar-data/:id')
+  atualizarData(@Param('id') id: string, @Body() updateReunioesDto: UpdateReunioesDto) {
+    return this.unidadesService.atualizarData(id, updateReunioesDto)
   }
 }

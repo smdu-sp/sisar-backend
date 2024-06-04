@@ -20,15 +20,6 @@ export class ReunioesService {
     return lista;
   }
 
-
-
-
-  // async buscarPorMes_ano(mes_ano: Date) {
-  //   const reuniao = await this.prisma.reuniao_Processo.findMany({ where: { data_reuniao: mes_ano } });
-  //   if (!reuniao || reuniao.length == 0) throw new ForbiddenException('Nenhuma subprefeitura encontrada');
-  //   return reuniao;
-  // }
-
   async buscarPorMesAno(mes: number, ano: number) {
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
@@ -56,22 +47,33 @@ export class ReunioesService {
     return inicial;
   }
 
+  async atualizarData(id: string, updateReunioesDto: UpdateReunioesDto) {
+    updateReunioesDto.nova_data_reuniao = new Date(updateReunioesDto.nova_data_reuniao);
+    updateReunioesDto.nova_data_reuniao.setUTCHours(updateReunioesDto.nova_data_reuniao.getUTCHours() - 3);
+    const reuniao = await this.prisma.reuniao_Processo.update({
+      where: { id },
+      data: {
+        nova_data_reuniao: updateReunioesDto.nova_data_reuniao,
+        justificativa_remarcacao: updateReunioesDto.justificativa_remarcacao
+      }
+    });
+    return reuniao;
+  }
+
   async buscarPorData(data: Date) {
     const reuniao = await this.prisma.reuniao_Processo.findMany({
       where: {
-        data_reuniao: {
-          equals: new Date(data).toISOString()
-        }
+          data_reuniao: {
+            equals: new Date(data).toISOString()
+          }
       },
       include: {
         inicial: true
       }
     });
-
     if (!reuniao) {
       throw new ForbiddenException('Nenhuma reunião encontrada para a data especificada.');
     } 
-
     return reuniao;
   }
 

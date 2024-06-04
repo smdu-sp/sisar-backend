@@ -4,7 +4,7 @@ export class CreateReunioesDto {
     @IsDate({ message: 'Data invalida!' })
     data_reuniao: Date;
     @IsDate({ message: 'Nova data invalida!' })
-    nova_data: Date;
+    nova_data_reuniao?: Date;
     @IsString({ message: 'justificativa invalida!' })
     justificativa_remarcacao: string;
     @IsNumber()
