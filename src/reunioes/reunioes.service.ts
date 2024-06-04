@@ -61,20 +61,25 @@ export class ReunioesService {
   }
 
   async buscarPorData(data: Date) {
-    const reuniao = await this.prisma.reuniao_Processo.findMany({
+    const reuniao_data = new Date(data).toISOString();
+    const reunioes = await this.prisma.reuniao_Processo.findMany({
       where: {
-          data_reuniao: {
-            equals: new Date(data).toISOString()
-          }
+        OR: [
+          { nova_data_reuniao: { equals: reuniao_data } },
+          { data_reuniao: { equals: reuniao_data } }
+        ]
       },
       include: {
         inicial: true
       }
     });
-    if (!reuniao) {
+    if (!reunioes) {
       throw new ForbiddenException('Nenhuma reunião encontrada para a data especificada.');
     } 
-    return reuniao;
+    reunioes.filter((reuniao) => {
+      return reuniao.nova_data_reuniao && reuniao.nova_data_reuniao === data;
+    })
+    return reunioes;
   }
 
 
