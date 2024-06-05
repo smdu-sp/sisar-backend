@@ -75,10 +75,7 @@ export class ReunioesService {
     });
     if (!reunioes) {
       throw new ForbiddenException('Nenhuma reunião encontrada para a data especificada.');
-    } 
-    reunioes.filter((reuniao) => {
-      return reuniao.nova_data_reuniao && reuniao.nova_data_reuniao === data;
-    })
+    }
     return reunioes;
   }
 
