@@ -66,7 +66,7 @@ export class ReunioesService {
       where: {
         OR: [
           { nova_data_reuniao: { equals: reuniao_data } },
-          { data_reuniao: { equals: reuniao_data } }
+          { nova_data_reuniao: null, data_reuniao: { equals: reuniao_data } }
         ]
       },
       include: {
