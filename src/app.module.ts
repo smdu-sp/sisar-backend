@@ -13,10 +13,11 @@ import { InicialModule } from './inicial/inicial.module';
 import { UnidadesModule } from './unidades/unidades.module';
 import { SubprefeituraModule } from './subprefeitura/subprefeitura.module';
 import { ReunioesModule } from './reunioes/reunioes.module';
+import { AdmissibilidadeModule } from './admissibilidade/admissibilidade.module';
 
 @Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule, AdmissibilidadeModule],
   controllers: [AppController],
   providers: [
     AppService,

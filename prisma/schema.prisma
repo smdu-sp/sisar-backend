@@ -22,6 +22,7 @@ model Admissibilidade {
   subprefeitura_id            String?
   categoria                   Categoria?     @relation(fields: [categoria_id], references: [id])
   categoria_id                String?
+  status                      Int            @default(1)
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
