@@ -25,7 +25,6 @@ export class AdmissibilidadeController {
 
   @Get('buscar-tudo')
   buscarTudo(@Query('pagina') pagina: number = 1, @Query('limite') limite: number = 10, @Query('filtro') filtro: number) {
-    console.log('Filtro: ', filtro);
     return this.admissibilidadeService.buscarTudo(+pagina, +limite, +filtro);
   }
 
