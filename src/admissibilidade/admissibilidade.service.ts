@@ -4,6 +4,8 @@ import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { Admissibilidade } from '@prisma/client';
+import { equal } from 'assert';
+import { equals } from 'class-validator';
 
 export class AdmissibilidadePaginado {
   data: Admissibilidade[];
@@ -40,6 +42,11 @@ export class AdmissibilidadeService {
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const admissibilidades = await this.prisma.admissibilidade.findMany({
+      where: {
+        OR: [
+          { status: { in: [1, 2] } }
+        ]
+      },
       include: {
         inicial: true,
       },
