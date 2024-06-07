@@ -36,17 +36,13 @@ export class AdmissibilidadeService {
     return admissibilidade;
   }
 
-  async buscarTudo(pagina: number, limite: number): Promise<AdmissibilidadePaginado> {
+  async buscarTudo(pagina: number, limite: number, filtro: number): Promise<AdmissibilidadePaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const total = await this.prisma.admissibilidade.count();
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const admissibilidades = await this.prisma.admissibilidade.findMany({
-      where: {
-        OR: [
-          { status: { in: [1, 2] } }
-        ]
-      },
+      where: { status: filtro === -1 ? undefined : filtro },
       include: {
         inicial: true,
       },
