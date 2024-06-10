@@ -197,6 +197,7 @@ model Inicial {
   tipo_processo                  Int?                            @default(1)
   obs                            String?
   status                         Int?                            @default(1)
+  pagamento                      Int?                            @default(0)
   comunique_ses                  Comunique_se[]
   controles_prazo                Controle_Prazo[]
   decisoes                       Decisao[]
