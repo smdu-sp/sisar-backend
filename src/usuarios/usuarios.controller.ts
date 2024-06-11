@@ -98,6 +98,12 @@ export class UsuariosController {
     return this.usuariosService.buscarAdministrativos();
   }
 
+  @Permissoes('ADM', 'SUP', 'USR')
+  @Get('buscar-funcionarios')
+  buscarFuncionarios() {
+    return this.usuariosService.buscarFuncionarios();
+  }
+
   @Permissoes('ADM', 'SUP')
   @Post('adicionar-substituto')
   adicionarSubstituto(@Body() { usuario_id, substituto_id }: { usuario_id: string; substituto_id: string }) {
