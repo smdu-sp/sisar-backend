@@ -216,7 +216,7 @@ export class InicialService {
   }
 
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
-    const { nums_sql } = createInicialDto;
+    const { nums_sql, interfaces } = createInicialDto;
     delete createInicialDto.nums_sql;
     delete createInicialDto.interfaces;
     if (createInicialDto.envio_admissibilidade) createInicialDto.status = 2;
@@ -224,6 +224,10 @@ export class InicialService {
       data: { ...createInicialDto },
     });
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');
+    if (novo_inicial.tipo_processo === 2){
+      await this.geraReuniaoData(novo_inicial);
+      await this.criaInterfaces(interfaces as CreateInterfacesDto, novo_inicial.id);
+    }
     if (novo_inicial) await this.criaDistribuicao(novo_inicial);
     if (nums_sql && nums_sql.length > 0) {
       await this.prisma.inicial_Sqls.createMany({
@@ -280,11 +284,16 @@ export class InicialService {
   ): Promise<Inicial> {
     const inicial = await this.prisma.inicial.findUnique({ where: { id } });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
+    const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;
     const inicial_atualizado = await this.prisma.inicial.update({
       where: { id },
       data: { ...updateInicialDto },
     });
+    if (inicial_atualizado.tipo_processo === 2){
+      await this.geraReuniaoData(inicial_atualizado);
+      await this.criaInterfaces(interfaces as CreateInterfacesDto, inicial_atualizado.id);
+    }
     if (!inicial_atualizado)
       throw new ForbiddenException('Erro ao atualizar processo');
     return inicial_atualizado;
