@@ -76,7 +76,10 @@ export class AdmissibilidadeService {
     return admissibilidade;
   }
 
-  async atulaizarStatus(id: number, updateAdmissibilidadeDto: UpdateAdmissibilidadeDto) {
+  async atulaizarStatus(
+    id: number, 
+    updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
+  ): Promise<Admissibilidade> {
     const admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },
       data:  updateAdmissibilidadeDto as any
