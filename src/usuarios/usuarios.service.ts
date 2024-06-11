@@ -328,4 +328,14 @@ export class UsuariosService {
     if (!administrativos) throw new ForbiddenException('Nenhum administrativo encontrado.');
     return administrativos;
   }
+
+  async buscarFuncionarios() {
+    const administrativos = await this.prisma.usuario.findMany({
+      where: { cargo: 'ADM' },
+    });
+    const tecnicos = await this.prisma.usuario.findMany({
+      where: { cargo: 'TEC' },
+    });
+    return { administrativos, tecnicos };
+  }
 }
