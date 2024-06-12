@@ -17,15 +17,17 @@ export class InicialService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) {}
+  ) { }
 
   async validaSql(sql: string) {
     const dataBusca = new Date();
     dataBusca.setDate(dataBusca.getDate() - 90);
-    const sqlBusca = await this.prisma.inicial_Sqls.findMany({ where: { 
-      sql,
-      criado_em: { gte: dataBusca },
-    }});
+    const sqlBusca = await this.prisma.inicial_Sqls.findMany({
+      where: {
+        sql,
+        criado_em: { gte: dataBusca },
+      }
+    });
     if (!sqlBusca) return new ForbiddenException('Erro ao buscar sql.');
     if (sqlBusca.length > 0) return true;
     return false;
@@ -53,7 +55,7 @@ export class InicialService {
   pegaQuarta(data: Date) {
     switch (data.getDay()) {
       case 2: return data;
-      case 3: 
+      case 3:
         return this.adicionaDiasData(data, -1);
       case 4:
         return this.adicionaDiasData(data, -2);
@@ -69,12 +71,13 @@ export class InicialService {
   }
 
   async geraReuniaoData(inicial: Inicial) {
-    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id }})
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } })
     if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvara.');
     const { prazo_admissibilidade, prazo_analise_multi1 } = tipoAlvara;
     const prazo = prazo_admissibilidade + prazo_analise_multi1;
     const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
     var data_reuniao = this.pegaQuarta(data_original);
+    data_reuniao.setUTCHours(0, 0, 0, 0);
     const reuniao = await this.prisma.reuniao_Processo.upsert({
       where: { inicial_id: inicial.id },
       create: {
@@ -85,6 +88,7 @@ export class InicialService {
         data_reuniao
       }
     });
+    console.log(data_reuniao);
     if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
   }
 
@@ -124,7 +128,8 @@ export class InicialService {
     var tecnico_responsavel_id = '';
     const include = {
       ferias: {
-        where: { OR: [
+        where: {
+          OR: [
             {
               inicio: {
                 gte: agora,
@@ -134,11 +139,12 @@ export class InicialService {
               inicio: { lte: agora },
               final: { gte: agora }
             }
-        ]}
+          ]
+        }
       }
     };
     var tecnicos = await this.prisma.usuario.findMany({
-      where: { 
+      where: {
         cargo: 'TEC'
       },
       orderBy: {
@@ -148,7 +154,7 @@ export class InicialService {
     });
     var tecnicos_id = tecnicos.filter(admin => admin.ferias.length === 0).map(admin => admin.id);
     var ultimo_tec = await this.prisma.distribuicao.findFirst({
-      where: { NOT: { tecnico_responsavel_id: null }},
+      where: { NOT: { tecnico_responsavel_id: null } },
       orderBy: { criado_em: 'desc' }
     });
     if (!ultimo_tec) tecnico_responsavel_id = tecnicos_id[0];
@@ -172,7 +178,8 @@ export class InicialService {
     var administrativo_responsavel_id = '';
     const include = {
       ferias: {
-        where: { OR: [
+        where: {
+          OR: [
             {
               inicio: {
                 gte: agora,
@@ -182,11 +189,12 @@ export class InicialService {
               inicio: { lte: agora },
               final: { gte: agora }
             }
-        ]}
+          ]
+        }
       }
     };
     var administrativos = await this.prisma.usuario.findMany({
-      where: { 
+      where: {
         cargo: 'ADM'
       },
       orderBy: {
@@ -195,7 +203,7 @@ export class InicialService {
       include
     });
     var administrativosId = administrativos.filter(admin => admin.ferias.length === 0).map(admin => admin.id);
-    var ultimo_adm = await this.prisma.distribuicao.findFirst({ orderBy: { criado_em: 'desc' }});
+    var ultimo_adm = await this.prisma.distribuicao.findFirst({ orderBy: { criado_em: 'desc' } });
     if (!ultimo_adm) administrativo_responsavel_id = administrativosId[0];
     else {
       administrativo_responsavel_id = ultimo_adm.administrativo_responsavel_id;
@@ -224,7 +232,7 @@ export class InicialService {
       data: { ...createInicialDto },
     });
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');
-    if (novo_inicial.tipo_processo === 2){
+    if (novo_inicial.tipo_processo === 2) {
       await this.geraReuniaoData(novo_inicial);
       await this.criaInterfaces(interfaces as CreateInterfacesDto, novo_inicial.id);
     }
@@ -260,7 +268,7 @@ export class InicialService {
 
   async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');
-    const inicial = await this.prisma.inicial.findUnique({ 
+    const inicial = await this.prisma.inicial.findUnique({
       where: { id },
       include: {
         iniciais_sqls: true,
@@ -290,7 +298,7 @@ export class InicialService {
       where: { id },
       data: { ...updateInicialDto },
     });
-    if (inicial_atualizado.tipo_processo === 2){
+    if (inicial_atualizado.tipo_processo === 2) {
       await this.geraReuniaoData(inicial_atualizado);
       await this.criaInterfaces(interfaces as CreateInterfacesDto, inicial_atualizado.id);
     }
