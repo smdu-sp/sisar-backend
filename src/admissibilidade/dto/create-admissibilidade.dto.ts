@@ -6,4 +6,5 @@ export class CreateAdmissibilidadeDto {
     parecer: number
     subprefeitura_id: string
     categoria_id: string
+    status?: number
 }
