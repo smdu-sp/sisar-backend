@@ -242,6 +242,9 @@ export class InicialService {
         data: nums_sql.map(sql => ({ sql, inicial_id: novo_inicial.id })),
       });
     }
+    await this.prisma.admissibilidade.create({
+      data: { inicial_id: novo_inicial.id }
+    });
     return novo_inicial;
   }
 
