@@ -4,6 +4,7 @@ import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial } from '@prisma/client';
 import { AppService } from 'src/app.service';
+import { promises } from 'dns';
 
 export class IniciaisPaginado {
   data: Inicial[];
@@ -269,6 +270,41 @@ export class InicialService {
     };
   }
 
+  async buscarPorMesAnoProcesso(mes: number, ano: number) {
+    const primeiroDiaMes = new Date(ano, mes - 1, 1);
+    const ultimoDiaMes = new Date(ano, mes, 0);
+  
+    const processo = await this.prisma.inicial.findMany({
+      include: {
+        alvara_tipo: true
+      },
+      where: {
+        AND: [
+          { envio_admissibilidade: { gte: primeiroDiaMes } },
+          { envio_admissibilidade: { lte: ultimoDiaMes } }
+        ]
+      }
+    });
+  
+    if (!processo || processo.length === 0) {
+      throw new ForbiddenException('Nenhuma reunião encontrada para o mês/ano especificado.');
+    }
+  
+    const datasAtualizadas = processo.map(item => {
+      const dataAtual = new Date(item.envio_admissibilidade);
+      dataAtual.setDate(dataAtual.getDate() + 
+      item.alvara_tipo.prazo_admissibilidade_multi + 
+      item.alvara_tipo.prazo_analise_multi1 + 
+      item.alvara_tipo.prazo_analise_multi2 + 
+      item.alvara_tipo.prazo_emissao_alvara_multi);
+      return dataAtual;
+    });
+  
+    console.log(datasAtualizadas);
+    return datasAtualizadas;
+  }
+  
+
   async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({
@@ -315,15 +351,17 @@ export class InicialService {
       where: {
         OR: [
           { sei },
-          { interfaces: {
-            OR: [
-              { num_sehab: sei },
-              { num_siurb: sei },
-              { num_smc: sei },
-              { num_smt: sei },
-              { num_svma: sei },
-            ]
-          }}
+          {
+            interfaces: {
+              OR: [
+                { num_sehab: sei },
+                { num_siurb: sei },
+                { num_smc: sei },
+                { num_smt: sei },
+                { num_svma: sei },
+              ]
+            }
+          }
         ]
       }
     });

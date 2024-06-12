@@ -36,7 +36,6 @@ export class ReunioesService {
     if (!reunioes || reunioes.length === 0) {
       throw new ForbiddenException('Nenhuma reunião encontrada para o mês/ano especificado.');
     }
-
     return reunioes;
   }
 
@@ -78,6 +77,4 @@ export class ReunioesService {
     }
     return reunioes;
   }
-
-
 }
