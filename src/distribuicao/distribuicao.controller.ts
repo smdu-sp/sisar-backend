@@ -7,28 +7,13 @@ import { UpdateDistribuicaoDto } from './dto/update-distribuicao.dto';
 export class DistribuicaoController {
   constructor(private readonly distribuicaoService: DistribuicaoService) {}
 
-  @Post()
-  create(@Body() createDistribuicaoDto: CreateDistribuicaoDto) {
-    return this.distribuicaoService.create(createDistribuicaoDto);
+  @Post('criar')
+  criar(@Body() createDistribuicaoDto: CreateDistribuicaoDto) {
+    return this.distribuicaoService.criar(createDistribuicaoDto);
   }
 
-  @Get()
-  findAll() {
-    return this.distribuicaoService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.distribuicaoService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDistribuicaoDto: UpdateDistribuicaoDto) {
-    return this.distribuicaoService.update(+id, updateDistribuicaoDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.distribuicaoService.remove(+id);
+  @Patch('atualizar/:inicial_id')
+  atualizar(@Param('inicial_id') inicial_id: string, @Body() updateDistribuicaoDto: UpdateDistribuicaoDto) {
+    return this.distribuicaoService.atualizar(+inicial_id, updateDistribuicaoDto);
   }
 }

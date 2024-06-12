@@ -271,6 +271,7 @@ export class InicialService {
 
   async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');
+    if (!id) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({
       where: { id },
       include: {
