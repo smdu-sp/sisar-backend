@@ -18,6 +18,11 @@ export class InicialController {
     return this.inicialService.buscarTudo(+pagina, +limite);
   }
 
+  @Get('buscar/:mes/:ano') // Definindo os parâmetros na rota
+  buscarPorMesAnoProcesso(@Param('mes') mes: string, @Param('ano') ano: string) {
+    return this.inicialService.buscarPorMesAnoProcesso(parseInt(mes), parseInt(ano)); // Passando os parâmetros corretos
+  }
+
   @Get('buscar-por-id/:id')
   buscarPorId(@Param('id') id: string) {
     return this.inicialService.buscarPorId(+id);
