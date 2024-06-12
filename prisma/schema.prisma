@@ -23,6 +23,7 @@ model Admissibilidade {
   categoria                   Categoria?     @relation(fields: [categoria_id], references: [id])
   categoria_id                String?
   status                      Int            @default(1)
+  reconsideracao              Boolean        @default(false)
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -32,15 +33,26 @@ model Admissibilidade {
 }
 
 model Alvara_Tipo {
-  id                    String    @id @default(uuid())
-  nome                  String    @unique
-  prazo_admissibilidade Int       @default(15)
-  prazo_analise_smul1   Int       @default(30)
-  prazo_analise_smul2   Int       @default(30)
-  prazo_analise_multi1  Int       @default(45)
-  prazo_analise_multi2  Int       @default(40)
-  iniciais              Inicial[]
-  status                Int       @default(1)
+  id                            String    @id @default(uuid())
+  nome                          String    @unique
+  prazo_admissibilidade_smul    Int       @default(15)
+  prazo_admissibilidade_multi   Int       @default(15)
+  reconsideracao_smul           Int       @default(3)
+  reconsideracao_smul_tipo      Int       @default(0)
+  analise_reconsideracao_smul   Int       @default(15)
+  reconsideracao_multi          Int       @default(3)
+  reconsideracao_multi_tipo     Int       @default(0)
+  analise_reconsideracao_multi  Int       @default(15) 
+  prazo_analise_smul1           Int       @default(30)
+  prazo_analise_smul2           Int       @default(30)
+  prazo_analise_multi1          Int       @default(45)
+  prazo_analise_multi2          Int       @default(40)
+  prazo_emissao_alvara_smul     Int       @default(0)
+  prazo_emissao_alvara_multi    Int       @default(0)
+  prazo_comunique_se            Int       @default(0)
+  prazo_encaminhar_coord        Int       @default(0)
+  iniciais                      Inicial[]
+  status                        Int       @default(1)
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -420,8 +432,8 @@ model Substituto {
 }
 
 enum Cargo {
-  ADM
-  TEC
+  ADM //administrativo
+  TEC //tecnico
 }
 
 enum Permissao {

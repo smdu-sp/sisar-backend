@@ -71,8 +71,8 @@ export class InicialService {
   async geraReuniaoData(inicial: Inicial) {
     const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id }})
     if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvara.');
-    const { prazo_admissibilidade, prazo_analise_multi1 } = tipoAlvara;
-    const prazo = prazo_admissibilidade + prazo_analise_multi1;
+    const { prazo_analise_multi1 } = tipoAlvara;
+    const prazo = prazo_analise_multi1;
     const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
     var data_reuniao = this.pegaQuarta(data_original);
     const reuniao = await this.prisma.reuniao_Processo.upsert({
@@ -288,6 +288,28 @@ export class InicialService {
     if (!inicial_atualizado)
       throw new ForbiddenException('Erro ao atualizar processo');
     return inicial_atualizado;
+  }
+
+  async verificaSei(sei: string, inicial_id?: number) {
+    const inicial = await this.prisma.inicial.findMany({
+      where: {
+        OR: [
+          { sei },
+          { interfaces: {
+            OR: [
+              { num_sehab: sei },
+              { num_siurb: sei },
+              { num_smc: sei },
+              { num_smt: sei },
+              { num_svma: sei },
+            ]
+          }}
+        ]
+      }
+    });
+    return {
+      cadastrado: inicial.length > 0
+    }
   }
 
   // async remove(id: number) {

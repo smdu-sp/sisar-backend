@@ -42,4 +42,9 @@ export class InicialController {
   validaSql(@Param('sql') sql: string) {
     return this.inicialService.validaSql(sql);
   }
+
+  @Get('verifica-sei/:sei')
+  verificaSei(@Param('sei') sei: string, @Query('inicial_id') inicial_id: string) {
+    return this.inicialService.verificaSei(sei, +inicial_id);
+  }
 }
