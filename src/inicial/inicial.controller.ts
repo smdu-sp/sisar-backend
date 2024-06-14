@@ -28,6 +28,11 @@ export class InicialController {
     return this.inicialService.buscarPorId(+id);
   }
 
+  @Get('buscar-data-processo/:date')
+  buscarPorDataProcesso(@Param('date') data: Date) {
+    return this.inicialService.buscarPorDataProcesso(data)
+  }
+
   @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateInicialDto: UpdateInicialDto) {
     return this.inicialService.atualizar(+id, updateInicialDto);

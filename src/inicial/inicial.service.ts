@@ -89,7 +89,6 @@ export class InicialService {
         data_reuniao
       }
     });
-    console.log(data_reuniao);
     if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
   }
 
@@ -270,40 +269,52 @@ export class InicialService {
     };
   }
 
-  async buscarPorMesAnoProcesso(mes: number, ano: number) {
-    const primeiroDiaMes = new Date(ano, mes - 1, 1);
-    const ultimoDiaMes = new Date(ano, mes, 0);
-  
-    const processo = await this.prisma.inicial.findMany({
+  async buscarPorMesAnoProcesso(mes: any, ano: any) {
+
+    const processos = await this.prisma.inicial.findMany({
       include: {
         alvara_tipo: true
-      },
-      where: {
-        AND: [
-          { envio_admissibilidade: { gte: primeiroDiaMes } },
-          { envio_admissibilidade: { lte: ultimoDiaMes } }
-        ]
       }
     });
-  
-    if (!processo || processo.length === 0) {
-      throw new ForbiddenException('Nenhuma reunião encontrada para o mês/ano especificado.');
+
+    if (!processos || processos.length === 0) {
+      throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
     }
-  
-    const datasAtualizadas = processo.map(item => {
+
+    const datasAtualizadas = processos.map(item => {
       const dataAtual = new Date(item.envio_admissibilidade);
-      dataAtual.setDate(dataAtual.getDate() + 
-      item.alvara_tipo.prazo_admissibilidade_multi + 
-      item.alvara_tipo.prazo_analise_multi1 + 
-      item.alvara_tipo.prazo_analise_multi2 + 
-      item.alvara_tipo.prazo_emissao_alvara_multi);
+      dataAtual.setDate(
+        dataAtual.getDate() +
+        item.alvara_tipo.prazo_admissibilidade_multi +
+        item.alvara_tipo.prazo_analise_multi1 +
+        item.alvara_tipo.prazo_analise_multi2 +
+        item.alvara_tipo.prazo_emissao_alvara_multi
+      );
       return dataAtual;
     });
-  
-    console.log(datasAtualizadas);
-    return datasAtualizadas;
+
+    const datasFiltradas = datasAtualizadas.filter(data => {
+      return data.getMonth() + 1 === mes && data.getFullYear() === ano;
+    });
+
+    return datasFiltradas;
   }
-  
+  async buscarPorDataProcesso(data: Date) {
+    const reuniao_data = new Date(data).toISOString();
+    const processos = await this.prisma.inicial.findMany({
+      where: {
+        envio_admissibilidade: { equals: reuniao_data } 
+      }
+    });
+    if (!processos) {
+      throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
+    }
+    return processos;
+  }
+
+
+
+
 
   async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');

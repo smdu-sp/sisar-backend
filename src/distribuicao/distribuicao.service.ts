@@ -21,7 +21,6 @@ export class DistribuicaoService {
   }
 
   async atualizar(inicial_id: number, updateDistribuicaoDto: UpdateDistribuicaoDto) {
-    console.log({ inicial_id, updateDistribuicaoDto })
     const distribuicao = await this.prisma.distribuicao.findUnique({
       where: { inicial_id: inicial_id }
     });
