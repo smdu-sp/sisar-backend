@@ -421,6 +421,18 @@ model Unidade {
   @@map("unidades")
 }
 
+model Avisos {
+  id            String @id @default(uuid())
+  titulo        String
+  descricao     String
+  data          DateTime
+  
+  criado_em   DateTime @default(now())
+  alterado_em DateTime @default(now()) @updatedAt
+
+  @@map("avisos")
+}
+
 model Substituto {
   id            String @id @default(uuid())
   usuario_id    String
@@ -443,3 +455,4 @@ enum Permissao {
   ADM
   USR
 }
+
