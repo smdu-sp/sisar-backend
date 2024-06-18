@@ -3,4 +3,6 @@ export class CreateAvisoDto {
     titulo?: string
     descricao?: string
     data?: Date
+    usuario_id: string
+    inicial_id?: number
 }

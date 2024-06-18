@@ -3,6 +3,7 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+
 @Injectable()
 export class AvisosService {
 
@@ -12,13 +13,14 @@ export class AvisosService {
   ) {}
 
   
-  async create(createAvisoDto: CreateAvisoDto) {
+  async create(createAvisoDto: CreateAvisoDto, usuario_id: string) {
+    const inicial_id = 1;
     let { titulo, descricao, data } = createAvisoDto;
     if (data instanceof Date) {
       data.setHours(0, 0, 0, 0);
     }
     const criar = await this.prisma.avisos.create({
-      data: { titulo, descricao, data }
+      data: { titulo, descricao, data, usuario_id, inicial_id }
     });
     if (!criar) {
       throw new InternalServerErrorException('Não foi possível criar o aviso. Tente novamente.');
@@ -39,6 +41,8 @@ export class AvisosService {
         ]
       }
     });
+    console.log(reunioes);
+    
     if (!reunioes) {
       throw new InternalServerErrorException('Nenhuma reunião encontrada para a data especificada.');
     }

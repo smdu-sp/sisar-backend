@@ -2,14 +2,16 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AvisosService } from './avisos.service';
 import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
+import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
+import { Usuario } from '@prisma/client';
 
 @Controller('avisos')
 export class AvisosController {
   constructor(private readonly avisosService: AvisosService) {}
 
   @Post('criar')
-  create(@Body() createAvisoDto: CreateAvisoDto) {
-    return this.avisosService.create(createAvisoDto);
+  create(@Body() createAvisoDto: CreateAvisoDto, @UsuarioAtual() usuario: Usuario) {
+    return this.avisosService.create(createAvisoDto, usuario.id);
   }
 
   @Get('buscar/:data')

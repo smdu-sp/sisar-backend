@@ -219,6 +219,7 @@ model Inicial {
   reunioes                       Reuniao_Processo[]
   suspensoes_prazo               Suspensao_Prazo[]
   iniciais_sqls                  Inicial_Sqls[]
+  avisos                         Avisos[]
   admissibilidade                Admissibilidade?
   conclusao                      Conclusao?
   distribuicao                   Distribuicao?
@@ -398,6 +399,8 @@ model Usuario {
   ferias         Ferias[]
   substitutos    Substituto[]   @relation(name: "substituto")
   usuarios       Substituto[]   @relation(name: "usuario")
+  avisos         Avisos[]
+
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -426,7 +429,12 @@ model Avisos {
   titulo        String
   descricao     String
   data          DateTime
+  usuario_id    String
+  inicial_id    Int
   
+  usuario       Usuario @relation(fields: [usuario_id], references: [id])
+  inicial       Inicial @relation(fields: [inicial_id], references: [id])
+
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
 
