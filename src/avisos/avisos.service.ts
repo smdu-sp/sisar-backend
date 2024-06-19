@@ -3,6 +3,7 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { equal } from 'assert';
 
 @Injectable()
 export class AvisosService {
@@ -14,8 +15,8 @@ export class AvisosService {
 
   
   async create(createAvisoDto: CreateAvisoDto, usuario_id: string) {
-    const inicial_id = 1;
-    let { titulo, descricao, data } = createAvisoDto;
+    let { titulo, descricao, data, inicial_id } = createAvisoDto;
+    console.log(inicial_id);
     if (data instanceof Date) {
       data.setHours(0, 0, 0, 0);
     }
@@ -29,14 +30,15 @@ export class AvisosService {
   }
   
 
-  async findOne(data: Date) {
+  async findOne(data: Date, usuario_id: string) {
     if (data instanceof Date) {
       data.setHours(0, 0, 0, 0);
     }
     const reuniao_data = new Date(data).toISOString();
     const reunioes = await this.prisma.avisos.findMany({
       where: {
-        OR: [
+        AND: [
+          { usuario_id: {equals: usuario_id} },
           { data: { equals: reuniao_data } }
         ]
       }
@@ -49,13 +51,14 @@ export class AvisosService {
     return reunioes;
   }
   
-  async buscarPorMesAno(mes: number, ano: number) {
+  async buscarPorMesAno(mes: number, ano: number, usuario_id: string) {
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
 
     const avisos = await this.prisma.avisos.findMany({
       where: {
         AND: [
+          { usuario_id: {equals: usuario_id} },
           { data: { gte: primeiroDiaMes } },
           { data: { lte: ultimoDiaMes } }
         ]

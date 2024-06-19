@@ -58,7 +58,7 @@ export class InicialController {
     return this.inicialService.verificaSei(sei, +inicial_id);
   }
 
-  @Get('buscaProcessos')
+  @Get('busca-processos')
   todosProcessos() {
     return this.inicialService.todosProcessos();
   }

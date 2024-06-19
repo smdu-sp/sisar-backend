@@ -273,10 +273,11 @@ export class InicialService {
     const iniciais = await this.prisma.inicial.findMany({
       select: {
         sei: true,
-        aprova_digital: true
+        aprova_digital: true,
       }
     });
     if (!iniciais) throw new ForbiddenException('Nenhum processo encontrado');
+    return iniciais;
   }
 
 

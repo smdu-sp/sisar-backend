@@ -4,5 +4,5 @@ export class CreateAvisoDto {
     descricao?: string
     data?: Date
     usuario_id: string
-    inicial_id?: number
+    inicial_id: number
 }
