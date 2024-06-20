@@ -269,8 +269,19 @@ export class InicialService {
     };
   }
 
-  async buscarPorMesAnoProcesso(mes: any, ano: any) {
+  async todosProcessos(){
+    const iniciais = await this.prisma.inicial.findMany({
+      select: {
+        sei: true,
+        aprova_digital: true,
+      }
+    });
+    if (!iniciais) throw new ForbiddenException('Nenhum processo encontrado');
+    return iniciais;
+  }
 
+
+  async buscarPorMesAnoProcesso(mes: any, ano: any) {
     const processos = await this.prisma.inicial.findMany({
       include: {
         alvara_tipo: true
@@ -303,7 +314,7 @@ export class InicialService {
     const reuniao_data = new Date(data).toISOString();
     const processos = await this.prisma.inicial.findMany({
       where: {
-        envio_admissibilidade: { equals: reuniao_data } 
+        envio_admissibilidade: { equals: reuniao_data }
       }
     });
     if (!processos) {

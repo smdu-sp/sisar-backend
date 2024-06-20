@@ -2,24 +2,26 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AvisosService } from './avisos.service';
 import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
+import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
+import { Usuario } from '@prisma/client';
 
 @Controller('avisos')
 export class AvisosController {
   constructor(private readonly avisosService: AvisosService) {}
 
   @Post('criar')
-  create(@Body() createAvisoDto: CreateAvisoDto) {
-    return this.avisosService.create(createAvisoDto);
+  create(@Body() createAvisoDto: CreateAvisoDto, @UsuarioAtual() usuario: Usuario) {
+    return this.avisosService.create(createAvisoDto, usuario.id);
   }
 
   @Get('buscar/:data')
-  findOne(@Param('data') data: Date) {
-    return this.avisosService.findOne(data);
+  findOne(@Param('data') data: Date, @UsuarioAtual() usuario: Usuario) {
+    return this.avisosService.findOne(data, usuario.id);
   }
 
   @Get('buscar/:mes/:ano')
-  buscarPorMesAno(@Param('mes') mes: string, @Param('ano') ano: string) {
-    return this.avisosService.buscarPorMesAno(parseInt(mes), parseInt(ano));
+  buscarPorMesAno(@Param('mes') mes: string, @Param('ano') ano: string, @UsuarioAtual() usuario: Usuario) {
+    return this.avisosService.buscarPorMesAno(parseInt(mes), parseInt(ano), usuario.id);
   }
 
   @Patch('atualizar/:id')
@@ -27,7 +29,7 @@ export class AvisosController {
     return this.avisosService.update(id, updateAvisoDto);
   }
 
-  @Delete('excluir:id')
+  @Delete('excluir/:id')
   remove(@Param('id') id: string) {
     return this.avisosService.remove(id);
   }
