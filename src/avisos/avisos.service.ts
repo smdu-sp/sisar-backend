@@ -14,7 +14,7 @@ export class AvisosService {
   ) { }
 
 
-  async create(createAvisoDto: CreateAvisoDto, usuario_id: string) {
+  async create(createAvisoDto: CreateAvisoDto, usuario_id?: string) {
     let { titulo, descricao, data, inicial_id } = createAvisoDto;
     const criar = await this.prisma.avisos.create({
       data: { titulo, descricao, data, usuario_id, inicial_id }
@@ -37,7 +37,12 @@ export class AvisosService {
       },
       where: {
         AND: [
-          { usuario_id: { equals: usuario_id } },
+          {
+            OR: [
+              { usuario_id: { equals: usuario_id } },
+              { usuario_id: { equals: null } }
+            ]
+          },
           { data: { equals: reuniao_data } }
         ]
       }
@@ -55,7 +60,12 @@ export class AvisosService {
     const avisos = await this.prisma.avisos.findMany({
       where: {
         AND: [
-          { usuario_id: { equals: usuario_id } },
+          {
+            OR: [
+              { usuario_id: { equals: usuario_id } },
+              { usuario_id: { equals: null } }
+            ]
+          },
           { data: { gte: primeiroDiaMes } },
           { data: { lte: ultimoDiaMes } }
         ]

@@ -429,10 +429,10 @@ model Avisos {
   titulo        String
   descricao     String
   data          DateTime
-  usuario_id    String
+  usuario_id    String?
   inicial_id    Int
   
-  usuario       Usuario @relation(fields: [usuario_id], references: [id])
+  usuario       Usuario? @relation(fields: [usuario_id], references: [id])
   inicial       Inicial @relation(fields: [inicial_id], references: [id])
 
   criado_em   DateTime @default(now())
