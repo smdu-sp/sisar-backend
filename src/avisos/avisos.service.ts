@@ -11,15 +11,11 @@ export class AvisosService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) {}
+  ) { }
 
-  
+
   async create(createAvisoDto: CreateAvisoDto, usuario_id: string) {
     let { titulo, descricao, data, inicial_id } = createAvisoDto;
-    console.log(inicial_id);
-    if (data instanceof Date) {
-      data.setHours(0, 0, 0, 0);
-    }
     const criar = await this.prisma.avisos.create({
       data: { titulo, descricao, data, usuario_id, inicial_id }
     });
@@ -28,7 +24,7 @@ export class AvisosService {
     }
     return criar;
   }
-  
+
 
   async findOne(data: Date, usuario_id: string) {
     if (data instanceof Date) {
@@ -36,21 +32,22 @@ export class AvisosService {
     }
     const reuniao_data = new Date(data).toISOString();
     const reunioes = await this.prisma.avisos.findMany({
+      include: {
+        inicial: true
+      },
       where: {
         AND: [
-          { usuario_id: {equals: usuario_id} },
+          { usuario_id: { equals: usuario_id } },
           { data: { equals: reuniao_data } }
         ]
       }
     });
-    console.log(reunioes);
-    
     if (!reunioes) {
       throw new InternalServerErrorException('Nenhuma reunião encontrada para a data especificada.');
     }
     return reunioes;
   }
-  
+
   async buscarPorMesAno(mes: number, ano: number, usuario_id: string) {
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
@@ -58,7 +55,7 @@ export class AvisosService {
     const avisos = await this.prisma.avisos.findMany({
       where: {
         AND: [
-          { usuario_id: {equals: usuario_id} },
+          { usuario_id: { equals: usuario_id } },
           { data: { gte: primeiroDiaMes } },
           { data: { lte: ultimoDiaMes } }
         ]
