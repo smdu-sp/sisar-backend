@@ -72,13 +72,28 @@ export class InicialService {
   }
 
   async geraReuniaoData(inicial: Inicial) {
-    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } })
-    if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvara.');
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } });
+    if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvará.');
+
     const { prazo_analise_multi1 } = tipoAlvara;
     const prazo = prazo_analise_multi1;
+
     const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
-    var data_reuniao = this.pegaQuarta(data_original);
+
+    const pegaQuarta = (data: Date) => {
+      const diaSemana = data.getDay();
+      console.log(diaSemana);
+      if (diaSemana != 3) {
+        const diff = 3 - diaSemana;
+        const quarta = new Date(data);
+        quarta.setDate(data.getDate() + diff - 7);
+        return quarta;
+      } else { return data; }
+    };
+
+    let data_reuniao = pegaQuarta(data_original);
     data_reuniao.setUTCHours(0, 0, 0, 0);
+
     const reuniao = await this.prisma.reuniao_Processo.upsert({
       where: { inicial_id: inicial.id },
       create: {
@@ -89,8 +104,10 @@ export class InicialService {
         data_reuniao
       }
     });
-    if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
+
+    if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
   }
+
 
   async removeSql(inicial_id: number, sql: string) {
     const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
@@ -269,7 +286,7 @@ export class InicialService {
     };
   }
 
-  async todosProcessos(){
+  async todosProcessos() {
     const iniciais = await this.prisma.inicial.findMany({
       select: {
         sei: true,
