@@ -211,6 +211,8 @@ model Inicial {
   obs                            String?
   status                         Int?                            @default(1)
   pagamento                      Int?                            @default(0)
+  data_limiteSmul                DateTime?
+  data_limiteMulti               DateTime?
   comunique_ses                  Comunique_se[]
   controles_prazo                Controle_Prazo[]
   decisoes                       Decisao[]

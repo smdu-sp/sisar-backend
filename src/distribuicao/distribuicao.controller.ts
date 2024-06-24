@@ -16,4 +16,14 @@ export class DistribuicaoController {
   atualizar(@Param('inicial_id') inicial_id: string, @Body() updateDistribuicaoDto: UpdateDistribuicaoDto) {
     return this.distribuicaoService.atualizar(+inicial_id, updateDistribuicaoDto);
   }
+
+  @Patch('administrativo/atualizar/:inicial_id')
+  mudarAdministrativoResponsavel(@Param('inicial_id') inicial_id: string, @Body() { administrativo_responsavel_id }: { administrativo_responsavel_id: string }) {
+    return this.distribuicaoService.mudarAdministrativoResponsavel(+inicial_id, administrativo_responsavel_id);
+  }
+
+  @Patch('tecnico/atualizar/:inicial_id')
+  mudarTecnicoResponsavel(@Param('inicial_id') inicial_id: string, @Body() { tecnico_responsavel_id }: { tecnico_responsavel_id: string }) {
+    return this.distribuicaoService.mudarTecnicoResponsavel(+inicial_id, tecnico_responsavel_id);
+  }
 }

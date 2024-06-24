@@ -228,6 +228,11 @@ export class InicialService {
     delete createInicialDto.nums_sql;
     delete createInicialDto.interfaces;
     if (createInicialDto.envio_admissibilidade) createInicialDto.status = 2;
+    const tipo_alvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: createInicialDto.alvara_tipo_id } });
+    if (!tipo_alvara) throw new ForbiddenException('Alvara inválido.');
+    const prazoTotalSmul = tipo_alvara.prazo_admissibilidade_smul + tipo_alvara.prazo_analise_smul1 + tipo_alvara.prazo_analise_smul2;
+    const prazoTotalMulti = tipo_alvara.prazo_admissibilidade_multi + tipo_alvara.prazo_analise_multi1 + tipo_alvara.prazo_analise_multi2;
+     
     const novo_inicial = await this.prisma.inicial.create({
       data: { ...createInicialDto },
     });

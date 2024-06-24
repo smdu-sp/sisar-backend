@@ -22,13 +22,54 @@ export class DistribuicaoService {
 
   async atualizar(inicial_id: number, updateDistribuicaoDto: UpdateDistribuicaoDto) {
     const distribuicao = await this.prisma.distribuicao.findUnique({
-      where: { inicial_id: inicial_id }
+      where: { inicial_id: inicial_id },
+      include: {
+        tecnico_responsavel: true,
+        administrativo_responsavel: true
+      }
     });
     if (distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Processo não existe.');
+    const { administrativo_responsavel_id, tecnico_responsavel_id } = updateDistribuicaoDto;
     const atualiza_distribuicao = await this.prisma.distribuicao.update({
       where: { inicial_id },
-      data: updateDistribuicaoDto
+      data: {
+        ...(administrativo_responsavel_id && { administrativo_responsavel_id }),
+        ...(tecnico_responsavel_id && { tecnico_responsavel_id })
+      }
+    }).catch(error => {
+      console.log(error);
     });
+    console.log(atualiza_distribuicao);
+    if (!atualiza_distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Tente novamente.');
+    return atualiza_distribuicao;
+  }
+
+  async mudarAdministrativoResponsavel(inicial_id: number, administrativo_responsavel_id: string) {
+    const distribuicao = await this.prisma.distribuicao.findUnique({
+      where: { inicial_id: inicial_id }
+    });
+    if (!distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Processo não existe.');
+    const atualiza_distribuicao = await this.prisma.distribuicao.update({
+      where: { inicial_id },
+      data: {
+        administrativo_responsavel_id
+      }
+    })
+    if (!atualiza_distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Tente novamente.');
+    return atualiza_distribuicao;
+  }
+
+  async mudarTecnicoResponsavel(inicial_id: number, tecnico_responsavel_id: string) {
+    const distribuicao = await this.prisma.distribuicao.findUnique({
+      where: { inicial_id: inicial_id }
+    });
+    if (!distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Processo não existe.');
+    const atualiza_distribuicao = await this.prisma.distribuicao.update({
+      where: { inicial_id },
+      data: {
+        tecnico_responsavel_id
+      }
+    })
     if (!atualiza_distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Tente novamente.');
     return atualiza_distribuicao;
   }
