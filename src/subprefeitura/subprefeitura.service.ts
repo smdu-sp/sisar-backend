@@ -28,10 +28,10 @@ export class SubprefeituraService {
   }
 
   async criar(createsubprefeituraDto: CreateSubprefeituraDto) {
-    const { nome } = createsubprefeituraDto;
+    const { nome, sigla } = createsubprefeituraDto;
     if (await this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma subprefeitura com o mesmo nome');
     const novasubprefeitura = await this.prisma.subprefeitura.create({
-      data: { nome }
+      data: { nome, sigla }
     });
     if (!novasubprefeitura) throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
     return novasubprefeitura;
