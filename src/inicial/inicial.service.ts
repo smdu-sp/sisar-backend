@@ -71,26 +71,8 @@ export class InicialService {
     }
   }
 
-  async geraReuniaoData(inicial: Inicial) {
-    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } })
-    if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvara.');
-    const { prazo_analise_multi1 } = tipoAlvara;
-    const prazo = prazo_analise_multi1;
-    const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
-    var data_reuniao = this.pegaQuarta(data_original);
-    data_reuniao.setUTCHours(0, 0, 0, 0);
-    const reuniao = await this.prisma.reuniao_Processo.upsert({
-      where: { inicial_id: inicial.id },
-      create: {
-        data_reuniao,
-        inicial_id: inicial.id
-      },
-      update: {
-        data_reuniao
-      }
-    });
-    if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
-  }
+
+
 
   async removeSql(inicial_id: number, sql: string) {
     const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
@@ -274,7 +256,7 @@ export class InicialService {
     };
   }
 
-  async todosProcessos(){
+  async todosProcessos() {
     const iniciais = await this.prisma.inicial.findMany({
       select: {
         sei: true,
@@ -287,9 +269,16 @@ export class InicialService {
 
 
   async buscarPorMesAnoProcesso(mes: any, ano: any) {
-    const processos = await this.prisma.inicial.findMany({
-      include: {
-        alvara_tipo: true
+
+    const primeiroDiaMes = new Date(ano, mes - 1, 1);
+    const ultimoDiaMes = new Date(ano, mes, 0);
+
+    const processos = await this.prisma.reuniao_Processo.findMany({
+      where: {
+        AND: [
+          { data_processo: { gte: primeiroDiaMes } },
+          { data_processo: { lte: ultimoDiaMes } }
+        ]
       }
     });
 
@@ -297,31 +286,67 @@ export class InicialService {
       throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
     }
 
-    const datasAtualizadas = processos.map(item => {
-      const dataAtual = new Date(item.envio_admissibilidade);
-      dataAtual.setDate(
-        dataAtual.getDate() +
-        item.alvara_tipo.prazo_admissibilidade_multi +
-        item.alvara_tipo.prazo_analise_multi1 +
-        item.alvara_tipo.prazo_analise_multi2 +
-        item.alvara_tipo.prazo_emissao_alvara_multi
-      );
-      return dataAtual;
+    return processos;
+  }
+  async geraReuniaoData(inicial: Inicial) {
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } });
+    if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvará.');
+
+    const { prazo_analise_multi1 } = tipoAlvara;
+    const prazo = prazo_analise_multi1;
+
+    const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
+
+    const pegaQuarta = (data: Date) => {
+      const diaSemana = data.getDay();
+      console.log(diaSemana);
+      if (diaSemana != 3) {
+        const diff = 3 - diaSemana;
+        const quarta = new Date(data);
+        quarta.setDate(data.getDate() + diff - 8);
+        return quarta;
+      } else { return data }
+    }
+
+    let data_reuniao = pegaQuarta(data_original);
+    data_reuniao.setUTCHours(0, 0, 0, 0);
+
+    let dataProcesso = new Date(inicial.envio_admissibilidade);
+    dataProcesso.setDate(
+      dataProcesso.getDate() +
+      tipoAlvara.prazo_admissibilidade_multi +
+      tipoAlvara.prazo_analise_multi1 +
+      tipoAlvara.prazo_analise_multi2 +
+      tipoAlvara.prazo_emissao_alvara_multi
+    );
+    dataProcesso.setUTCHours(0, 0, 0, 0);
+
+    const reuniao = await this.prisma.reuniao_Processo.upsert({
+      where: { inicial_id: inicial.id },
+      create: {
+        data_reuniao,
+        inicial_id: inicial.id,
+        data_processo: dataProcesso
+      },
+      update: {
+        data_reuniao
+      }
     });
 
-    const datasFiltradas = datasAtualizadas.filter(data => {
-      return data.getMonth() + 1 === mes && data.getFullYear() === ano;
-    });
-
-    return datasFiltradas;
+    if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
   }
   async buscarPorDataProcesso(data: Date) {
     const reuniao_data = new Date(data).toISOString();
-    const processos = await this.prisma.inicial.findMany({
+    const processos = await this.prisma.reuniao_Processo.findMany({
+      include: {
+        inicial: true
+      },
       where: {
-        envio_admissibilidade: { equals: reuniao_data }
+        data_processo: { equals: reuniao_data }
       }
     });
+
+
     if (!processos) {
       throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
     }

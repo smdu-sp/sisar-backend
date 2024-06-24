@@ -11,7 +11,7 @@ export class AvisosController {
 
   @Post('criar')
   create(@Body() createAvisoDto: CreateAvisoDto, @UsuarioAtual() usuario: Usuario) {
-    return this.avisosService.create(createAvisoDto, usuario.id);
+    return this.avisosService.create(createAvisoDto, createAvisoDto.tipo === 1 ? usuario.id : null);
   }
 
   @Get('buscar/:data')
