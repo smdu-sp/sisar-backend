@@ -199,7 +199,7 @@ model Inicial {
   id                             Int                             @id @default(autoincrement())
   decreto                        Boolean                         @default(false)
   sei                            String
-  tipo_requerimento              String
+  tipo_requerimento              Int                             @default(1)
   requerimento                   String
   aprova_digital                 String?
   processo_fisico                String?

@@ -303,7 +303,7 @@ export class InicialService {
       if (diaSemana != 3) {
         const diff = 3 - diaSemana;
         const quarta = new Date(data);
-        quarta.setDate(data.getDate() + diff - 8);
+        quarta.setDate(data.getDate() + diff - 7);
         return quarta;
       } else { return data }
     }

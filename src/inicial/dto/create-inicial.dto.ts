@@ -8,7 +8,7 @@ export class CreateInicialDto {
     @ApiProperty()
     sei: string;
     @ApiProperty()
-    tipo_requerimento: string;
+    tipo_requerimento: number;
     @ApiProperty()
     requerimento: string;
     @ApiProperty()
