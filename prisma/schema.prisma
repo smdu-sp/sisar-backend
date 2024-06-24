@@ -12,7 +12,7 @@ datasource db {
 
 model Admissibilidade {
   inicial_id                  Int
-  inicial                     Inicial       @relation(fields: [inicial_id], references: [id])
+  inicial                     Inicial        @relation(fields: [inicial_id], references: [id])
   unidade                     Unidade?       @relation(fields: [unidade_id], references: [id])
   unidade_id                  String?
   data_envio                  DateTime?
@@ -24,7 +24,7 @@ model Admissibilidade {
   categoria_id                String?
   status                      Int            @default(1)
   reconsiderado               Boolean        @default(false)
-  motivo                      String?         
+  motivo                      String?
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -34,26 +34,26 @@ model Admissibilidade {
 }
 
 model Alvara_Tipo {
-  id                            String    @id @default(uuid())
-  nome                          String    @unique
-  prazo_admissibilidade_smul    Int       @default(15)
-  reconsideracao_smul           Int       @default(3)
-  reconsideracao_smul_tipo      Int       @default(0)
-  analise_reconsideracao_smul   Int       @default(15)
-  prazo_analise_smul1           Int       @default(30)
-  prazo_analise_smul2           Int       @default(30)
-  prazo_emissao_alvara_smul     Int       @default(0)
-  prazo_admissibilidade_multi   Int       @default(15)
-  reconsideracao_multi          Int       @default(3)
-  reconsideracao_multi_tipo     Int       @default(0)
-  analise_reconsideracao_multi  Int       @default(15) 
-  prazo_analise_multi1          Int       @default(45)
-  prazo_analise_multi2          Int       @default(40)
-  prazo_emissao_alvara_multi    Int       @default(0)
-  prazo_comunique_se            Int       @default(0)
-  prazo_encaminhar_coord        Int       @default(0)
-  iniciais                      Inicial[]
-  status                        Int       @default(1)
+  id                           String    @id @default(uuid())
+  nome                         String    @unique
+  prazo_admissibilidade_smul   Int       @default(15)
+  reconsideracao_smul          Int       @default(3)
+  reconsideracao_smul_tipo     Int       @default(0)
+  analise_reconsideracao_smul  Int       @default(15)
+  prazo_analise_smul1          Int       @default(30)
+  prazo_analise_smul2          Int       @default(30)
+  prazo_emissao_alvara_smul    Int       @default(0)
+  prazo_admissibilidade_multi  Int       @default(15)
+  reconsideracao_multi         Int       @default(3)
+  reconsideracao_multi_tipo    Int       @default(0)
+  analise_reconsideracao_multi Int       @default(15)
+  prazo_analise_multi1         Int       @default(45)
+  prazo_analise_multi2         Int       @default(40)
+  prazo_emissao_alvara_multi   Int       @default(0)
+  prazo_comunique_se           Int       @default(0)
+  prazo_encaminhar_coord       Int       @default(0)
+  iniciais                     Inicial[]
+  status                       Int       @default(1)
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -131,10 +131,10 @@ model Controle_Prazo {
 }
 
 model Coordenadoria {
-  id               String            @id @default(uuid())
-  nome             String            @unique
-  sigla            String            @unique
-  diretorias       Diretoria[]
+  id         String      @id @default(uuid())
+  nome       String      @unique
+  sigla      String      @unique
+  diretorias Diretoria[]
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -165,10 +165,10 @@ model Decisao {
 }
 
 model Diretoria {
-  id               String            @id @default(uuid())
-  nome             String            @unique
+  id               String        @id @default(uuid())
+  nome             String        @unique
   coordenadoria_id String
-  coordenadoria    Coordenadoria     @relation(fields: [coordenadoria_id], references: [id])
+  coordenadoria    Coordenadoria @relation(fields: [coordenadoria_id], references: [id])
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -178,14 +178,14 @@ model Diretoria {
 
 model Distribuicao {
   inicial_id                           Int
-  inicial                              Inicial @relation(fields: [inicial_id], references: [id])
+  inicial                              Inicial  @relation(fields: [inicial_id], references: [id])
   tecnico_responsavel                  Usuario? @relation(fields: [tecnico_responsavel_id], references: [id], name: "tecnico")
   tecnico_responsavel_id               String?
-  administrativo_responsavel           Usuario @relation(fields: [administrativo_responsavel_id], references: [id], name: "administrativo")
+  administrativo_responsavel           Usuario  @relation(fields: [administrativo_responsavel_id], references: [id], name: "administrativo")
   administrativo_responsavel_id        String
   processo_relacionado_incomum         String?
   assunto_processo_relacionado_incomum String?
-  baixa_pagamento                      Int     @default(0)
+  baixa_pagamento                      Int      @default(0)
   obs                                  String?
 
   criado_em   DateTime @default(now())
@@ -256,11 +256,11 @@ model Motivo_Inadmissao {
 }
 
 model Motivo_Inadmissao_Inicial {
-  inicial_id            Int
-  inicial               Inicial @relation(fields: [inicial_id], references: [id])
-  motivo_inadmissao_id  String
-  motivo_inadmissao     Motivo_Inadmissao @relation(fields: [motivo_inadmissao_id], references: [id])
-  descricao             String?
+  inicial_id           Int
+  inicial              Inicial           @relation(fields: [inicial_id], references: [id])
+  motivo_inadmissao_id String
+  motivo_inadmissao    Motivo_Inadmissao @relation(fields: [motivo_inadmissao_id], references: [id])
+  descricao            String?
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -311,10 +311,11 @@ model Reconsideracao_Admissibilidade {
 }
 
 model Reuniao_Processo {
-  id                       String    @id @default(uuid())
-  inicial_id               Int       @unique
-  inicial                  Inicial   @relation(fields: [inicial_id], references: [id])
+  id                       String     @id @default(uuid())
+  inicial_id               Int        @unique
+  inicial                  Inicial    @relation(fields: [inicial_id], references: [id])
   data_reuniao             DateTime
+  data_processo            DateTime    @db.DateTime(0)     
   nova_data_reuniao        DateTime?
   justificativa_remarcacao String?
 
@@ -346,10 +347,10 @@ model Interface {
 }
 
 model Subprefeitura {
-  id               String            @id @default(uuid())
-  nome             String            @unique
-  status           Int?              @default(1)
-  
+  id     String @id @default(uuid())
+  nome   String @unique
+  status Int?   @default(1)
+
   admissibilidades Admissibilidade[]
 
   criado_em   DateTime @default(now())
@@ -374,15 +375,15 @@ model Suspensao_Prazo {
 }
 
 model Ferias {
-  id         String @id @default(uuid())
+  id         String   @id @default(uuid())
   usuario_id String
-  usuario    Usuario @relation(fields: [usuario_id], references: [id])
+  usuario    Usuario  @relation(fields: [usuario_id], references: [id])
   inicio     DateTime
   final      DateTime
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
-  
+
   @@map("ferias")
 }
 
@@ -401,39 +402,38 @@ model Usuario {
   usuarios       Substituto[]   @relation(name: "usuario")
   avisos         Avisos[]
 
-
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
 
-  unidade     Unidade?   @relation(fields: [unidade_id], references: [id])
-  unidade_id  String?
+  unidade    Unidade? @relation(fields: [unidade_id], references: [id])
+  unidade_id String?
 
   @@map("usuarios")
 }
 
 model Unidade {
-  id        String    @id @default(uuid())
-  nome      String    @unique
-  sigla     String    @unique
-  codigo    String    @unique
-  status    Boolean   @default(true)
+  id     String  @id @default(uuid())
+  nome   String  @unique
+  sigla  String  @unique
+  codigo String  @unique
+  status Boolean @default(true)
 
-  usuarios  Usuario[]
+  usuarios         Usuario[]
   admissibilidades Admissibilidade[]
 
   @@map("unidades")
 }
 
 model Avisos {
-  id            String @id @default(uuid())
-  titulo        String
-  descricao     String
-  data          DateTime
-  usuario_id    String?
-  inicial_id    Int
-  
-  usuario       Usuario? @relation(fields: [usuario_id], references: [id])
-  inicial       Inicial @relation(fields: [inicial_id], references: [id])
+  id         String   @id @default(uuid())
+  titulo     String
+  descricao  String
+  data       DateTime
+  usuario_id String?
+  inicial_id Int
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id])
+  inicial Inicial  @relation(fields: [inicial_id], references: [id])
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -442,7 +442,7 @@ model Avisos {
 }
 
 model Substituto {
-  id            String @id @default(uuid())
+  id            String  @id @default(uuid())
   usuario_id    String
   usuario       Usuario @relation(fields: [usuario_id], references: [id], name: "usuario")
   substituto_id String
@@ -463,4 +463,3 @@ enum Permissao {
   ADM
   USR
 }
-
