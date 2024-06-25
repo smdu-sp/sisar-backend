@@ -6,4 +6,7 @@ export class CreateSubprefeituraDto {
 
     @IsString({ message: 'Sigla inválida!' })
     sigla: string;
+
+    @IsString({ message: 'Sigla inválida!' })
+    status: number;
 }

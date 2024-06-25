@@ -352,7 +352,7 @@ model Subprefeitura {
   id     String @id @default(uuid())
   nome   String @unique
   sigla  String @unique
-  status Int?   @default(1)
+  status Int   
 
   admissibilidades Admissibilidade[]
 
