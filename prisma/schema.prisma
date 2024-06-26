@@ -419,7 +419,7 @@ model Unidade {
   nome   String  @unique
   sigla  String  @unique
   codigo String  @unique
-  status Boolean @default(true)
+  status Int     
 
   usuarios         Usuario[]
   admissibilidades Admissibilidade[]

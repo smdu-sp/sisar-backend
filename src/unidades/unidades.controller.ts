@@ -20,7 +20,7 @@ export class UnidadesController {
   buscarTudo(
     @Query('pagina') pagina?: string,
     @Query('limite') limite?: string,
-    @Query('status') status?: string,
+    @Query('status') status?: number,
     @Query('busca') busca?: string,
   ) {
     return this.unidadesService.buscarTudo(+pagina, +limite, status, busca);
@@ -46,7 +46,7 @@ export class UnidadesController {
 
   @Permissoes('ADM')
   @Delete('desativar/:id')
-  desativar(@Param('id') id: string) {
-    return this.unidadesService.desativar(id);
+  desativar(@Param('id') id: string, @Query('status') status: number) {
+    return this.unidadesService.desativar(id, status);
   }
 }
