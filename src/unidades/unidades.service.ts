@@ -3,6 +3,7 @@ import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { contains } from 'class-validator';
 // import { Connection } from 'oracledb';
 
 @Injectable()
@@ -56,7 +57,6 @@ export class UnidadesService {
   async buscarTudo(
     pagina: number = 1,
     limite: number = 10,
-    status: number,
     busca?: string
   ) {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
@@ -67,14 +67,12 @@ export class UnidadesService {
             { sigla: { contains: busca } },
         ] } : 
         {}),
-      ...(status == 1 || status == 0 ? {} : { status: 0 }),
     };
     const total = await this.prisma.unidade.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const unidades = await this.prisma.unidade.findMany({
       where: searchParams,
-      orderBy: { codigo: 'asc' },
       skip: (pagina - 1) * limite,
       take: limite,
     });
@@ -116,13 +114,14 @@ export class UnidadesService {
     return updatedUnidade;
   }
 
-  async desativar(id: string, status: number) {
+  async desativar(id: string, updateUnidadeDto: UpdateUnidadeDto) {
     const unidade = await this.prisma.unidade.findUnique({ where: { id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
     const updatedUnidade = await this.prisma.unidade.update({
       where: { id },
-      data: { status }
+      data: updateUnidadeDto
     });
+    console.log(updatedUnidade);
     if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
     return {
       message: 'Unidade desativada com sucesso.'

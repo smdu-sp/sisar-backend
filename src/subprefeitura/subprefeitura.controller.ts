@@ -7,12 +7,12 @@ import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 
 @Controller('subprefeitura')
 export class SubprefeituraController {
-  constructor(private readonly unidadesService: SubprefeituraService) {}
+  constructor(private readonly subprefeiturasServiceimport: SubprefeituraService) {}
 
   @Permissoes('ADM')
   @Post('criar')
   criar(@Body() CreateSubprefeituraDto: CreateSubprefeituraDto) {
-    return this.unidadesService.criar(CreateSubprefeituraDto);
+    return this.subprefeiturasServiceimport.criar(CreateSubprefeituraDto);
   }
 
   @Permissoes('ADM')
@@ -22,36 +22,36 @@ export class SubprefeituraController {
     @Query('limite') limite?: string,
     @Query('busca') busca?: string,
   ) {
-    return this.unidadesService.buscarTudo(+pagina, +limite, busca);
+    return this.subprefeiturasServiceimport.buscarTudo(+pagina, +limite, busca);
   }
 
   @Permissoes('ADM')
   @Get('lista-completa')
   listaCompleta() {
-    return this.unidadesService.listaCompleta();
+    return this.subprefeiturasServiceimport.listaCompleta();
   }
 
   @Permissoes('ADM')
   @Get('buscar-por-id/:id')
   buscarPorId(@Param('id') id: string) {
-    return this.unidadesService.buscarPorId(id);
+    return this.subprefeiturasServiceimport.buscarPorId(id);
   }
 
   @Permissoes('ADM')
   @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateSubprefeituraDto) {
-    return this.unidadesService.atualizar(id, updateUnidadeDto);
+    return this.subprefeiturasServiceimport.atualizar(id, updateUnidadeDto);
   }
 
   // @Permissoes('ADM')
   // @Patch('desativar/:id')
   // desativar(@Param('id') id: string) {
-  //   return this.unidadesService.desativar(id);
+  //   return this.subprefeiturasServiceimport.desativar(id);
   // }
 
   // @Permissoes('ADM')
   // @Delete('desativar/:id')
   // desativar(@Param('id') id: string) {
-  //   return this.unidadesService.desativar(id);
+  //   return this.subprefeiturasServiceimport.desativar(id);
   // }
 }
