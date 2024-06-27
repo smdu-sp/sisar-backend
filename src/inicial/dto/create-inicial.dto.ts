@@ -31,6 +31,8 @@ export class CreateInicialDto {
     nums_sql?: string[];
     @ApiProperty()
     interfaces?: any;
+    @ApiProperty()
+    data_limteSmul: Date;
 }
 
 export class CreateInterfacesDto {
