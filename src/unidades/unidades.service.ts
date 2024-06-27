@@ -72,7 +72,11 @@ export class UnidadesService {
     if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const unidades = await this.prisma.unidade.findMany({
-      where: searchParams,
+      where: {
+        OR: [
+          {...searchParams}
+        ]
+      },
       skip: (pagina - 1) * limite,
       take: limite,
     });

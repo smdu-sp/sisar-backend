@@ -214,7 +214,7 @@ export class InicialService {
     if (!tipo_alvara) throw new ForbiddenException('Alvara inválido.');
     const prazoTotalSmul = tipo_alvara.prazo_admissibilidade_smul + tipo_alvara.prazo_analise_smul1 + tipo_alvara.prazo_analise_smul2;
     const prazoTotalMulti = tipo_alvara.prazo_admissibilidade_multi + tipo_alvara.prazo_analise_multi1 + tipo_alvara.prazo_analise_multi2;
-     
+
     const novo_inicial = await this.prisma.inicial.create({
       data: { ...createInicialDto },
     });
@@ -291,24 +291,42 @@ export class InicialService {
   async geraReuniaoData(inicial: Inicial) {
     const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } });
     if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvará.');
-
     const { prazo_analise_multi1 } = tipoAlvara;
-    const prazo = prazo_analise_multi1;
-
-    const data_original = this.adicionaDiasData(inicial.data_protocolo, prazo);
+    const data = new Date(inicial.envio_admissibilidade);
+    data.setDate(data.getDate() + prazo_analise_multi1);
 
     const pegaQuarta = (data: Date) => {
       const diaSemana = data.getDay();
-      console.log(diaSemana);
-      if (diaSemana != 3) {
-        const diff = 3 - diaSemana;
+      if (diaSemana !== 3) {
         const quarta = new Date(data);
-        quarta.setDate(data.getDate() + diff - 7);
+        switch (diaSemana) {
+          case 0:
+            quarta.setDate(data.getDate() - 4);
+            break;
+          case 1:
+            quarta.setDate(data.getDate() - 5);
+            break;
+          case 2:
+            quarta.setDate(data.getDate() - 6);
+            break;
+          case 3:
+            quarta.setDate(data.getDate() - 7);
+            break;
+          case 4:
+            quarta.setDate(data.getDate() - 1);
+            break;
+          case 5:
+            quarta.setDate(data.getDate() - 2);
+            break;
+          case 6:
+            quarta.setDate(data.getDate() - 3);
+            break;
+        }
         return quarta;
       } else { return data }
     }
 
-    let data_reuniao = pegaQuarta(data_original);
+    let data_reuniao = pegaQuarta(new Date(data));
     data_reuniao.setUTCHours(0, 0, 0, 0);
 
     let dataProcesso = new Date(inicial.envio_admissibilidade);
