@@ -11,5 +11,5 @@ export class CreateUnidadeDto {
     codigo: string;
 
     @IsBoolean({ message: 'Status inválida!' })
-    status?: boolean;
+    status: number;
 }

@@ -94,7 +94,7 @@ export class SubprefeituraService {
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
     const updatedUnidade = await this.prisma.unidade.update({
       where: { id },
-      data: { status: false }
+      data: { status: 0 }
     });
     if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
     return {
