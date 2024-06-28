@@ -23,15 +23,17 @@ export class InicialService {
   async validaSql(sql: string) {
     const dataBusca = new Date();
     dataBusca.setDate(dataBusca.getDate() - 90);
-    const sqlBusca = await this.prisma.inicial_Sqls.findMany({
-      where: {
-        sql,
-        criado_em: { gte: dataBusca },
-      }
-    });
-    if (!sqlBusca) return new ForbiddenException('Erro ao buscar sql.');
-    if (sqlBusca.length > 0) return true;
-    return false;
+    const sqlBusca = await this.prisma.inicial_Sqls.count({ where: {
+      sql, criado_em: { gte: dataBusca }
+    }});
+    if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
+    return sqlBusca > 0;
+  }
+
+  async validaSei(sei: string) {
+    const processo = await this.prisma.inicial.count({ where: { sei } });
+    if (!processo) throw new ForbiddenException('Erro ao buscar processos.');
+    return processo > 0;
   }
 
   async adicionaSql(inicial_id: number, sql: string) {
@@ -70,9 +72,6 @@ export class InicialService {
         return this.adicionaDiasData(data, -6);
     }
   }
-
-
-
 
   async removeSql(inicial_id: number, sql: string) {
     const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
@@ -269,7 +268,6 @@ export class InicialService {
 
 
   async buscarPorMesAnoProcesso(mes: any, ano: any) {
-
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
 
@@ -285,9 +283,9 @@ export class InicialService {
     if (!processos || processos.length === 0) {
       throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
     }
-
     return processos;
   }
+
   async geraReuniaoData(inicial: Inicial) {
     const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } });
     if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvará.');
@@ -353,17 +351,17 @@ export class InicialService {
     return processos;
   }
 
-
-
-
-
   async buscarPorId(id: number): Promise<Inicial> {
     if (id < 1) throw new ForbiddenException('Id inválido');
     if (!id) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({
       where: { id },
       include: {
-        iniciais_sqls: true,
+        iniciais_sqls: {
+          orderBy: {
+            sql: 'asc'
+          }
+        },
         interfaces: true,
         admissibilidade: true,
         distribuicao: {
@@ -399,28 +397,25 @@ export class InicialService {
     return inicial_atualizado;
   }
 
-  async verificaSei(sei: string, inicial_id?: number) {
-    const inicial = await this.prisma.inicial.findMany({
+  async verificaSei(sei: string) {
+    const inicial = await this.prisma.inicial.count({
       where: {
         OR: [
           { sei },
-          {
-            interfaces: {
-              OR: [
-                { num_sehab: sei },
-                { num_siurb: sei },
-                { num_smc: sei },
-                { num_smt: sei },
-                { num_svma: sei },
-              ]
-            }
-          }
+          { interfaces: {
+            OR: [
+              { num_sehab: sei },
+              { num_siurb: sei },
+              { num_smc: sei },
+              { num_smt: sei },
+              { num_svma: sei },
+            ]
+          }}
         ]
       }
     });
-    return {
-      cadastrado: inicial.length > 0
-    }
+    if (!inicial) throw new ForbiddenException("Erro ao buscar processos.");
+    return inicial > 0;
   }
 
   // async remove(id: number) {

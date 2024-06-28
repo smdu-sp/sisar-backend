@@ -54,8 +54,8 @@ export class InicialController {
   }
 
   @Get('verifica-sei/:sei')
-  verificaSei(@Param('sei') sei: string, @Query('inicial_id') inicial_id: string) {
-    return this.inicialService.verificaSei(sei, +inicial_id);
+  verificaSei(@Param('sei') sei: string) {
+    return this.inicialService.verificaSei(sei);
   }
 
   @Get('busca-processos')
