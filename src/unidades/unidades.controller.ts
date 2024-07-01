@@ -21,9 +21,10 @@ export class UnidadesController {
     @Query('pagina') pagina?: string,
     @Query('limite') limite?: string,
     @Query('busca') busca?: string,
-  ) {
-    return this.unidadesService.buscarTudo(+pagina, +limite, busca);
-  }
+    @Query('filtro') filtro?: string
+) {
+    return this.unidadesService.buscarTudo(+pagina, +limite, busca, +filtro);
+}
 
   @Permissoes('ADM')
   @Get('lista-completa')

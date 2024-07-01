@@ -11,7 +11,7 @@ export class UnidadesService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) {}
+  ) { }
 
   async listaCompleta() {
     const lista = await this.prisma.unidade.findMany({
@@ -57,15 +57,19 @@ export class UnidadesService {
   async buscarTudo(
     pagina: number = 1,
     limite: number = 10,
-    busca?: string
+    busca?: string,
+    filtro?: number
   ) {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
-      ...(busca ? 
-        { OR: [
+      ...(busca ?
+        {
+          OR: [
             { nome: { contains: busca } },
             { sigla: { contains: busca } },
-        ] } : 
+            { codigo: { contains: busca } }
+          ]
+        } :
         {}),
     };
     const total = await this.prisma.unidade.count({ where: searchParams });
@@ -73,8 +77,9 @@ export class UnidadesService {
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const unidades = await this.prisma.unidade.findMany({
       where: {
-        OR: [
-          {...searchParams}
+        AND: [
+          searchParams,
+          { status: filtro === -1 ? undefined : filtro },
         ]
       },
       skip: (pagina - 1) * limite,
