@@ -6,7 +6,7 @@ import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('inicial')
 export class InicialController {
-  constructor(private readonly inicialService: InicialService) {}
+  constructor(private readonly inicialService: InicialService) { }
 
   @Post('criar')
   criar(@Body() createInicialDto: CreateInicialDto) {
@@ -14,7 +14,10 @@ export class InicialController {
   }
 
   @Get('buscar-tudo')
-  buscarTudo(@Query('pagina') pagina: number = 1, @Query('limite') limite: number = 10) {
+  buscarTudo(
+    @Query('pagina') pagina?: string,
+    @Query('limite') limite?: string
+  ) {
     return this.inicialService.buscarTudo(+pagina, +limite);
   }
 

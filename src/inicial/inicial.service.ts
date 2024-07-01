@@ -234,7 +234,7 @@ export class InicialService {
     return novo_inicial;
   }
 
-  async buscarTudo(pagina: number, limite: number): Promise<IniciaisPaginado> {
+  async buscarTudo(pagina: number = 1, limite: number = 10): Promise<IniciaisPaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const total = await this.prisma.inicial.count();
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
@@ -248,10 +248,10 @@ export class InicialService {
     });
     if (!iniciais) throw new ForbiddenException('Nenhum processo encontrado');
     return {
+      total: +total,
+      pagina: +pagina,
+      limite: +limite,
       data: iniciais,
-      total,
-      pagina,
-      limite
     };
   }
 
