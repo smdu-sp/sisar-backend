@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { promises } from 'dns';
+import { HttpService } from '@nestjs/axios';
 
 export class IniciaisPaginado {
   data: Inicial[];
@@ -13,19 +14,26 @@ export class IniciaisPaginado {
   limite: number;
 }
 
+interface Feriado {
+  nome: string
+}
+
 @Injectable()
 export class InicialService {
   constructor(
     private prisma: PrismaService,
-    private app: AppService
+    private app: AppService,
+    private readonly httpService: HttpService
   ) { }
 
   async validaSql(sql: string) {
     const dataBusca = new Date();
     dataBusca.setDate(dataBusca.getDate() - 90);
-    const sqlBusca = await this.prisma.inicial_Sqls.count({ where: {
-      sql, criado_em: { gte: dataBusca }
-    }});
+    const sqlBusca = await this.prisma.inicial_Sqls.count({
+      where: {
+        sql, criado_em: { gte: dataBusca }
+      }
+    });
     if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
     return sqlBusca > 0;
   }
@@ -260,6 +268,7 @@ export class InicialService {
       select: {
         sei: true,
         aprova_digital: true,
+        id: true
       }
     });
     if (!iniciais) throw new ForbiddenException('Nenhum processo encontrado');
@@ -285,6 +294,19 @@ export class InicialService {
     }
     return processos;
   }
+
+  async verificaFeriado(data: string){
+    const iniciais = await fetch(`http://10.75.32.170:3030/feriados/data/${data}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then((response) => {
+      return response.json();
+    })
+    return iniciais.length >= 1 ? true : false;
+  }
+
 
   async geraReuniaoData(inicial: Inicial) {
     const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } });
@@ -325,9 +347,19 @@ export class InicialService {
     }
 
     let data_reuniao = pegaQuarta(new Date(data));
+
+    const data_formatada = data_reuniao.toISOString().split('T')[0]
+
+    const validaFeriado = await this.verificaFeriado(data_formatada);
+
     data_reuniao.setUTCHours(0, 0, 0, 0);
 
+    if (validaFeriado) {
+      data_reuniao.setDate(data_reuniao.getDate() - 7)
+    }
+
     let dataProcesso = new Date(inicial.envio_admissibilidade);
+
     dataProcesso.setDate(
       dataProcesso.getDate() +
       tipoAlvara.prazo_admissibilidade_multi +
@@ -420,15 +452,17 @@ export class InicialService {
       where: {
         OR: [
           { sei },
-          { interfaces: {
-            OR: [
-              { num_sehab: sei },
-              { num_siurb: sei },
-              { num_smc: sei },
-              { num_smt: sei },
-              { num_svma: sei },
-            ]
-          }}
+          {
+            interfaces: {
+              OR: [
+                { num_sehab: sei },
+                { num_siurb: sei },
+                { num_smc: sei },
+                { num_smt: sei },
+                { num_svma: sei },
+              ]
+            }
+          }
         ]
       }
     });

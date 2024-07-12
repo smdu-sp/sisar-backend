@@ -65,4 +65,5 @@ export class InicialController {
   todosProcessos() {
     return this.inicialService.todosProcessos();
   }
+
 }

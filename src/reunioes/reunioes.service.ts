@@ -26,9 +26,12 @@ export class ReunioesService {
 
     const reunioes = await this.prisma.reuniao_Processo.findMany({
       where: {
-        AND: [
-          { data_reuniao: { gte: primeiroDiaMes } },
-          { data_reuniao: { lte: ultimoDiaMes } }
+        OR: [
+          { AND: [{ nova_data_reuniao: { gte: primeiroDiaMes } }, 
+                  { nova_data_reuniao: { lte: ultimoDiaMes } }] },
+                  
+          { AND: [{ nova_data_reuniao: null }, { data_reuniao: { gte: primeiroDiaMes } }, 
+                  { nova_data_reuniao: null }, { data_reuniao: { lte: ultimoDiaMes } }] }
         ]
       }
     });
