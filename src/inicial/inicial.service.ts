@@ -296,7 +296,7 @@ export class InicialService {
   }
 
   async verificaFeriado(data: string){
-    const iniciais = await fetch(`http://10.75.32.170:3030/feriados/data/${data}`, {
+    const feriado = await fetch(`http://10.75.32.170:3003/feriados/data/${data}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -304,7 +304,8 @@ export class InicialService {
     }).then((response) => {
       return response.json();
     })
-    return iniciais.length >= 1 ? true : false;
+    console.log(feriado);
+    return feriado;
   }
 
 
