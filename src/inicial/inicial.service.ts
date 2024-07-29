@@ -304,7 +304,6 @@ export class InicialService {
     }).then((response) => {
       return response.json();
     })
-    console.log(feriado);
     return feriado;
   }
 

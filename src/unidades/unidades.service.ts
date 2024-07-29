@@ -130,7 +130,6 @@ export class UnidadesService {
       where: { id },
       data: updateUnidadeDto
     });
-    console.log(updatedUnidade);
     if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
     return {
       message: 'Unidade desativada com sucesso.'
