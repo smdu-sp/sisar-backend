@@ -4,6 +4,7 @@ import { UpdateAlvaraTipoDto } from './dto/update-alvara-tipo.dto';
 import { Alvara_Tipo } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { contains } from 'class-validator';
 
 @Injectable()
 export class AlvaraTipoService {
@@ -39,10 +40,21 @@ export class AlvaraTipoService {
     return tipos;
   }
 
-  async buscarTudo(pagina: number = 1, limite: number = 10, busca?: string) {
+  async buscarTudo(
+    pagina: number = 1, 
+    limite: number = 10, 
+    busca?: string
+  ) {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
+    console.log(busca);
     const searchParams = {
-      ...(busca ? { nome: { contains: busca } } : {}),
+      ...(busca ? 
+        { 
+          OR: [
+            {nome: { contains: busca } }
+          ]
+        }: {}
+        ),
     };
     const total = await this.prisma.alvara_Tipo.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
