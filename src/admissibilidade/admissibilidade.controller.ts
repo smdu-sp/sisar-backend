@@ -41,7 +41,7 @@ export class AdmissibilidadeController {
 
   @Patch('atualizar-id/:id')
   atulaizarStatus(@Param('id') id: string, @Body() updateAdmissibilidadeDto: UpdateAdmissibilidadeDto) {
-    return this.admissibilidadeService.atulaizarStatus(+id, updateAdmissibilidadeDto);
+    return this.admissibilidadeService.atualizarStatus(+id, updateAdmissibilidadeDto);
   }
 
   @Delete(':id')

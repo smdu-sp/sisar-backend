@@ -21,12 +21,33 @@ export class AdmissibilidadeService {
     private prisma: PrismaService,
     private app: AppService
   ) { }
+
   async create(createAdmissibilidadeDto: CreateAdmissibilidadeDto) {
-    const criaradmissibilidade = await this.prisma.admissibilidade.create({
-      data: createAdmissibilidadeDto as any
+    const { interfaces, tipo_processo, inicial_id } = createAdmissibilidadeDto;
+    const admissibilidade = await this.prisma.admissibilidade.create({
+      data: createAdmissibilidadeDto,
+      include: { inicial: true }
     });
-    if (!criaradmissibilidade) throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
-    return criaradmissibilidade;
+    if (tipo_processo){
+      await this.prisma.inicial.update({
+        where: { id: inicial_id },
+        data: { tipo_processo }
+      });
+    };
+    if (tipo_processo === 2 && interfaces) {
+      const interface_nova = this.prisma.interface.upsert({
+        where: { inicial_id },
+        create: {
+          inicial_id,
+          ...interfaces
+        },
+        update: {
+          ...interfaces
+        }
+      });
+    }
+    if (!admissibilidade) throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
+    return admissibilidade;
   }
 
   async listaCompleta() {
@@ -97,14 +118,33 @@ export class AdmissibilidadeService {
     return admissibilidade;
   }
 
-  async atulaizarStatus(
+  async atualizarStatus(
     id: number,
     updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
   ): Promise<Admissibilidade> {
+    const { interfaces, tipo_processo, inicial_id } = updateAdmissibilidadeDto;
     const admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },
-      data: updateAdmissibilidadeDto as any
+      data: updateAdmissibilidadeDto
     });
+    if (tipo_processo){
+      await this.prisma.inicial.update({
+        where: { id: inicial_id },
+        data: { tipo_processo }
+      });
+    };
+    if (tipo_processo === 2 && interfaces) {
+      const interface_nova = this.prisma.interface.upsert({
+        where: { inicial_id },
+        create: {
+          inicial_id,
+          ...interfaces
+        },
+        update: {
+          ...interfaces
+        }
+      });
+    }
     if (!admissibilidade) throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     return admissibilidade;
   }

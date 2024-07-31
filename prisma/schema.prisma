@@ -17,7 +17,7 @@ model Admissibilidade {
   unidade_id                  String?
   data_envio                  DateTime?
   data_decisao_interlocutoria DateTime?
-  parecer                     Boolean        @default(false)
+  parecer                     Int            @default(0)
   subprefeitura               Subprefeitura? @relation(fields: [subprefeitura_id], references: [id])
   subprefeitura_id            String?
   categoria                   Categoria?     @relation(fields: [categoria_id], references: [id])
