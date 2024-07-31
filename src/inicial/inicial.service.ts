@@ -299,7 +299,7 @@ export class InicialService {
   }
 
   async verificaFeriado(data: string){
-    const feriado = await fetch(`http://10.75.32.170:3003/feriados/data/${data}`, {
+    const feriado = await fetch(`${process.env.API_FERIADOS_URL}feriados/data/${data}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
