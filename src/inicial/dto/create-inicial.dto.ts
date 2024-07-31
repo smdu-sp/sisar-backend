@@ -28,6 +28,10 @@ export class CreateInicialDto {
     @ApiProperty()
     status?: number;
     @ApiProperty()
+    requalifica_rapido: boolean = false;
+    @ApiProperty()
+    associado_reforma: boolean = false;
+    @ApiProperty()
     nums_sql?: string[];
     @ApiProperty()
     interfaces?: any;

@@ -216,6 +216,9 @@ export class InicialService {
     const { nums_sql, interfaces } = createInicialDto;
     delete createInicialDto.nums_sql;
     delete createInicialDto.interfaces;
+    createInicialDto.sei = createInicialDto.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    createInicialDto.aprova_digital = createInicialDto.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    createInicialDto.processo_fisico = createInicialDto.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
     if (createInicialDto.envio_admissibilidade) createInicialDto.status = 2;
     const tipo_alvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: createInicialDto.alvara_tipo_id } });
     if (!tipo_alvara) throw new ForbiddenException('Alvara inválido.');
@@ -448,7 +451,7 @@ export class InicialService {
   }
 
   async verificaSei(sei: string) {
-    const inicial = await this.prisma.inicial.count({
+    const inicial = await this.prisma.inicial.findFirst({
       where: {
         OR: [
           { sei },
@@ -467,7 +470,7 @@ export class InicialService {
       }
     });
     if (!inicial) throw new ForbiddenException("Erro ao buscar processos.");
-    return inicial > 0;
+    return inicial;
   }
 
   // async remove(id: number) {

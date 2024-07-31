@@ -210,7 +210,9 @@ model Inicial {
   tipo_processo                  Int?                            @default(1)
   obs                            String?
   status                         Int?                            @default(1)
-  pagamento                      Int?                            @default(0)
+  pagamento                      Int?                            @default(1)
+  requalifica_rapido             Boolean?                        @default(false)
+  associado_reforma              Boolean?                        @default(false)
   data_limiteSmul                DateTime?
   data_limiteMulti               DateTime?
   comunique_ses                  Comunique_se[]
