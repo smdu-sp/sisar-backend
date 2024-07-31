@@ -20,10 +20,10 @@ export class AdmissibilidadeService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) {}
+  ) { }
   async create(createAdmissibilidadeDto: CreateAdmissibilidadeDto) {
     const criaradmissibilidade = await this.prisma.admissibilidade.create({
-      data:  createAdmissibilidadeDto as any
+      data: createAdmissibilidadeDto as any
     });
     if (!criaradmissibilidade) throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
     return criaradmissibilidade;
@@ -47,13 +47,25 @@ export class AdmissibilidadeService {
         } :
         {}),
     };
-    const total = await this.prisma.admissibilidade.count();
+    const total = await this.prisma.admissibilidade.count({
+      where: {
+        inicial: {
+          ...searchParams
+        }
+      }
+    });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const admissibilidades = await this.prisma.admissibilidade.findMany({
-      where: { status: filtro === -1 ? undefined : filtro },
+
       include: {
         inicial: true
+      },
+      where: {
+        status: filtro === -1 ? undefined : filtro,
+        inicial: {
+          ...searchParams
+        }
       },
       skip: (pagina - 1) * limite,
       take: limite,
@@ -86,12 +98,12 @@ export class AdmissibilidadeService {
   }
 
   async atulaizarStatus(
-    id: number, 
+    id: number,
     updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
   ): Promise<Admissibilidade> {
     const admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },
-      data:  updateAdmissibilidadeDto as any
+      data: updateAdmissibilidadeDto as any
     });
     if (!admissibilidade) throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     return admissibilidade;
