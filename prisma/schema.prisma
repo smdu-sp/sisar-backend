@@ -24,7 +24,7 @@ model Admissibilidade {
   categoria_id                String?
   status                      Int            @default(1)
   reconsiderado               Boolean        @default(false)
-  motivo                      String?
+  motivo                      Int?
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
