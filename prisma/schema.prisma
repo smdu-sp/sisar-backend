@@ -23,7 +23,7 @@ model Admissibilidade {
   categoria                   Categoria?     @relation(fields: [categoria_id], references: [id])
   categoria_id                String?
   status                      Int            @default(1)
-  reconsiderado               Boolean        @default(false)
+  reconsiderado               Boolean?        
   motivo                      Int?
 
   criado_em   DateTime @default(now())
