@@ -9,13 +9,13 @@ import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 export class SubprefeituraController {
   constructor(private readonly subprefeiturasServiceimport: SubprefeituraService) {}
 
-  @Permissoes('ADM')
+  @Permissoes('SUP', 'ADM')
   @Post('criar')
   criar(@Body() CreateSubprefeituraDto: CreateSubprefeituraDto) {
     return this.subprefeiturasServiceimport.criar(CreateSubprefeituraDto);
   }
 
-  @Permissoes('ADM')
+  @Permissoes('SUP', 'ADM')
   @Get('buscar-tudo')
   buscarTudo(
     @Query('pagina') pagina?: string,
@@ -25,19 +25,19 @@ export class SubprefeituraController {
     return this.subprefeiturasServiceimport.buscarTudo(+pagina, +limite, busca);
   }
 
-  @Permissoes('ADM')
+  @Permissoes('SUP', 'ADM')
   @Get('lista-completa')
   listaCompleta() {
     return this.subprefeiturasServiceimport.listaCompleta();
   }
 
-  @Permissoes('ADM')
+  @Permissoes('SUP', 'ADM')
   @Get('buscar-por-id/:id')
   buscarPorId(@Param('id') id: string) {
     return this.subprefeiturasServiceimport.buscarPorId(id);
   }
 
-  @Permissoes('ADM')
+  @Permissoes('SUP', 'ADM')
   @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateSubprefeituraDto) {
     return this.subprefeiturasServiceimport.atualizar(id, updateUnidadeDto);
