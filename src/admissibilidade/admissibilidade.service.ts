@@ -28,7 +28,7 @@ export class AdmissibilidadeService {
       data: createAdmissibilidadeDto,
       include: { inicial: true }
     });
-    if (tipo_processo){
+    if (tipo_processo) {
       await this.prisma.inicial.update({
         where: { id: inicial_id },
         data: { tipo_processo }
@@ -118,6 +118,17 @@ export class AdmissibilidadeService {
     return admissibilidade;
   }
 
+  async ultimaAtualizacao(id: number) {
+    const inicial = await this.prisma.inicial.update({
+      where: { id },
+      data: {
+        alterado_em: new Date()
+      }
+    })
+    if (!inicial) throw new InternalServerErrorException('Nenhum processo encontrado');
+    return inicial;
+  }
+
   async atualizarStatus(
     id: number,
     updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
@@ -127,13 +138,15 @@ export class AdmissibilidadeService {
       where: { inicial_id: id },
       data: updateAdmissibilidadeDto
     });
-    if (tipo_processo){
+    if (tipo_processo) {
       await this.prisma.inicial.update({
         where: { id: inicial_id },
         data: { tipo_processo }
       });
+      this.ultimaAtualizacao(id)
     };
     if (tipo_processo === 2 && interfaces) {
+      this.ultimaAtualizacao(id)
       const interface_nova = this.prisma.interface.upsert({
         where: { inicial_id },
         create: {
@@ -146,6 +159,7 @@ export class AdmissibilidadeService {
       });
     }
     if (!admissibilidade) throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
+    this.ultimaAtualizacao(id)
     return admissibilidade;
   }
 
