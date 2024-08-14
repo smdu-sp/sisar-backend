@@ -143,11 +143,9 @@ export class AdmissibilidadeService {
         where: { id: inicial_id },
         data: { tipo_processo }
       });
-      console.log('teste1');
       this.ultimaAtualizacao(id)
     };
     if (tipo_processo === 2 && interfaces) {
-    console.log('teste2');
       this.ultimaAtualizacao(id)
       const interface_nova = this.prisma.interface.upsert({
         where: { inicial_id },
@@ -162,7 +160,6 @@ export class AdmissibilidadeService {
     }
     if (!admissibilidade) throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     this.ultimaAtualizacao(id)
-    console.log('teste3');
     return admissibilidade;
   }
 
