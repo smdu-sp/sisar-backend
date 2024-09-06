@@ -3,6 +3,7 @@ import { CreateReunioesDto } from './dto/create-reunioes.dto';
 import { UpdateReunioesDto } from './dto/update-reunioes.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { ReunioesResponseDTO } from './dto/response.dto';
 // import { Connection } from 'oracledb';
 
 @Injectable()
