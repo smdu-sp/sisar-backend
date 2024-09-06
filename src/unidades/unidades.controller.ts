@@ -25,7 +25,7 @@ export class UnidadesController {
   @Permissoes('SUP', 'ADM')
   @Get('buscar-tudo')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar com sucesso.', type: CreateUnidadeDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar com sucesso.', type: [CreateUnidadeDto] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Busque todas as unidades.", summary: 'Busque todas as unidades.' })
   @ApiQuery({ name: 'pagina', type: 'string', required: false })
@@ -44,7 +44,7 @@ export class UnidadesController {
   @Permissoes('SUP', 'ADM')
   @Get('lista-completa')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se listar tudo com sucesso.', type: CreateUnidadeDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se listar tudo com sucesso.', type: [CreateUnidadeDto] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Listar todas as unidades.", summary: 'Liste todas as unidades.' })
   listaCompleta() {
