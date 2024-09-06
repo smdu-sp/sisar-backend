@@ -3,7 +3,9 @@ import { AlvaraTipoService } from './alvara-tipo.service';
 import { CreateAlvaraTipoDto } from './dto/create-alvara-tipo.dto';
 import { UpdateAlvaraTipoDto } from './dto/update-alvara-tipo.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Alvará-Tipo')
 @Controller('alvara-tipo')
 export class AlvaraTipoController {
   constructor(private readonly alvaraTipoService: AlvaraTipoService) {}

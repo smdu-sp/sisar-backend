@@ -4,16 +4,16 @@ async function main() {
   const root = await prisma.usuario.upsert({
     where: { login: 'd927014' },
     create: {
-      login: 'd927014',
-      nome: 'Victor Alexander Menezes de Abreu',
-      email: 'vmabreu@prefeitura.sp.gov.br',
+      login: 'x392687',
+      nome: 'Marcus Vinicius Rolemberg Nastasi',
+      email: 'mvnastasi@prefeitura.sp.gov.br',
       status: 1,
       permissao: 'DEV',
     },
     update: {
-      login: 'd927014',
-      nome: 'Victor Alexander Menezes de Abreu',
-      email: 'vmabreu@prefeitura.sp.gov.br',
+      login: 'x392687',
+      nome: 'Marcus Vinicius Rolemberg Nastasi',
+      email: 'mvnastasi@prefeitura.sp.gov.br',
       status: 1,
       permissao: 'DEV',
     },

@@ -4,7 +4,9 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Avisos')
 @Controller('avisos')
 export class AvisosController {
   constructor(private readonly avisosService: AvisosService) {}

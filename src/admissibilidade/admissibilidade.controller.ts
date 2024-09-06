@@ -3,7 +3,9 @@ import { AdmissibilidadeService } from './admissibilidade.service';
 import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Admissibilidade')
 @Controller('admissibilidade')
 export class AdmissibilidadeController {
   constructor(private readonly admissibilidadeService: AdmissibilidadeService) {}

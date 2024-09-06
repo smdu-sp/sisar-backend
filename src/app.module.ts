@@ -1,5 +1,4 @@
 import { Global, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { AuthModule } from './auth/auth.module';
@@ -20,7 +19,7 @@ import { AvisosModule } from './avisos/avisos.module';
 @Global()
 @Module({
   imports: [UsuariosModule, AuthModule, PrismaModule, SGUModule, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule, AdmissibilidadeModule, DistribuicaoModule, AvisosModule],
-  controllers: [AppController],
+  controllers: [],
   providers: [
     AppService,
     {

@@ -2,7 +2,9 @@ import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { ReunioesService } from './reunioes.service';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UpdateReunioesDto } from './dto/update-reunioes.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Reuniões')
 @Controller('reunioes')
 export class ReunioesController {
   constructor(private readonly unidadesService: ReunioesService) {}

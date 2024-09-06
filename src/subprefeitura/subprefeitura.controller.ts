@@ -4,7 +4,9 @@ import { SubprefeituraService } from './subprefeitura.service';
 import { CreateSubprefeituraDto } from './dto/create-subprefeitura.dto';
 import { UpdateSubprefeituraDto } from './dto/update-subprefeitura.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Subprefeitura')
 @Controller('subprefeitura')
 export class SubprefeituraController {
   constructor(private readonly subprefeiturasServiceimport: SubprefeituraService) {}

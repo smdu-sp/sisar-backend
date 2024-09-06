@@ -3,7 +3,9 @@ import { InicialService } from './inicial.service';
 import { CreateInicialDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Inicial')
 @Controller('inicial')
 export class InicialController {
   constructor(private readonly inicialService: InicialService) { }
