@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { AdmissibilidadePaginado, AdmissibilidadeService } from './admissibilidade.service';
+import { AdmissibilidadeService } from './admissibilidade.service';
 import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
+import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 
 @ApiTags('Admissibilidade')
 @ApiBearerAuth()
@@ -24,10 +24,10 @@ export class AdmissibilidadeController {
 
   @Get('consulta')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se consultar a admissibilidade com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se consultar a admissibilidade com sucesso.', type: [AdmissibilidadeResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Consultar uma admissibilidade.", summary: 'Consulte uma admissibilidade.' })
-  findAll() {
+  findAll(): Promise<AdmissibilidadeResponseDTO[]> {
     return this.admissibilidadeService.findAll();
   }
 
@@ -53,9 +53,9 @@ export class AdmissibilidadeController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ description: "Buscar admissibilidade por ID.", summary: 'Busque a admissibilidade por ID.' })
   @ApiParam({ name: 'id', type: 'string', required: false })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar a admissibilidade por ID com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar a admissibilidade por ID com sucesso.', type: AdmissibilidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  buscarPorId(@Param('id') id: string) {
+  buscarPorId(@Param('id') id: string): Promise<AdmissibilidadeResponseDTO> {
     return this.admissibilidadeService.buscarPorId(+id);
   }
 
@@ -74,9 +74,12 @@ export class AdmissibilidadeController {
   @ApiParam({ name: 'id', type: 'string', required: true })
   @ApiBody({ type: UpdateAdmissibilidadeDto })
   @ApiOperation({ description: "Atualizar admissibilidade.", summary: 'Atualize admissibilidade.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a admissibilidade com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a admissibilidade com sucesso.', type: AdmissibilidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  atulaizarStatus(@Param('id') id: string, @Body() updateAdmissibilidadeDto: UpdateAdmissibilidadeDto) {
+  atulaizarStatus(
+    @Param('id') id: string, 
+    @Body() updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
+  ): Promise<AdmissibilidadeResponseDTO> {
     return this.admissibilidadeService.atualizarStatus(+id, updateAdmissibilidadeDto);
   }
 
