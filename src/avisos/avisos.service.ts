@@ -25,11 +25,12 @@ export class AvisosService {
     return criar;
   }
 
-
   async findOne(data: Date, usuario_id: string) {
     if (data instanceof Date) {
       data.setHours(0, 0, 0, 0);
     }
+    console.log(data);
+    
     const reuniao_data = new Date(data).toISOString();
     const reunioes = await this.prisma.avisos.findMany({
       include: {

@@ -433,7 +433,7 @@ model Avisos {
   id         String   @id @default(uuid())
   titulo     String
   descricao  String
-  data       DateTime
+  data       DateTime @db.Date()
   usuario_id String?
   inicial_id Int
 
