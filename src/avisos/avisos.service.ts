@@ -29,8 +29,6 @@ export class AvisosService {
     if (data instanceof Date) {
       data.setHours(0, 0, 0, 0);
     }
-    console.log(data);
-    
     const reuniao_data = new Date(data).toISOString();
     const reunioes = await this.prisma.avisos.findMany({
       include: {
