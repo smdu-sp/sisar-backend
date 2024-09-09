@@ -16,10 +16,11 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddSubstitutoDTO } from './dto/add-substituto.dto';
 
 @ApiTags('Usuarios')
+@ApiBearerAuth()
 @Controller('usuarios') //localhost:3000/usuarios
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
@@ -41,9 +42,9 @@ export class UsuariosController {
   @Permissoes('ADM', 'SUP')
   @Get('buscar-tudo') //localhost:3000/usuarios/buscar-tudo
   @HttpCode(HttpStatus.OK)
-  @ApiQuery({ name: 'pagina', type: 'string', required: false })
-  @ApiQuery({ name: 'limite', type: 'string', required: false })
-  @ApiQuery({ name: 'status', type: 'string', required: false })
+  @ApiQuery({ name: 'pagina', type: 'string', required: true })
+  @ApiQuery({ name: 'limite', type: 'string', required: true })
+  @ApiQuery({ name: 'status', type: 'string', required: true })
   @ApiQuery({ name: 'busca', type: 'string', required: false })
   @ApiQuery({ name: 'permissao', type: 'string', required: false })
   @ApiOperation({ description: "Buscar todos os usuários.", summary: 'Busque os usuários.' })
