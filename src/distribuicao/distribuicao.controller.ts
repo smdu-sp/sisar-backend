@@ -3,7 +3,7 @@ import { DistribuicaoService } from './distribuicao.service';
 import { CreateDistribuicaoDto } from './dto/create-distribuicao.dto';
 import { UpdateDistribuicaoDto } from './dto/update-distribuicao.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { DistribuicaoResponseDTO } from './dto/response.dto';
+import { DistribuicaoResponseDTO } from './dto/distribuicao-response.dto';
 
 export class UpdateAdministrativoResponsavelDTO {
   @ApiProperty()
@@ -27,7 +27,7 @@ export class DistribuicaoController {
   @ApiResponse({ status: 201, description: 'Retorna 201 se criar a distribuição com sucesso.', type: DistribuicaoResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Criar uma distribuição.", summary: 'Crie distribuições.' })
-  criar(@Body() createDistribuicaoDto: CreateDistribuicaoDto) {
+  criar(@Body() createDistribuicaoDto: CreateDistribuicaoDto): Promise<DistribuicaoResponseDTO> {
     return this.distribuicaoService.criar(createDistribuicaoDto);
   }
 
@@ -37,7 +37,10 @@ export class DistribuicaoController {
   @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a distribuição com sucesso.', type: DistribuicaoResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Atualizar uma distribuição.", summary: 'Atualize distribuições.' })
-  atualizar(@Param('inicial_id') inicial_id: string, @Body() updateDistribuicaoDto: UpdateDistribuicaoDto) {
+  atualizar(
+    @Param('inicial_id') inicial_id: string, 
+    @Body() updateDistribuicaoDto: UpdateDistribuicaoDto
+  ): Promise<DistribuicaoResponseDTO> {
     return this.distribuicaoService.atualizar(+inicial_id, updateDistribuicaoDto);
   }
 
@@ -50,7 +53,7 @@ export class DistribuicaoController {
   mudarAdministrativoResponsavel(
     @Param('inicial_id') inicial_id: string, 
     @Body() { administrativo_responsavel_id }: UpdateAdministrativoResponsavelDTO
-  ) {
+  ): Promise<DistribuicaoResponseDTO> {
     return this.distribuicaoService.mudarAdministrativoResponsavel(+inicial_id, administrativo_responsavel_id);
   }
 
@@ -63,7 +66,7 @@ export class DistribuicaoController {
   mudarTecnicoResponsavel(
     @Param('inicial_id') inicial_id: string, 
     @Body() { tecnico_responsavel_id }: UpdateTecnicoResponsavelDTO
-  ) {
+  ): Promise<DistribuicaoResponseDTO> {
     return this.distribuicaoService.mudarTecnicoResponsavel(+inicial_id, tecnico_responsavel_id);
   }
 }
