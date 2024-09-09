@@ -6,11 +6,16 @@ import { Inicial } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { promises } from 'dns';
 import { HttpService } from '@nestjs/axios';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class IniciaisPaginado {
+  @ApiProperty()
   data: Inicial[];
+  @ApiProperty()
   total: number;
+  @ApiProperty()
   pagina: number;
+  @ApiProperty()
   limite: number;
 }
 

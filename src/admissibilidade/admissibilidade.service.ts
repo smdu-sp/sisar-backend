@@ -6,11 +6,16 @@ import { AppService } from 'src/app.service';
 import { Admissibilidade } from '@prisma/client';
 import { equal } from 'assert';
 import { equals } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AdmissibilidadePaginado {
+  @ApiProperty()
   data: Admissibilidade[];
+  @ApiProperty()
   total: number;
+  @ApiProperty()
   pagina: number;
+  @ApiProperty()
   limite: number;
 }
 
