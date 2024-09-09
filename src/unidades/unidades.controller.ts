@@ -5,6 +5,7 @@ import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UnidadeResponseDTO } from './dto/unidade-response.dto';
 
 @ApiTags('Unidades')
 @ApiBearerAuth()
@@ -16,10 +17,10 @@ export class UnidadesController {
   @Post('criar')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ description: 'Corpo da requisição para criação de unidade.', type: CreateUnidadeDto })
-  @ApiResponse({ status: 201, description: 'Retorna 201 se criar com sucesso.', type: CreateUnidadeDto })
+  @ApiResponse({ status: 201, description: 'Retorna 201 se criar com sucesso.', type: UnidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Crie uma unidade.", summary: 'Crie unidades.' })
-  criar(@Body() createUnidadeDto: CreateUnidadeDto) {
+  criar(@Body() createUnidadeDto: CreateUnidadeDto): Promise<UnidadeResponseDTO> {
     return this.unidadesService.criar(createUnidadeDto);
   }
 
@@ -45,20 +46,20 @@ export class UnidadesController {
   @Permissoes('SUP', 'ADM')
   @Get('lista-completa')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se listar tudo com sucesso.', type: [CreateUnidadeDto] })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se listar tudo com sucesso.', type: [UnidadeResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Listar todas as unidades.", summary: 'Liste todas as unidades.' })
-  listaCompleta() {
+  listaCompleta(): Promise<UnidadeResponseDTO[]> {
     return this.unidadesService.listaCompleta();
   }
 
   @Permissoes('SUP', 'ADM')
   @Get('buscar-por-id/:id')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar por ID com sucesso.', type: CreateUnidadeDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar por ID com sucesso.', type: UnidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Buscar uma unidade.", summary: 'Busque uma unidade.' })
-  buscarPorId(@Param('id') id: string) {
+  buscarPorId(@Param('id') id: string): Promise<UnidadeResponseDTO> {
     return this.unidadesService.buscarPorId(id);
   }
 
@@ -66,10 +67,13 @@ export class UnidadesController {
   @Patch('atualizar/:id')
   @HttpCode(HttpStatus.OK)
   @ApiBody({ description: 'Corpo da requisição para atualização de unidade.', type: CreateUnidadeDto })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar com sucesso.', type: CreateUnidadeDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar com sucesso.', type: UnidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Atualizar uma unidade.", summary: 'Atualize uma unidade.' })
-  atualizar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateUnidadeDto) {
+  atualizar(
+    @Param('id') id: string, 
+    @Body() updateUnidadeDto: UpdateUnidadeDto
+  ): Promise<UnidadeResponseDTO> {
     return this.unidadesService.atualizar(id, updateUnidadeDto);
   }
 
@@ -77,7 +81,7 @@ export class UnidadesController {
   @Patch('desativar/:id')
   @HttpCode(HttpStatus.OK)
   @ApiBody({ description: 'Corpo da requisição para desativação de unidade.', type: CreateUnidadeDto })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se desativar com sucesso.', type: CreateUnidadeDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se desativar com sucesso.' })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Desativar uma unidade.", summary: 'Desative uma unidade.' })
   desativar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateUnidadeDto) {
