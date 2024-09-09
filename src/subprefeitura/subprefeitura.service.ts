@@ -3,7 +3,7 @@ import { CreateSubprefeituraDto } from './dto/create-subprefeitura.dto';
 import { UpdateSubprefeituraDto } from './dto/update-subprefeitura.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { CreateResponseSubprefeituraDTO } from './dto/create-response.dto';
+import { CreateResponseSubprefeituraDTO } from './dto/subprefeitura-response.dto';
 // import { Connection } from 'oracledb';
 
 @Injectable()

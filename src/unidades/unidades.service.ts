@@ -4,7 +4,7 @@ import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { contains } from 'class-validator';
-import { CreateUnidadeResponseDTO } from './dto/unidade-response.dto';
+import { UnidadeResponseDTO } from './dto/unidade-response.dto';
 // import { Connection } from 'oracledb';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class UnidadesService {
     return unidade;
   }
 
-  async criar(createUnidadeDto: CreateUnidadeDto): Promise<CreateUnidadeResponseDTO> {
+  async criar(createUnidadeDto: CreateUnidadeDto): Promise<UnidadeResponseDTO> {
     const { nome, sigla, codigo, status } = createUnidadeDto;
     if (await this.buscaPorCodigo(codigo)) throw new ForbiddenException('Ja existe uma unidade com o mesmo código');
     if (await this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma unidade com o mesmo nome');
