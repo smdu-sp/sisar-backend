@@ -3,9 +3,11 @@ import { AdmissibilidadePaginado, AdmissibilidadeService } from './admissibilida
 import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 
 @ApiTags('Admissibilidade')
+@ApiBearerAuth()
 @Controller('admissibilidade')
 export class AdmissibilidadeController {
   constructor(private readonly admissibilidadeService: AdmissibilidadeService) {}
@@ -13,7 +15,7 @@ export class AdmissibilidadeController {
   @Post('criar')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: CreateAdmissibilidadeDto })
-  @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a admissibilidade com sucesso.' })
+  @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a admissibilidade com sucesso.', type: CreateResponseAdmissibilidadeDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Registrar uma admissibilidade.", summary: 'Registre uma admissibilidade.' })
   create(@Body() createAdmissibilidadeDto: CreateAdmissibilidadeDto) {

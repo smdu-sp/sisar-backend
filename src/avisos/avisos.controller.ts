@@ -4,10 +4,11 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AvisosResponseDTO } from './dto/response.dto';
 
 @ApiTags('Avisos')
+@ApiBearerAuth()
 @Controller('avisos')
 export class AvisosController {
   constructor(private readonly avisosService: AvisosService) {}
@@ -33,7 +34,7 @@ export class AvisosController {
 
   @Get('buscar/:mes/:ano')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o aviso por mês e ano com sucesso.',  type: AvisosResponseDTO })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o aviso por mês e ano com sucesso.',  type: [AvisosResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Buscar avisos por mês e ano.", summary: 'Busque avisos por mês e ano.' })
   buscarPorMesAno(@Param('mes') mes: string, @Param('ano') ano: string, @UsuarioAtual() usuario: Usuario) {

@@ -4,9 +4,11 @@ import { SubprefeituraService } from './subprefeitura.service';
 import { CreateSubprefeituraDto } from './dto/create-subprefeitura.dto';
 import { UpdateSubprefeituraDto } from './dto/update-subprefeitura.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateResponseSubprefeituraDTO } from './dto/create-response.dto';
 
 @ApiTags('Subprefeitura')
+@ApiBearerAuth()
 @Controller('subprefeitura')
 export class SubprefeituraController {
   constructor(private readonly subprefeiturasServiceimport: SubprefeituraService) {}
@@ -15,10 +17,10 @@ export class SubprefeituraController {
   @Post('criar')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: CreateSubprefeituraDto })
-  @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a subprefeitura com sucesso.' })
+  @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a subprefeitura com sucesso.', type: CreateResponseSubprefeituraDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Registrar uma subprefeitura.", summary: 'Registre uma subprefeitura.' })
-  criar(@Body() CreateSubprefeituraDto: CreateSubprefeituraDto) {
+  criar(@Body() CreateSubprefeituraDto: CreateSubprefeituraDto): Promise<CreateResponseSubprefeituraDTO> {
     return this.subprefeiturasServiceimport.criar(CreateSubprefeituraDto);
   }
 

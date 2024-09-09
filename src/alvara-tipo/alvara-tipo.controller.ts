@@ -3,9 +3,10 @@ import { AlvaraTipoService } from './alvara-tipo.service';
 import { CreateAlvaraTipoDto } from './dto/create-alvara-tipo.dto';
 import { UpdateAlvaraTipoDto } from './dto/update-alvara-tipo.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Alvará-Tipo')
+@ApiBearerAuth()
 @Controller('alvara-tipo')
 export class AlvaraTipoController {
   constructor(private readonly alvaraTipoService: AlvaraTipoService) {}

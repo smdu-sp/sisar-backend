@@ -3,6 +3,7 @@ import { CreateSubprefeituraDto } from './dto/create-subprefeitura.dto';
 import { UpdateSubprefeituraDto } from './dto/update-subprefeitura.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { CreateResponseSubprefeituraDTO } from './dto/create-response.dto';
 // import { Connection } from 'oracledb';
 
 @Injectable()
@@ -27,7 +28,7 @@ export class SubprefeituraService {
     return subprefeitura;
   }
 
-  async criar(createsubprefeituraDto: CreateSubprefeituraDto) {
+  async criar(createsubprefeituraDto: CreateSubprefeituraDto): Promise<CreateResponseSubprefeituraDTO> {
     const { nome, sigla, status } = createsubprefeituraDto;
     if (await this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma subprefeitura com o mesmo nome');
     const novasubprefeitura = await this.prisma.subprefeitura.create({

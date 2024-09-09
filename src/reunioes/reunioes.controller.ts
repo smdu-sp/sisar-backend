@@ -2,10 +2,11 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch } from '@nest
 import { ReunioesService } from './reunioes.service';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UpdateReunioesDto } from './dto/update-reunioes.dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ReunioesResponseDTO } from './dto/response.dto';
 
 @ApiTags('Reuniões')
+@ApiBearerAuth()
 @Controller('reunioes')
 export class ReunioesController {
   constructor(private readonly unidadesService: ReunioesService) {}
