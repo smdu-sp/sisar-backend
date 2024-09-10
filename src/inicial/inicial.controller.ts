@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { IniciaisPaginado, InicialService } from './inicial.service';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus, ForbiddenException } from '@nestjs/common';
+import { InicialService } from './inicial.service';
 import { CreateInicialDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { IniciaisPaginado, InicialProcessosMesAnoResponseDTO, InicialProcessosResponseDTO, InicialResponseDTO, SqlResponseDTO } from './dto/inicial-response.dto';
+import { Inicial } from '@prisma/client';
 
 @ApiTags('Inicial')
 @ApiBearerAuth()
@@ -15,9 +17,9 @@ export class InicialController {
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: CreateInicialDto })
   @ApiOperation({ description: "Registrar uma inicial.", summary: 'Registre uma inicial.' })
-  @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a inicial com sucesso.' })
+  @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a inicial com sucesso.', type: InicialResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  criar(@Body() createInicialDto: CreateInicialDto) {
+  criar(@Body() createInicialDto: CreateInicialDto): Promise<InicialResponseDTO> {
     return this.inicialService.criar(createInicialDto);
   }
 
@@ -31,7 +33,7 @@ export class InicialController {
   buscarTudo(
     @Query('pagina') pagina?: string,
     @Query('limite') limite?: string
-  ) {
+  ): Promise<IniciaisPaginado> {
     return this.inicialService.buscarTudo(+pagina, +limite);
   }
 
@@ -40,9 +42,12 @@ export class InicialController {
   @ApiParam({ name: 'mes', type: 'string', required: true })
   @ApiParam({ name: 'ano', type: 'string', required: true })
   @ApiOperation({ description: "Buscar todas por mês e ano.", summary: 'Busque todas por mês e ano.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar as iniciais com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar as iniciais com sucesso.', type: [InicialProcessosMesAnoResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  buscarPorMesAnoProcesso(@Param('mes') mes: string, @Param('ano') ano: string) {
+  buscarPorMesAnoProcesso(
+    @Param('mes') mes: string, 
+    @Param('ano') ano: string
+  ): Promise<InicialProcessosMesAnoResponseDTO[]> {
     return this.inicialService.buscarPorMesAnoProcesso(parseInt(mes), parseInt(ano)); // Passando os parâmetros corretos
   }
 
@@ -50,9 +55,9 @@ export class InicialController {
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', type: 'string', required: true })
   @ApiOperation({ description: "Buscar por ID.", summary: 'Busque por ID.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar a inicial por ID com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar a inicial por ID com sucesso.', type: InicialResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  buscarPorId(@Param('id') id: string) {
+  buscarPorId(@Param('id') id: string): Promise<InicialResponseDTO> {
     return this.inicialService.buscarPorId(+id);
   }
 
@@ -71,9 +76,9 @@ export class InicialController {
   @ApiParam({ name: 'id', type: 'string', required: true })
   @ApiBody({ type: UpdateInicialDto })
   @ApiOperation({ description: "Atualizar por ID.", summary: 'Atualize por ID.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a inicial por ID com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a inicial por ID com sucesso.', type: InicialResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  atualizar(@Param('id') id: string, @Body() updateInicialDto: UpdateInicialDto) {
+  atualizar(@Param('id') id: string, @Body() updateInicialDto: UpdateInicialDto): Promise<InicialResponseDTO> {
     return this.inicialService.atualizar(+id, updateInicialDto);
   }
 
@@ -82,9 +87,12 @@ export class InicialController {
   @ApiParam({ name: 'inicial_id', type: 'string', required: true })
   // @ApiBody({ type: })
   @ApiOperation({ description: "Adicionar sql por ID.", summary: 'Adicione sql por ID.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se adicionar sql à inicial por ID com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se adicionar sql à inicial por ID com sucesso.', type: SqlResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  adicionaSql(@Param('inicial_id') inicial_id: string, @Body() { sql }: { sql: string }) {
+  adicionaSql(
+    @Param('inicial_id') inicial_id: string, 
+    @Body() { sql }: { sql: string }
+  ): Promise<SqlResponseDTO | ForbiddenException> {
     return this.inicialService.adicionaSql(+inicial_id, sql);
   }
 
@@ -95,7 +103,7 @@ export class InicialController {
   @ApiOperation({ description: "Deletar sql por ID da inicial.", summary: 'Delete sql por ID da inicial.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se deletar sql por ID da inicial com sucesso.', type: Boolean })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  removeSql(@Param('inicial_id') inicial_id: string, @Param('sql') sql: string) {
+  removeSql(@Param('inicial_id') inicial_id: string, @Param('sql') sql: string): Promise<boolean> {
     return this.inicialService.removeSql(+inicial_id, sql);
   }
 
@@ -113,18 +121,18 @@ export class InicialController {
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'sei', type: 'string', required: true })
   @ApiOperation({ description: "Verificar sei.", summary: 'Verifique o sei.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se verificar o sei com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se verificar o sei com sucesso.', type: InicialResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  verificaSei(@Param('sei') sei: string) {
+  verificaSei(@Param('sei') sei: string): Promise<InicialResponseDTO> {
     return this.inicialService.verificaSei(sei);
   }
 
   @Get('busca-processos')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ description: "Buscar processos.", summary: 'Busque processos.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 ao buscar processos com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 ao buscar processos com sucesso.', type: [InicialProcessosResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  todosProcessos() {
+  todosProcessos(): Promise<InicialProcessosResponseDTO[]> {
     return this.inicialService.todosProcessos();
   }
 }

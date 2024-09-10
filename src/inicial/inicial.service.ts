@@ -7,17 +7,7 @@ import { AppService } from 'src/app.service';
 import { promises } from 'dns';
 import { HttpService } from '@nestjs/axios';
 import { ApiProperty } from '@nestjs/swagger';
-
-export class IniciaisPaginado {
-  @ApiProperty()
-  data: Inicial[];
-  @ApiProperty()
-  total: number;
-  @ApiProperty()
-  pagina: number;
-  @ApiProperty()
-  limite: number;
-}
+import { IniciaisPaginado } from './dto/inicial-response.dto';
 
 interface Feriado {
   nome: string
