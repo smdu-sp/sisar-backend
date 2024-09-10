@@ -11,7 +11,7 @@ export class UsuarioResponseDTO {
     @ApiProperty()
     email: string
     @ApiProperty()
-    cargo: string
+    cargo: Cargo
     @ApiProperty()
     permissao: Permissao
     @ApiProperty()
@@ -37,16 +37,6 @@ export class UsuarioPaginadoResponseDTO {
     data?: UsuarioResponseDTO[]
 }
 
-export class UsuarioDesativadoResponseDTO {
-    @ApiProperty()
-    desativado: boolean
-}
-
-export class UsuarioAutorizadoResponseDTO {
-    @ApiProperty()
-    autorizado: boolean
-}
-
 export class BuscarNovoResponseDTO {
     @ApiProperty()
     login: string
@@ -70,4 +60,14 @@ export class AddSubstitutoDTO {
     usuario_id: string;
     @ApiProperty()
     substituto_id: string;
+}
+
+export class UsuarioDesativadoResponseDTO {
+    @ApiProperty()
+    desativado: boolean
+}
+
+export class UsuarioAutorizadoResponseDTO {
+    @ApiProperty()
+    autorizado: boolean
 }
