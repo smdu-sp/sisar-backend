@@ -26,8 +26,8 @@ model Admissibilidade {
   reconsiderado               Boolean?        
   motivo                      Int?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em                   DateTime       @default(now())
+  alterado_em                 DateTime       @default(now()) @updatedAt
 
   @@unique(inicial_id)
   @@map("admissibilidades")
@@ -55,8 +55,8 @@ model Alvara_Tipo {
   iniciais                     Inicial[]
   status                       Int       @default(1)
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em                    DateTime  @default(now())
+  alterado_em                  DateTime  @default(now()) @updatedAt
 
   @@map("alvara_tipos")
 }
@@ -69,8 +69,8 @@ model Categoria {
   competencia      String            @default("")
   admissibilidades Admissibilidade[]
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em        DateTime          @default(now())
+  alterado_em      DateTime          @default(now()) @updatedAt
 
   @@map("categorias")
 }
@@ -85,8 +85,8 @@ model Comunique_se {
   graproem      Int?
   data_resposta DateTime?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em     DateTime  @default(now())
+  alterado_em   DateTime  @default(now()) @updatedAt
 
   @@map("comunique_ses")
 }
@@ -104,8 +104,8 @@ model Conclusao {
   obs                String
   outorga            Boolean   @default(false)
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em          DateTime  @default(now())
+  alterado_em        DateTime  @default(now()) @updatedAt
 
   @@unique(inicial_id)
   @@map("conclusoes")
@@ -124,20 +124,20 @@ model Controle_Prazo {
   graproem          Int
   status            Int
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em         DateTime  @default(now())
+  alterado_em       DateTime  @default(now()) @updatedAt
 
   @@map("controles_prazo")
 }
 
 model Coordenadoria {
-  id         String      @id @default(uuid())
-  nome       String      @unique
-  sigla      String      @unique
-  diretorias Diretoria[]
+  id          String      @id @default(uuid())
+  nome        String      @unique
+  sigla       String      @unique
+  diretorias  Diretoria[]
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em   DateTime    @default(now())
+  alterado_em DateTime    @default(now()) @updatedAt
 
   @@map("coordenadorias")
 }
@@ -158,8 +158,8 @@ model Decisao {
   etapa              Int?
   graproem           Int?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em          DateTime  @default(now())
+  alterado_em        DateTime  @default(now()) @updatedAt
 
   @@map("decisoes")
 }
@@ -170,8 +170,8 @@ model Diretoria {
   coordenadoria_id String
   coordenadoria    Coordenadoria @relation(fields: [coordenadoria_id], references: [id])
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em        DateTime      @default(now())
+  alterado_em      DateTime      @default(now()) @updatedAt
 
   @@map("diretorias")
 }
@@ -188,8 +188,8 @@ model Distribuicao {
   baixa_pagamento                      Int      @default(0)
   obs                                  String?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em                            DateTime @default(now())
+  alterado_em                          DateTime @default(now()) @updatedAt
 
   @@unique(inicial_id)
   @@map("distribuicoes")
@@ -230,28 +230,28 @@ model Inicial {
   reconsideracao_admissibilidade Reconsideracao_Admissibilidade?
   interfaces                     Interface?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em                      DateTime                        @default(now())
+  alterado_em                    DateTime                        @default(now()) @updatedAt
 
   @@map("iniciais")
 }
 
 model Inicial_Sqls {
-  id         String  @id @default(uuid())
-  inicial    Inicial @relation(fields: [inicial_id], references: [id])
-  inicial_id Int
-  sql        String
+  id          String    @id @default(uuid())
+  inicial     Inicial   @relation(fields: [inicial_id], references: [id])
+  inicial_id  Int
+  sql         String
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em   DateTime  @default(now())
+  alterado_em DateTime  @default(now()) @updatedAt
 
   @@map("iniciais_sqls")
 }
 
 model Motivo_Inadmissao {
-  id        String                      @id @default(uuid())
-  descricao String
-  iniciais  Motivo_Inadmissao_Inicial[]
+  id          String   @id @default(uuid())
+  descricao   String
+  iniciais    Motivo_Inadmissao_Inicial[]
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -266,34 +266,34 @@ model Motivo_Inadmissao_Inicial {
   motivo_inadmissao    Motivo_Inadmissao @relation(fields: [motivo_inadmissao_id], references: [id])
   descricao            String?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em            DateTime          @default(now())
+  alterado_em          DateTime          @default(now()) @updatedAt
 
   @@unique([inicial_id, motivo_inadmissao_id])
   @@map("motivos_inadmissao_inicial")
 }
 
 model Pedido {
-  id        String           @id @default(uuid())
-  descricao String           @unique
-  iniciais  Pedido_Inicial[]
+  id          String           @id @default(uuid())
+  descricao   String           @unique
+  iniciais    Pedido_Inicial[]
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em   DateTime         @default(now())
+  alterado_em DateTime         @default(now()) @updatedAt
 
   @@map("pedidos")
 }
 
 model Pedido_Inicial {
-  inicial_id Int
-  inicial    Inicial @relation(fields: [inicial_id], references: [id])
-  pedido_id  String
-  pedido     Pedido  @relation(fields: [pedido_id], references: [id])
-  quantidade Int
-  medida     String
+  inicial_id  Int
+  inicial     Inicial   @relation(fields: [inicial_id], references: [id])
+  pedido_id   String
+  pedido      Pedido    @relation(fields: [pedido_id], references: [id])
+  quantidade  Int
+  medida      String
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em   DateTime  @default(now())
+  alterado_em DateTime  @default(now()) @updatedAt
 
   @@unique([inicial_id, pedido_id])
   @@map("pedidos_inicial")
@@ -307,8 +307,8 @@ model Reconsideracao_Admissibilidade {
   pedido_reconsideracao DateTime?
   parecer               Boolean   @default(false)
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em             DateTime  @default(now())
+  alterado_em           DateTime  @default(now()) @updatedAt
 
   @@unique(inicial_id)
   @@map("reconsideracoes_admissibilidade")
@@ -319,72 +319,72 @@ model Reuniao_Processo {
   inicial_id               Int        @unique
   inicial                  Inicial    @relation(fields: [inicial_id], references: [id])
   data_reuniao             DateTime
-  data_processo            DateTime    @db.DateTime(0)     
+  data_processo            DateTime   @db.DateTime(0)     
   nova_data_reuniao        DateTime?
   justificativa_remarcacao String?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em                DateTime   @default(now())
+  alterado_em              DateTime   @default(now()) @updatedAt
 
   @@map("reuniao_processos")
 }
 
 model Interface {
   inicial_id      Int
-  inicial         Inicial @relation(fields: [inicial_id], references: [id])
-  interface_sehab Boolean @default(false)
-  interface_siurb Boolean @default(false)
-  interface_smc   Boolean @default(false)
-  interface_smt   Boolean @default(false)
-  interface_svma  Boolean @default(false)
+  inicial         Inicial   @relation(fields: [inicial_id], references: [id])
+  interface_sehab Boolean   @default(false)
+  interface_siurb Boolean   @default(false)
+  interface_smc   Boolean   @default(false)
+  interface_smt   Boolean   @default(false)
+  interface_svma  Boolean   @default(false)
   num_sehab       String?
   num_siurb       String?
   num_smc         String?
   num_smt         String?
   num_svma        String?
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em       DateTime  @default(now())
+  alterado_em     DateTime  @default(now()) @updatedAt
 
   @@unique(inicial_id)
   @@map("interfaces")
 }
 
 model Subprefeitura {
-  id     String @id @default(uuid())
-  nome   String @unique
-  sigla  String @unique
-  status Int   
+  id                String    @id @default(uuid())
+  nome              String    @unique
+  sigla             String    @unique
+  status            Int
 
-  admissibilidades Admissibilidade[]
+  criado_em         DateTime  @default(now())
+  alterado_em       DateTime  @default(now()) @updatedAt
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  admissibilidades  Admissibilidade[]
 
   @@map("subprefeituras")
 }
 
 model Suspensao_Prazo {
-  id         String    @id @default(uuid())
-  inicial_id Int
-  inicial    Inicial   @relation(fields: [inicial_id], references: [id])
-  inicio     DateTime
-  final      DateTime?
-  motivo     Int
-  etapa      Int
+  id          String    @id @default(uuid())
+  inicial_id  Int
+  inicial     Inicial   @relation(fields: [inicial_id], references: [id])
+  inicio      DateTime
+  final       DateTime?
+  motivo      Int
+  etapa       Int
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em   DateTime  @default(now())
+  alterado_em DateTime  @default(now()) @updatedAt
 
   @@map("suspensoes_prazo")
 }
 
 model Ferias {
-  id         String   @id @default(uuid())
-  usuario_id String
-  usuario    Usuario  @relation(fields: [usuario_id], references: [id])
-  inicio     DateTime
-  final      DateTime
+  id          String   @id @default(uuid())
+  usuario_id  String
+  usuario     Usuario  @relation(fields: [usuario_id], references: [id])
+  inicio      DateTime
+  final       DateTime
 
   criado_em   DateTime @default(now())
   alterado_em DateTime @default(now()) @updatedAt
@@ -407,21 +407,21 @@ model Usuario {
   usuarios       Substituto[]   @relation(name: "usuario")
   avisos         Avisos[]
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em      DateTime       @default(now())
+  alterado_em    DateTime       @default(now()) @updatedAt
 
-  unidade    Unidade? @relation(fields: [unidade_id], references: [id])
-  unidade_id String?
+  unidade        Unidade?       @relation(fields: [unidade_id], references: [id])
+  unidade_id     String?
 
   @@map("usuarios")
 }
 
 model Unidade {
-  id     String  @id @default(uuid())
-  nome   String  @unique
-  sigla  String  @unique
-  codigo String  @unique
-  status Int     
+  id               String  @id @default(uuid())
+  nome             String  @unique
+  sigla            String  @unique
+  codigo           String  @unique
+  status           Int     
 
   usuarios         Usuario[]
   admissibilidades Admissibilidade[]
@@ -430,31 +430,31 @@ model Unidade {
 }
 
 model Avisos {
-  id         String   @id @default(uuid())
-  titulo     String
-  descricao  String
-  data       DateTime @db.Date()
-  usuario_id String?
-  inicial_id Int
+  id            String   @id @default(uuid())
+  titulo        String
+  descricao     String
+  data          DateTime @db.Date()
+  usuario_id    String?
+  inicial_id    Int
 
-  usuario Usuario? @relation(fields: [usuario_id], references: [id])
-  inicial Inicial  @relation(fields: [inicial_id], references: [id])
+  usuario       Usuario? @relation(fields: [usuario_id], references: [id])
+  inicial       Inicial  @relation(fields: [inicial_id], references: [id])
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em     DateTime @default(now())
+  alterado_em   DateTime @default(now()) @updatedAt
 
   @@map("avisos")
 }
 
 model Substituto {
-  id            String  @id @default(uuid())
-  usuario_id    String
-  usuario       Usuario @relation(fields: [usuario_id], references: [id], name: "usuario")
-  substituto_id String
-  substituto    Usuario @relation(fields: [substituto_id], references: [id], name: "substituto")
+  id            String    @id @default(uuid())
+  usuario_id    String  
+  usuario       Usuario   @relation(fields: [usuario_id], references: [id], name: "usuario")
+  substituto_id String  
+  substituto    Usuario   @relation(fields: [substituto_id], references: [id], name: "substituto")
 
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @default(now()) @updatedAt
+  criado_em     DateTime  @default(now())
+  alterado_em   DateTime  @default(now()) @updatedAt
 }
 
 enum Cargo {
