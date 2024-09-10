@@ -5,6 +5,7 @@ import { Alvara_Tipo } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { contains } from 'class-validator';
+import { AlvaraTipoPaginadoDTO, AlvaraTipoResponseDTO } from './dto/alvara-tipo-responses.dto';
 
 @Injectable()
 export class AlvaraTipoService {
@@ -34,7 +35,7 @@ export class AlvaraTipoService {
     return novo_alvara_tipo;
   }
 
-  async listaCompleta() {
+  async listaCompleta(): Promise<AlvaraTipoResponseDTO[]> {
     const tipos = await this.prisma.alvara_Tipo.findMany({ where: { status: 1 }});
     if (!tipos) throw new ForbiddenException('Não foi possível listar os tipos de alvará.');
     return tipos;
@@ -44,7 +45,7 @@ export class AlvaraTipoService {
     pagina: number = 1, 
     limite: number = 10, 
     busca?: string
-  ) {
+  ): Promise<AlvaraTipoPaginadoDTO> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     console.log(busca);
     const searchParams = {
@@ -57,7 +58,7 @@ export class AlvaraTipoService {
         ),
     };
     const total = await this.prisma.alvara_Tipo.count({ where: searchParams });
-    if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
+    if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const alvara_tipos = await this.prisma.alvara_Tipo.findMany({
       where: searchParams,
@@ -84,7 +85,10 @@ export class AlvaraTipoService {
     return alvara_tipo;
   }
 
-  async atualizar(id: string, updateAlvaraTipoDto: UpdateAlvaraTipoDto) {
+  async atualizar(
+    id: string, 
+    updateAlvaraTipoDto: UpdateAlvaraTipoDto
+  ): Promise<AlvaraTipoResponseDTO> {
     const alvara_tipo = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });
@@ -100,7 +104,10 @@ export class AlvaraTipoService {
     return alvara_tipo_atualizado;
   }
 
-  async alterarStatus(id: string, status: number) {
+  async alterarStatus(
+    id: string, 
+    status: number
+  ): Promise<AlvaraTipoResponseDTO> {
     const alvaraTipo = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });
