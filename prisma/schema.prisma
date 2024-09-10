@@ -10,20 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Parecer_Admissibilidade {
+  id          String    @id @default(uuid())
+  parecer     String    @unique
+  status      Int       @default(1)
+
+  criado_em   DateTime  @default(now())
+  alterado_em DateTime  @default(now()) @updatedAt
+
+  @@map("pareceres_admissibilidade")
+}
+
 model Admissibilidade {
   inicial_id                  Int
   inicial                     Inicial        @relation(fields: [inicial_id], references: [id])
   unidade                     Unidade?       @relation(fields: [unidade_id], references: [id])
   unidade_id                  String?
-  data_envio                  DateTime?
-  data_decisao_interlocutoria DateTime?
+  data_envio                  DateTime?      @db.Date
+  data_decisao_interlocutoria DateTime?      @db.Date
   parecer                     Int            @default(0)
   subprefeitura               Subprefeitura? @relation(fields: [subprefeitura_id], references: [id])
   subprefeitura_id            String?
   categoria                   Categoria?     @relation(fields: [categoria_id], references: [id])
   categoria_id                String?
   status                      Int            @default(1)
-  reconsiderado               Boolean?        
+  reconsiderado               Boolean        @default(false)
   motivo                      Int?
 
   criado_em                   DateTime       @default(now())
