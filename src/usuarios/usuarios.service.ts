@@ -12,6 +12,7 @@ import { $Enums, Usuario } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { SGUService } from 'src/sgu/sgu.service';
 import { Client, createClient } from 'ldapjs';
+import { UsuarioResponseDTO } from './dto/usuario-response.dto';
 
 @Global()
 @Injectable()
@@ -246,7 +247,7 @@ export class UsuariosService {
     const client: Client = createClient({
       url: process.env.LDAP_SERVER,
     });
-    var unidade_id = this.buscaUnidade(login);
+    var unidade_id = await this.buscaUnidade(login);
     await new Promise<void>((resolve, reject) => {
       client.bind(`${process.env.USER_LDAP}${process.env.LDAP_DOMAIN}`, process.env.PASS_LDAP, (err) => {
         if (err) {
@@ -321,7 +322,7 @@ export class UsuariosService {
     return true;
   }
 
-  async buscarAdministrativos() {
+  async buscarAdministrativos(): Promise<UsuarioResponseDTO[]> {
     const administrativos = await this.prisma.usuario.findMany({
       where: { cargo: 'ADM' },
     });
