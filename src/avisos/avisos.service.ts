@@ -3,7 +3,6 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { equal } from 'assert';
 
 @Injectable()
 export class AvisosService {
@@ -11,8 +10,7 @@ export class AvisosService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) { }
-
+  ) {}
 
   async create(createAvisoDto: CreateAvisoDto, usuario_id?: string) {
     let { titulo, descricao, data, inicial_id } = createAvisoDto;
@@ -29,8 +27,6 @@ export class AvisosService {
     if (data instanceof Date) {
       data.setHours(0, 0, 0, 0);
     }
-    console.log(data);
-    
     const reuniao_data = new Date(data).toISOString();
     const reunioes = await this.prisma.avisos.findMany({
       include: {
