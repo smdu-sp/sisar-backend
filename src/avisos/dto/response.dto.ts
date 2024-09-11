@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Inicial } from "@prisma/client";
 
 export class AvisosResponseDTO {
     @ApiProperty()
@@ -17,4 +18,9 @@ export class AvisosResponseDTO {
     criado_em: Date;
     @ApiProperty()
     alterado_em: Date;
+}
+
+export class AvisosPorDataResponseDTO {
+    inicial: Inicial;
+    
 }

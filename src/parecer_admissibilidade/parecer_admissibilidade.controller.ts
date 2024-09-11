@@ -3,7 +3,7 @@ import { ParecerAdmissibilidadeService } from './parecer_admissibilidade.service
 import { CreateParecerAdmissibilidadeDto } from './dto/create-parecer_admissibilidade.dto';
 import { UpdateParecerAdmissibilidadeDto } from './dto/update-parecer_admissibilidade.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParecerAdmissibilidadePaginadoDTO, ParecerAdmissibilidadeResponseDTO } from './dto/parecer_admissibilidade-resopnse.sto';
+import { ParecerAdmissibilidadePaginadoDTO, ParecerAdmissibilidadeResponseDTO } from './dto/parecer_admissibilidade-resopnse.dto';
 
 @ApiTags('Parecer-Admissibilidade')
 @Controller('parecer-admissibilidade')

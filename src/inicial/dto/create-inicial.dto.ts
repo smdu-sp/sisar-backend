@@ -16,9 +16,9 @@ export class CreateInicialDto {
     @ApiProperty()
     processo_fisico: string;
     @ApiProperty()
-    data_protocolo: string;
+    data_protocolo: Date;
     @ApiProperty()
-    envio_admissibilidade: string;
+    envio_admissibilidade: Date;
     @ApiProperty()
     alvara_tipo_id: string;
     @ApiProperty()
@@ -36,7 +36,7 @@ export class CreateInicialDto {
     @ApiProperty()
     interfaces?: any;
     @ApiProperty()
-    data_limteSmul: Date;
+    data_limteSmul?: Date;
 }
 
 export class CreateInterfacesDto {

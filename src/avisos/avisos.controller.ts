@@ -5,7 +5,7 @@ import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AvisosResponseDTO } from './dto/response.dto';
+import { AvisosPorDataResponseDTO, AvisosResponseDTO } from './dto/response.dto';
 
 @ApiTags('Avisos')
 @ApiBearerAuth()

@@ -9,10 +9,6 @@ import { HttpService } from '@nestjs/axios';
 import { ApiProperty } from '@nestjs/swagger';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
 
-interface Feriado {
-  nome: string
-}
-
 @Injectable()
 export class InicialService {
   constructor(
