@@ -68,7 +68,7 @@ export class ParecerAdmissibilidadeService {
     if (!id && id === "") throw new BadRequestException('Id inválido.');
     const parecerAdmissibilidade = await this.prisma.parecer_Admissibilidade.findUnique({ where: { id } });
     if (!parecerAdmissibilidade) throw new BadRequestException('Parecer não encontrado.');
-    const parecerAdmissibilidadeDesativado = await this.prisma.parecer_Admissibilidade.update({ where: { id }, data: { status: 0 } });
+    const parecerAdmissibilidadeDesativado = await this.prisma.parecer_Admissibilidade.update({ where: { id }, data: { status: parecerAdmissibilidade.status === 1 ? 0 : 1 } });
     if (!parecerAdmissibilidadeDesativado) throw new InternalServerErrorException('Não foi possível desativar o parecer. Tente novamente.');
     return parecerAdmissibilidadeDesativado;
   }
