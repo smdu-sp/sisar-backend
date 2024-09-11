@@ -5,7 +5,6 @@ import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IniciaisPaginado, InicialProcessosMesAnoResponseDTO, InicialProcessosResponseDTO, InicialResponseDTO, SqlResponseDTO } from './dto/inicial-response.dto';
-import { Inicial } from '@prisma/client';
 
 @ApiTags('Inicial')
 @ApiBearerAuth()
@@ -78,7 +77,10 @@ export class InicialController {
   @ApiOperation({ description: "Atualizar por ID.", summary: 'Atualize por ID.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a inicial por ID com sucesso.', type: InicialResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  atualizar(@Param('id') id: string, @Body() updateInicialDto: UpdateInicialDto): Promise<InicialResponseDTO> {
+  atualizar(
+    @Param('id') id: string, 
+    @Body() updateInicialDto: UpdateInicialDto
+  ): Promise<InicialResponseDTO> {
     return this.inicialService.atualizar(+id, updateInicialDto);
   }
 
@@ -103,7 +105,10 @@ export class InicialController {
   @ApiOperation({ description: "Deletar sql por ID da inicial.", summary: 'Delete sql por ID da inicial.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se deletar sql por ID da inicial com sucesso.', type: Boolean })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  removeSql(@Param('inicial_id') inicial_id: string, @Param('sql') sql: string): Promise<boolean> {
+  removeSql(
+    @Param('inicial_id') inicial_id: string, 
+    @Param('sql') sql: string
+  ): Promise<boolean> {
     return this.inicialService.removeSql(+inicial_id, sql);
   }
 
