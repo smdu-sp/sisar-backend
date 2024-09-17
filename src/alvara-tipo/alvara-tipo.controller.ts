@@ -89,9 +89,4 @@ export class AlvaraTipoController {
   ): Promise<AlvaraTipoResponseDTO> {
     return this.alvaraTipoService.atualizar(id, updateAlvaraTipoDto);
   }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.alvaraTipoService.remove(id);
-  // }
 }

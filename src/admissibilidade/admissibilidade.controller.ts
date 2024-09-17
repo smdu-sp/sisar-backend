@@ -18,7 +18,9 @@ export class AdmissibilidadeController {
   @ApiResponse({ status: 201, description: 'Retorna 201 se registrar a admissibilidade com sucesso.', type: CreateResponseAdmissibilidadeDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Registrar uma admissibilidade.", summary: 'Registre uma admissibilidade.' })
-  create(@Body() createAdmissibilidadeDto: CreateAdmissibilidadeDto) {
+  create(
+    @Body() createAdmissibilidadeDto: CreateAdmissibilidadeDto
+  ): Promise<CreateResponseAdmissibilidadeDTO> {
     return this.admissibilidadeService.create(createAdmissibilidadeDto);
   }
 
@@ -45,7 +47,7 @@ export class AdmissibilidadeController {
     @Query('limite') limite: number = 10, 
     @Query('filtro') filtro: number, 
     @Query('busca') busca: string
-  ) {
+  ): Promise<AdmissibilidadePaginado> {
     return this.admissibilidadeService.buscarTudo(+pagina, +limite, +filtro, busca);
   }
 
@@ -55,7 +57,9 @@ export class AdmissibilidadeController {
   @ApiParam({ name: 'id', type: 'string', required: false })
   @ApiResponse({ status: 200, description: 'Retorna 200 se buscar a admissibilidade por ID com sucesso.', type: AdmissibilidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  buscarPorId(@Param('id') id: string): Promise<AdmissibilidadeResponseDTO> {
+  buscarPorId(
+    @Param('id') id: string
+  ): Promise<AdmissibilidadeResponseDTO> {
     return this.admissibilidadeService.buscarPorId(+id);
   }
 
@@ -63,9 +67,9 @@ export class AdmissibilidadeController {
   @Get('lista')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ description: "Listar todas as admissibilidades.", summary: 'Liste tudo admissibilidade.' })
-  @ApiResponse({ status: 200, description: 'Retorna 200 se listar todas as admissibilidades com sucesso.', type: AdmissibilidadePaginado })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se listar todas as admissibilidades com sucesso.', type: [AdmissibilidadeResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  listaCompleta() {
+  listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
     return this.admissibilidadeService.listaCompleta();
   }
 
