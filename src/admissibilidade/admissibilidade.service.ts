@@ -157,7 +157,7 @@ export class AdmissibilidadeService {
     return admissibilidade;
   }
 
-  remove(id: number) {
+  remove(id: number): string {
     return `This action removes a #${id} admissibilidade`;
   }
 }
