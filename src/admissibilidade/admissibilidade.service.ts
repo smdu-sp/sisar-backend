@@ -7,19 +7,20 @@ import { Admissibilidade } from '@prisma/client';
 import { equal } from 'assert';
 import { equals } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { AdmissibilidadePaginado } from './dto/responses.dto';
+import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 
 @Injectable()
 export class AdmissibilidadeService {
-
   constructor(
     private prisma: PrismaService,
     private app: AppService
   ) { }
 
-  async create(createAdmissibilidadeDto: CreateAdmissibilidadeDto) {
+  async create(
+    createAdmissibilidadeDto: CreateAdmissibilidadeDto
+  ): Promise<CreateResponseAdmissibilidadeDTO> {
     const { interfaces, tipo_processo, inicial_id } = createAdmissibilidadeDto;
-    const admissibilidade = await this.prisma.admissibilidade.create({
+    const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.create({
       data: createAdmissibilidadeDto,
       include: { inicial: true }
     });
@@ -41,19 +42,23 @@ export class AdmissibilidadeService {
         }
       });
     }
-    if (!admissibilidade) throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
+    if (!admissibilidade) 
+      throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
     return admissibilidade;
   }
 
-  async listaCompleta() {
-    const admissibilidade = await this.prisma.admissibilidade.findMany({
+  async listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
+    const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany({
     });
-    if (!admissibilidade || admissibilidade.length == 0) throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
+    if (!admissibilidade || admissibilidade.length == 0) 
+      throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
   }
 
-  async buscarTudo(pagina: number, limite: number, filtro: number, busca?: string): Promise<AdmissibilidadePaginado> {
-    [pagina, limite] = this.app.verificaPagina(pagina, limite);
+  async buscarTudo(
+    pagina: number, limite: number, filtro: number, busca?: string
+  ): Promise<AdmissibilidadePaginado> {
+    [ pagina, limite ] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca ?
         {
@@ -63,30 +68,26 @@ export class AdmissibilidadeService {
         } :
         {}),
     };
-    const total = await this.prisma.admissibilidade.count({
+    const total: number = await this.prisma.admissibilidade.count({
       where: {
-        inicial: {
-          ...searchParams
-        }
+        inicial: { ...searchParams }
       }
     });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
-    [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
-    const admissibilidades = await this.prisma.admissibilidade.findMany({
-
+    [ pagina, limite ] = this.app.verificaLimite(pagina, limite, total);
+    const admissibilidades: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany({
       include: {
         inicial: true
       },
       where: {
         status: filtro === -1 ? undefined : filtro,
-        inicial: {
-          ...searchParams
-        }
+        inicial: { ...searchParams }
       },
       skip: (pagina - 1) * limite,
       take: limite,
     });
-    if (!admissibilidades) throw new ForbiddenException('Nenhum processo encontrado');
+    if (!admissibilidades) 
+      throw new ForbiddenException('Nenhum processo encontrado');
     return {
       data: admissibilidades,
       total,
@@ -95,32 +96,30 @@ export class AdmissibilidadeService {
     };
   }
 
-  async findAll() {
-    const admissibilidade = await this.prisma.admissibilidade.findMany({
-    });
-    if (!admissibilidade || admissibilidade.length == 0) throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
+  async findAll(): Promise<AdmissibilidadeResponseDTO[]> {
+    const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany();
+    if (!admissibilidade || admissibilidade.length == 0) 
+      throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
   }
 
-  async buscarPorId(id: number) {
+  async buscarPorId(id: number): Promise<Admissibilidade> {
     const admissibilidade = await this.prisma.admissibilidade.findUnique({
       where: { inicial_id: id },
-      include: {
-        inicial: true
-      }
+      include: { inicial: true }
     });
-    if (!admissibilidade) throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
+    if (!admissibilidade) 
+      throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     return admissibilidade;
   }
 
   async ultimaAtualizacao(id: number) {
     const inicial = await this.prisma.inicial.update({
       where: { id },
-      data: {
-        alterado_em: new Date()
-      }
+      data: { alterado_em: new Date() }
     })
-    if (!inicial) throw new InternalServerErrorException('Nenhum processo encontrado');
+    if (!inicial) 
+      throw new InternalServerErrorException('Nenhum processo encontrado');
     return inicial;
   }
 
