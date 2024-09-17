@@ -14,20 +14,19 @@ export class AlvaraTipoService {
     private app: AppService
   ) {}
 
-  async verificaSeExiste(nome: string, id?: string) {
-    const alvara_tipo = await this.prisma.alvara_Tipo.findFirst({
+  async verificaSeExiste(nome: string, id?: string): Promise<void> {
+    const alvara_tipo: Alvara_Tipo = await this.prisma.alvara_Tipo.findFirst({
       where: { nome },
     });
-    if (id)
-      if (alvara_tipo && alvara_tipo.id != id)
-        throw new ForbiddenException('Tipo de alvará já cadastrado');
+    if (id && alvara_tipo && alvara_tipo.id != id)
+      throw new ForbiddenException('Tipo de alvará já cadastrado');
     if (alvara_tipo)
       throw new ForbiddenException('Tipo de alvará já cadastrado');
   }
 
   async criar(createAlvaraTipoDto: CreateAlvaraTipoDto): Promise<Alvara_Tipo> {
     await this.verificaSeExiste(createAlvaraTipoDto.nome);
-    const novo_alvara_tipo = await this.prisma.alvara_Tipo.create({
+    const novo_alvara_tipo: Alvara_Tipo = await this.prisma.alvara_Tipo.create({
       data: { ...createAlvaraTipoDto },
     });
     if (!novo_alvara_tipo)
@@ -36,8 +35,13 @@ export class AlvaraTipoService {
   }
 
   async listaCompleta(): Promise<AlvaraTipoResponseDTO[]> {
-    const tipos = await this.prisma.alvara_Tipo.findMany({ where: { status: 1 }});
-    if (!tipos) throw new ForbiddenException('Não foi possível listar os tipos de alvará.');
+    const tipos: AlvaraTipoResponseDTO[] = await this.prisma.alvara_Tipo.findMany({ 
+      where: { 
+        status: 1 
+      }
+    });
+    if (!tipos) 
+      throw new ForbiddenException('Não foi possível listar os tipos de alvará.');
     return tipos;
   }
 
@@ -47,7 +51,6 @@ export class AlvaraTipoService {
     busca?: string
   ): Promise<AlvaraTipoPaginadoDTO> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
-    console.log(busca);
     const searchParams = {
       ...(busca ? 
         { 
@@ -57,10 +60,10 @@ export class AlvaraTipoService {
         }: {}
         ),
     };
-    const total = await this.prisma.alvara_Tipo.count({ where: searchParams });
+    const total: number = await this.prisma.alvara_Tipo.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
-    [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
-    const alvara_tipos = await this.prisma.alvara_Tipo.findMany({
+    [ pagina, limite ] = this.app.verificaLimite(pagina, limite, total);
+    const alvara_tipos: AlvaraTipoResponseDTO[] = await this.prisma.alvara_Tipo.findMany({
       where: searchParams,
       orderBy: { criado_em: 'desc' },
       skip: (pagina - 1) * limite,
@@ -77,7 +80,7 @@ export class AlvaraTipoService {
   }
 
   async buscarPorId(id: string): Promise<Alvara_Tipo> {
-    const alvara_tipo = await this.prisma.alvara_Tipo.findFirst({
+    const alvara_tipo: Alvara_Tipo = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });
     if (!alvara_tipo)
@@ -89,13 +92,12 @@ export class AlvaraTipoService {
     id: string, 
     updateAlvaraTipoDto: UpdateAlvaraTipoDto
   ): Promise<AlvaraTipoResponseDTO> {
-    const alvara_tipo = await this.prisma.alvara_Tipo.findFirst({
+    const alvara_tipo: AlvaraTipoResponseDTO = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });
     if (!alvara_tipo)
       throw new ForbiddenException('Tipo de alvará não encontrado');
-    // await this.verificaSeExiste(updateAlvaraTipoDto.nome, id);
-    const alvara_tipo_atualizado = await this.prisma.alvara_Tipo.update({
+    const alvara_tipo_atualizado: AlvaraTipoResponseDTO = await this.prisma.alvara_Tipo.update({
       where: { id },
       data: { ...updateAlvaraTipoDto },
     });
@@ -108,12 +110,12 @@ export class AlvaraTipoService {
     id: string, 
     status: number
   ): Promise<AlvaraTipoResponseDTO> {
-    const alvaraTipo = await this.prisma.alvara_Tipo.findFirst({
+    const alvaraTipo: AlvaraTipoResponseDTO = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });
     if (!alvaraTipo)
       throw new ForbiddenException('Tipo de alvara não encontrado');
-    const alvaraTipo_alterado = await this.prisma.alvara_Tipo.update({
+    const alvaraTipo_alterado: AlvaraTipoResponseDTO = await this.prisma.alvara_Tipo.update({
       where: { id },
       data: { status },
     });
@@ -121,8 +123,4 @@ export class AlvaraTipoService {
       throw new ForbiddenException('Erro ao alterar status do tipo de alvara');
     return alvaraTipo_alterado;
   }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} alvaraTipo`;
-  // }
 }
