@@ -3,7 +3,7 @@ import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Admissibilidade } from '@prisma/client';
+import { Admissibilidade, Interface } from '@prisma/client';
 import { equal } from 'assert';
 import { equals } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -128,7 +128,7 @@ export class AdmissibilidadeService {
     updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
   ): Promise<Admissibilidade> {
     const { interfaces, tipo_processo, inicial_id } = updateAdmissibilidadeDto;
-    const admissibilidade = await this.prisma.admissibilidade.update({
+    const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },
       data: updateAdmissibilidadeDto
     });
@@ -147,12 +147,11 @@ export class AdmissibilidadeService {
           inicial_id,
           ...interfaces
         },
-        update: {
-          ...interfaces
-        }
+        update: { ...interfaces }
       });
     }
-    if (!admissibilidade) throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
+    if (!admissibilidade) 
+      throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     this.ultimaAtualizacao(id)
     return admissibilidade;
   }
