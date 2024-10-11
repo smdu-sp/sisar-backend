@@ -36,6 +36,22 @@ export class InicialController {
     return this.inicialService.buscarTudo(+pagina, +limite);
   }
 
+  @Get('buscar-tudo-analise')
+  @HttpCode(HttpStatus.OK)
+  @ApiQuery({ name: 'pagina', type: 'string', required: true })
+  @ApiQuery({ name: 'limite', type: 'string', required: true })
+  @ApiQuery({ name: 'status', type: 'string', required: true })
+  @ApiOperation({ description: "Buscar todas as iniciais.", summary: 'Busque todas as iniciais.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar as iniciais com sucesso.', type: IniciaisPaginado })
+  @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
+  buscarTudoEmAnalise(
+    @Query('pagina') pagina?: string,
+    @Query('limite') limite?: string,
+    @Query('status') status?: string
+  ): Promise<IniciaisPaginado> {
+    return this.inicialService.buscarTudoEmAnalise(+pagina, +limite, +status);
+  }
+
   @Get('buscar/:mes/:ano') // Definindo os parâmetros na rota
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'mes', type: 'string', required: true })

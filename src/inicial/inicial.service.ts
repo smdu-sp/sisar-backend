@@ -210,7 +210,7 @@ export class InicialService {
     createInicialDto.sei = createInicialDto.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
     createInicialDto.aprova_digital = createInicialDto.aprova_digital.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
     createInicialDto.processo_fisico = createInicialDto.processo_fisico.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
-    if (createInicialDto.envio_admissibilidade) createInicialDto.status = 2;
+    if (createInicialDto.envio_admissibilidade) createInicialDto.status = 0;
     const tipo_alvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: createInicialDto.alvara_tipo_id } });
     if (!tipo_alvara) throw new ForbiddenException('Alvara inválido.');
     const novo_inicial = await this.prisma.inicial.create({
@@ -239,6 +239,30 @@ export class InicialService {
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const iniciais = await this.prisma.inicial.findMany({
+      include: {
+        alvara_tipo: true,
+      },
+      skip: (pagina - 1) * limite,
+      take: limite,
+    });
+    if (!iniciais) throw new ForbiddenException('Nenhum processo encontrado');
+    return {
+      total: +total,
+      pagina: +pagina,
+      limite: +limite,
+      data: iniciais,
+    };
+  }
+
+  async buscarTudoEmAnalise(pagina: number = 1, limite: number = 10, status: number = 0): Promise<IniciaisPaginado> {
+    [pagina, limite] = this.app.verificaPagina(pagina, limite);
+    const total = await this.prisma.inicial.count();
+    if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
+    [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
+    const iniciais = await this.prisma.inicial.findMany({
+      where: {
+        status: status
+      },
       include: {
         alvara_tipo: true,
       },
