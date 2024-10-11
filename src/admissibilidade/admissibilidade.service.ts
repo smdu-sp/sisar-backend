@@ -42,7 +42,7 @@ export class AdmissibilidadeService {
         }
       });
     }
-    if (!admissibilidade) 
+    if (!admissibilidade)
       throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
     return admissibilidade;
   }
@@ -50,7 +50,7 @@ export class AdmissibilidadeService {
   async listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
     const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany({
     });
-    if (!admissibilidade || admissibilidade.length == 0) 
+    if (!admissibilidade || admissibilidade.length == 0)
       throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
   }
@@ -58,7 +58,7 @@ export class AdmissibilidadeService {
   async buscarTudo(
     pagina: number, limite: number, filtro: number, busca?: string
   ): Promise<AdmissibilidadePaginado> {
-    [ pagina, limite ] = this.app.verificaPagina(pagina, limite);
+    [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca ?
         {
@@ -74,7 +74,7 @@ export class AdmissibilidadeService {
       }
     });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
-    [ pagina, limite ] = this.app.verificaLimite(pagina, limite, total);
+    [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const admissibilidades: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany({
       include: {
         inicial: true
@@ -86,7 +86,7 @@ export class AdmissibilidadeService {
       skip: (pagina - 1) * limite,
       take: limite,
     });
-    if (!admissibilidades) 
+    if (!admissibilidades)
       throw new ForbiddenException('Nenhum processo encontrado');
     return {
       data: admissibilidades,
@@ -98,7 +98,7 @@ export class AdmissibilidadeService {
 
   async findAll(): Promise<AdmissibilidadeResponseDTO[]> {
     const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany();
-    if (!admissibilidade || admissibilidade.length == 0) 
+    if (!admissibilidade || admissibilidade.length == 0)
       throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
   }
@@ -108,7 +108,7 @@ export class AdmissibilidadeService {
       where: { inicial_id: id },
       include: { inicial: true }
     });
-    if (!admissibilidade) 
+    if (!admissibilidade)
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     return admissibilidade;
   }
@@ -118,7 +118,7 @@ export class AdmissibilidadeService {
       where: { id },
       data: { alterado_em: new Date() }
     })
-    if (!inicial) 
+    if (!inicial)
       throw new InternalServerErrorException('Nenhum processo encontrado');
     return inicial;
   }
@@ -150,7 +150,7 @@ export class AdmissibilidadeService {
         update: { ...interfaces }
       });
     }
-    if (!admissibilidade) 
+    if (!admissibilidade)
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     this.ultimaAtualizacao(id)
     return admissibilidade;
