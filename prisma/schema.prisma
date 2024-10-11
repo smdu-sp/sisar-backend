@@ -126,9 +126,9 @@ model Controle_Prazo {
   id                String    @id @default(uuid())
   inicial_id        Int
   inicial           Inicial   @relation(fields: [inicial_id], references: [id])
-  data_inicio       DateTime?
-  final_planejado   DateTime
-  final_executado   DateTime?
+  data_inicio       DateTime? 
+  final_planejado   DateTime  
+  final_executado   DateTime? 
   duracao_planejada Int
   duracao_executada Int?
   etapa             Int
@@ -214,8 +214,8 @@ model Inicial {
   requerimento                   String
   aprova_digital                 String?
   processo_fisico                String?
-  data_protocolo                 DateTime
-  envio_admissibilidade          DateTime?
+  data_protocolo                 DateTime                        @db.Date
+  envio_admissibilidade          DateTime?                       @db.Date
   alvara_tipo                    Alvara_Tipo                     @relation(fields: [alvara_tipo_id], references: [id])
   alvara_tipo_id                 String
   tipo_processo                  Int?                            @default(1)
@@ -224,8 +224,8 @@ model Inicial {
   pagamento                      Int?                            @default(1)
   requalifica_rapido             Boolean?                        @default(false)
   associado_reforma              Boolean?                        @default(false)
-  data_limiteSmul                DateTime?
-  data_limiteMulti               DateTime?
+  data_limiteSmul                DateTime?                       @db.Date
+  data_limiteMulti               DateTime?                       @db.Date
   comunique_ses                  Comunique_se[]
   controles_prazo                Controle_Prazo[]
   decisoes                       Decisao[]
@@ -313,9 +313,9 @@ model Pedido_Inicial {
 model Reconsideracao_Admissibilidade {
   inicial_id            Int
   inicial               Inicial   @relation(fields: [inicial_id], references: [id])
-  envio                 DateTime?
-  publicacao            DateTime?
-  pedido_reconsideracao DateTime?
+  envio                 DateTime? @db.Date
+  publicacao            DateTime? @db.Date
+  pedido_reconsideracao DateTime? @db.Date
   parecer               Boolean   @default(false)
 
   criado_em             DateTime  @default(now())
@@ -329,9 +329,9 @@ model Reuniao_Processo {
   id                       String     @id @default(uuid())
   inicial_id               Int        @unique
   inicial                  Inicial    @relation(fields: [inicial_id], references: [id])
-  data_reuniao             DateTime
-  data_processo            DateTime   @db.DateTime(0)     
-  nova_data_reuniao        DateTime?
+  data_reuniao             DateTime   @db.Date
+  data_processo            DateTime   @db.Date     
+  nova_data_reuniao        DateTime?  @db.Date
   justificativa_remarcacao String?
 
   criado_em                DateTime   @default(now())
