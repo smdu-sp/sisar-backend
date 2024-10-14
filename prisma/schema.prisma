@@ -90,7 +90,7 @@ model Comunique_se {
   id            String    @id @default(uuid())
   inicial_id    Int
   inicial       Inicial   @relation(fields: [inicial_id], references: [id])
-  data          DateTime
+  data          DateTime 
   complementar  Boolean   @default(false)
   etapa         Int
   graproem      Int?
@@ -105,12 +105,12 @@ model Comunique_se {
 model Conclusao {
   inicial_id         Int
   inicial            Inicial   @relation(fields: [inicial_id], references: [id])
-  data_apostilamento DateTime?
-  data_conclusao     DateTime?
-  data_emissao       DateTime?
-  data_outorga       DateTime?
-  data_resposta      DateTime?
-  data_termo         DateTime?
+  data_apostilamento DateTime? @db.Date
+  data_conclusao     DateTime? @db.Date
+  data_emissao       DateTime? @db.Date
+  data_outorga       DateTime? @db.Date
+  data_resposta      DateTime? @db.Date
+  data_termo         DateTime? @db.Date
   num_alvara         String
   obs                String
   outorga            Boolean   @default(false)
