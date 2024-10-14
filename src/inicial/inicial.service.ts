@@ -223,7 +223,7 @@ export class InicialService {
     }
     if (novo_inicial) await this.criaDistribuicao(novo_inicial);
     if (nums_sql && nums_sql.length > 0) {
-      await this.prisma.inicial_Sqls.createMany({
+      await this.prisma.inicial_Sqls.createMany({ 
         data: nums_sql.map(sql => ({ sql, inicial_id: novo_inicial.id })),
       });
     }
@@ -233,12 +233,29 @@ export class InicialService {
     return novo_inicial;
   }
 
-  async buscarTudo(pagina: number = 1, limite: number = 10): Promise<IniciaisPaginado> {
+  async buscarTudo(
+    pagina: number = 1, 
+    limite: number = 10,
+    busca?: string,
+    status: number = 0
+  ): Promise<IniciaisPaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
-    const total = await this.prisma.inicial.count();
+    const searchParams = {
+      ...(busca ? 
+        { OR: [
+            { sei: { contains: busca } },
+            { requerimento: { contains: busca } },
+            { aprova_digital: { contains: busca } },
+            { processo_fisico: { contains: busca } }
+        ] } : 
+        {}),
+        status: status
+    };
+    const total = await this.prisma.inicial.count({where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const iniciais = await this.prisma.inicial.findMany({
+      where: searchParams,
       include: {
         alvara_tipo: true,
       },

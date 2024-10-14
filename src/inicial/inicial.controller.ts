@@ -26,14 +26,17 @@ export class InicialController {
   @HttpCode(HttpStatus.OK)
   @ApiQuery({ name: 'pagina', type: 'string', required: true })
   @ApiQuery({ name: 'limite', type: 'string', required: true })
+  @ApiQuery({ name: 'busca', type: 'string', required: false })
   @ApiOperation({ description: "Buscar todas as iniciais.", summary: 'Busque todas as iniciais.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se buscar as iniciais com sucesso.', type: IniciaisPaginado })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   buscarTudo(
     @Query('pagina') pagina?: string,
-    @Query('limite') limite?: string
+    @Query('limite') limite?: string,
+    @Query('busca') busca?: string,
+    @Query('status') status?: string,
   ): Promise<IniciaisPaginado> {
-    return this.inicialService.buscarTudo(+pagina, +limite);
+    return this.inicialService.buscarTudo(+pagina, +limite, busca, +status);
   }
 
   @Get('buscar-tudo-analise')
