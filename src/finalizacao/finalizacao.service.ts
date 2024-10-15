@@ -13,12 +13,16 @@ export class FinalizacaoService {
     private app: AppService
   ) { }
 
-  async criar(createFinalizacaoDto: CreateFinalizacaoDto) {
+  async criar(createFinalizacaoDto: CreateFinalizacaoDto, conclusao: boolean) {
     let { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga } = createFinalizacaoDto;
     const criar = await this.prisma.conclusao.create({
       data: { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga }
     })
     if (!criar) throw new InternalServerErrorException('Erro ao criar a finalização')
+    await this.prisma.inicial.update({
+      where: { id: inicial_id },
+      data: { status: conclusao ? 3 : 4 }
+    })
     return criar;
   }
 
@@ -60,7 +64,7 @@ export class FinalizacaoService {
 
   async buscaId(id: number) {
     const buscaId = await this.prisma.conclusao.findUnique({
-      where: {inicial_id: id}
+      where: { inicial_id: id }
     })
     if (!buscaId) throw new InternalServerErrorException('Processo não encontrado');
     return buscaId

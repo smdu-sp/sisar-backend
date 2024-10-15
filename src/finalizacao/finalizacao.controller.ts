@@ -8,8 +8,13 @@ export class FinalizacaoController {
   constructor(private readonly finalizacaoService: FinalizacaoService) {}
 
   @Post('criar')
-  create(@Body() createFinalizacaoDto: CreateFinalizacaoDto) {
-    return this.finalizacaoService.criar(createFinalizacaoDto);
+  create(
+    @Body() createFinalizacaoDto: CreateFinalizacaoDto,
+    @Query('conclusao') conclusao: string
+  ) {
+    console.log(conclusao);
+    const conclusaoBoolean = conclusao === 'true' ? true : false;
+    return this.finalizacaoService.criar(createFinalizacaoDto, conclusaoBoolean);
   }
 
   @Get('buscar-tudo')
