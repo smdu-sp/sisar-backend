@@ -8,6 +8,7 @@ import { equal } from 'assert';
 import { equals } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class AdmissibilidadeService {
@@ -159,4 +160,65 @@ export class AdmissibilidadeService {
   remove(id: number): string {
     return `This action removes a #${id} admissibilidade`;
   }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async verificaReconsideracao() {
+    const reconsiderados = await this.prisma.admissibilidade.findMany({
+      where: {
+        AND: [
+          { status: 3 },
+          { data_decisao_interlocutoria: { not: null } }
+        ]
+      },
+      select: {
+        inicial_id: true,
+        data_decisao_interlocutoria: true,
+        inicial: {
+          select: {
+            alvara_tipo_id: true
+          }
+        }
+      }
+    })
+
+    if (!reconsiderados) throw new InternalServerErrorException('Nenhum processo encontrado');
+
+    for (let i = 0; i < reconsiderados.length; i++) {
+
+      const iniciais = await this.prisma.inicial.findUnique({
+        where: {
+          id: reconsiderados[i].inicial_id
+        },
+        select: {
+          tipo_processo: true
+        }
+      });
+
+      const alvaraTipo = await this.prisma.alvara_Tipo.findUnique({
+        where: { id: reconsiderados[i].inicial.alvara_tipo_id },
+        select: {
+          reconsideracao_smul: true,
+          reconsideracao_multi: true
+        }
+      });
+
+      const dataDecisao = new Date(reconsiderados[i].data_decisao_interlocutoria);
+      const diasPassados = Math.floor((new Date().getTime() - dataDecisao.getTime()) / (1000 * 60 * 60 * 24));
+
+      const diasSubtraidosSmul = diasPassados - (alvaraTipo.reconsideracao_smul || 0);
+      const diasSubtraidosMulti = diasPassados - (alvaraTipo.reconsideracao_multi || 0);
+      
+      if (iniciais.tipo_processo === 1 ? diasSubtraidosSmul == 0 : diasSubtraidosMulti == 0) {
+        await this.prisma.admissibilidade.update({
+          where: { inicial_id: reconsiderados[i].inicial_id },
+          data: { status: 2 }
+        })
+        await this.prisma.inicial.update({
+          where: { id: reconsiderados[i].inicial_id },
+          data: { status: 1 }
+        })
+      }
+    }
+  }
+
 }
