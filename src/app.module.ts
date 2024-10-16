@@ -33,7 +33,6 @@ import { FinalizacaoModule } from './finalizacao/finalizacao.module';
       provide: APP_GUARD,
       useClass: RoleGuard,
     },
-    XlsxService,
   ],
   exports: [AppService],
 })
