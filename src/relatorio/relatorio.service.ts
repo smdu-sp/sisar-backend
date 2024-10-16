@@ -137,6 +137,7 @@ export class RelatorioService {
                     "quantidade": resultadoFinalGrap.length,
                     "data": resultadoFinalGrap
                  },
+                 "total-parcial": analiseGeralSmul.length + resultadoFinalGrap.length
             }
         };
     }
