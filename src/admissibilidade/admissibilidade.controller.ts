@@ -5,6 +5,7 @@ import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @ApiTags('Admissibilidade')
 @ApiBearerAuth()
@@ -95,5 +96,11 @@ export class AdmissibilidadeController {
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   remove(@Param('id') id: string): string {
     return this.admissibilidadeService.remove(+id);
+  }
+
+  @IsPublic()
+  @Get('verifica-reconsideracao')
+  verificaReconsideracao() {
+    return this.admissibilidadeService.verificaReconsideracao();
   }
 }
