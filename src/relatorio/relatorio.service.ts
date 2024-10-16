@@ -128,7 +128,7 @@ export class RelatorioService {
             "inadimissiveis": inadimissiveis,
             "admissiveis": admissiveis,
             "data_gerado": data_gerado,
-            "emAnalise": {
+            "em_analise": {
                 "smul": {
                     "quantidade": analiseGeralSmul.length,
                     "data": resultadoFinalSmul
@@ -137,7 +137,7 @@ export class RelatorioService {
                     "quantidade": resultadoFinalGrap.length,
                     "data": resultadoFinalGrap
                  },
-                 "total-parcial": analiseGeralSmul.length + resultadoFinalGrap.length
+                 "total_parcial": analiseGeralSmul.length + resultadoFinalGrap.length
             }
         };
     }
