@@ -7,11 +7,10 @@ import { FinalizacaoPaginado } from './dto/finalizacao-response.dto';
 
 @Injectable()
 export class FinalizacaoService {
-
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) { }
+  ) {}
 
   async criar(createFinalizacaoDto: CreateFinalizacaoDto, conclusao: boolean) {
     let { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga } = createFinalizacaoDto;
@@ -25,7 +24,6 @@ export class FinalizacaoService {
     })
     return criar;
   }
-
 
   async buscarTudo(
     pagina: number = 1,
