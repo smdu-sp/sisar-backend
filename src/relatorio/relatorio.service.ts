@@ -36,6 +36,7 @@ export class RelatorioService {
             }
         });
 
+        //Analise Geral Smul
         const analiseGeralSmul = await this.prisma.admissibilidade.findMany({
             where: {
                 AND: [
@@ -55,7 +56,107 @@ export class RelatorioService {
                 }
             }
         });
+        const unidadesContadasSmul = analiseGeralSmul.reduce((acc, item) => {
+            const nome = item.unidade.nome;
+            if (!acc[nome]) {
+                acc[nome] = { nome, count: 0 };
+            }
+            acc[nome].count++;
+            return acc;
+        }, {});
+        const resultadoFinalSmul = Object.values(unidadesContadasSmul);
+        
+        //Deferido Geral Smul
+        const deferidoGeralSmul = await this.prisma.admissibilidade.findMany({
+            where: {
+                AND: [
+                    { inicial: { status: 3 } },
+                    { inicial: { tipo_processo: 1 } },
+                    { data_decisao_interlocutoria: { gte: primeiroDia } },
+                    { data_decisao_interlocutoria: { lte: ultimoDia } },
+                    { unidade_id: { in: unidades.map(unidade => unidade.id) } }
+                ]
+            },
+            select: {
+                unidade: {
+                    select: {
+                        nome: true,
+                        id: true
+                    }
+                }
+            }
+        });
+        const unidadesContadasDeferidoSmul = deferidoGeralSmul.reduce((acc, item) => {
+            const nome = item.unidade.nome;
+            if (!acc[nome]) {
+                acc[nome] = { nome, count: 0 };
+            }
+            acc[nome].count++;
+            return acc;
+        }, {});
+        const resultadoFinalDeferidoSmul = Object.values(unidadesContadasDeferidoSmul);
 
+        //Indeferidos Geral Smul
+        const indeferidosGeralSmul = await this.prisma.admissibilidade.findMany({
+            where: {
+                AND: [
+                    { inicial: { status: 4 } },
+                    { inicial: { tipo_processo: 1 } },
+                    { data_decisao_interlocutoria: { gte: primeiroDia } },
+                    { data_decisao_interlocutoria: { lte: ultimoDia } },
+                    { unidade_id: { in: unidades.map(unidade => unidade.id) } }
+                ]
+            },
+            select: {
+                unidade: {
+                    select: {
+                        nome: true,
+                        id: true
+                    }
+                }
+            }
+        });
+        const unidadesContadasIndeferidosSmul = indeferidosGeralSmul.reduce((acc, item) => {
+            const nome = item.unidade.nome;
+            if (!acc[nome]) {
+                acc[nome] = { nome, count: 0 };
+            }
+            acc[nome].count++;
+            return acc;
+        }, {});
+        const resultadoFinalIndeferidosSmul = Object.values(unidadesContadasIndeferidosSmul);
+
+        //Indeferidos Graproem
+        const indeferidosGeralGrap = await this.prisma.admissibilidade.findMany({
+            where: {
+                AND: [
+                    { inicial: { status: 4 } },
+                    { inicial: { tipo_processo: 2 } },
+                    { data_decisao_interlocutoria: { gte: primeiroDia } },
+                    { data_decisao_interlocutoria: { lte: ultimoDia } },
+                    { unidade_id: { in: unidades.map(unidade => unidade.id) } }
+                ]
+            },
+            select: {
+                unidade: {
+                    select: {
+                        nome: true,
+                        id: true
+                    }
+                }
+            }
+        });
+        const unidadesIndeferidosContadasGrap = indeferidosGeralGrap.reduce((acc, item) => {
+            const nome = item.unidade.nome;
+            if (!acc[nome]) {
+                acc[nome] = { nome, count: 0 };
+            }
+            acc[nome].count++;
+            return acc;
+        }, {});
+        const resultadoFinalIndeferidosGrap = Object.values(unidadesIndeferidosContadasGrap);
+
+        //Em analise Graproem
         const analiseGeralGrap = await this.prisma.admissibilidade.findMany({
             where: {
                 AND: [
@@ -75,8 +176,7 @@ export class RelatorioService {
                 }
             }
         });
-
-        const unidadesContadasGrap = analiseGeralGrap.reduce((acc, item) => {
+        const unidadesAvaliseContadasGrap = analiseGeralGrap.reduce((acc, item) => {
             const nome = item.unidade.nome;
             if (!acc[nome]) {
                 acc[nome] = { nome, count: 0 };
@@ -84,11 +184,30 @@ export class RelatorioService {
             acc[nome].count++;
             return acc;
         }, {});
+        const resultadoFinalAnaliseGrap = Object.values(unidadesAvaliseContadasGrap);
 
-        const resultadoFinalGrap = Object.values(unidadesContadasGrap);
 
-
-        const unidadesContadasSmul = analiseGeralSmul.reduce((acc, item) => {
+        //Deferidos Geral Graproem
+        const deferidoGeralGrap = await this.prisma.admissibilidade.findMany({
+            where: {
+                AND: [
+                    { inicial: { status: 3 } },
+                    { inicial: { tipo_processo: 2 } },
+                    { data_decisao_interlocutoria: { gte: primeiroDia } },
+                    { data_decisao_interlocutoria: { lte: ultimoDia } },
+                    { unidade_id: { in: unidades.map(unidade => unidade.id) } }
+                ]
+            },
+            select: {
+                unidade: {
+                    select: {
+                        nome: true,
+                        id: true
+                    }
+                }
+            }
+        });
+        const unidadesDeferidoContadasGrap = deferidoGeralGrap.reduce((acc, item) => {
             const nome = item.unidade.nome;
             if (!acc[nome]) {
                 acc[nome] = { nome, count: 0 };
@@ -96,8 +215,7 @@ export class RelatorioService {
             acc[nome].count++;
             return acc;
         }, {});
-
-        const resultadoFinalSmul = Object.values(unidadesContadasSmul);
+        const resultadoFinalDeferidoGrap = Object.values(unidadesDeferidoContadasGrap);
 
         const inadimissiveis = await this.prisma.admissibilidade.count({
             where: {
@@ -134,10 +252,32 @@ export class RelatorioService {
                     "data": resultadoFinalSmul
                 },
                 "graproem": { 
-                    "quantidade": resultadoFinalGrap.length,
-                    "data": resultadoFinalGrap
+                    "quantidade": resultadoFinalAnaliseGrap.length,
+                    "data": resultadoFinalAnaliseGrap
                  },
-                 "total_parcial": analiseGeralSmul.length + resultadoFinalGrap.length
+                 "total_parcial": analiseGeralSmul.length + resultadoFinalAnaliseGrap.length
+            },
+            "deferidos": {
+                "smul": {
+                    "quantidade": deferidoGeralSmul.length,
+                    "data": resultadoFinalDeferidoSmul
+                },
+                "graproem": { 
+                    "quantidade": resultadoFinalDeferidoGrap.length,
+                    "data": resultadoFinalDeferidoGrap
+                 },
+                 "total_parcial": analiseGeralSmul.length + resultadoFinalDeferidoGrap.length
+            },
+            "indeferidos": {
+                "smul": {
+                    "quantidade": indeferidosGeralSmul.length,
+                    "data": resultadoFinalIndeferidosSmul
+                },
+                "graproem": { 
+                    "quantidade": resultadoFinalIndeferidosGrap.length,
+                    "data": resultadoFinalIndeferidosGrap
+                 },
+                 "total_parcial": analiseGeralSmul.length + resultadoFinalIndeferidosGrap.length
             }
         };
     }
