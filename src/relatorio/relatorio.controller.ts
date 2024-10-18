@@ -2,6 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { RelatorioService } from './relatorio.service';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { RelatorioResopnseDto } from './dto/response-relatorio.dto';
 
 @Controller('relatorio')
 @ApiTags('Relatórios')
@@ -11,10 +12,10 @@ export class RelatorioController {
   @IsPublic()
   @Get("ap/quantitativo")
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar os relatórios com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar os relatórios com sucesso.', type: RelatorioResopnseDto })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Buscar todos os relatórios.", summary: 'Busque relatórios.' })
-  relatorioQuantitativo(){
+  relatorioQuantitativo() {
     return this.relatorioService.relatorioQuantitativo();
   }
 }

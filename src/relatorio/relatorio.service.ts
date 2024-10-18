@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateRelatorioDto } from './dto/create-relatorio.dto';
 import { AppService } from 'src/app.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RelatorioResopnseDto } from './dto/response-relatorio.dto';
 
 @Injectable()
 export class RelatorioService {
@@ -281,5 +282,4 @@ export class RelatorioService {
             }
         };
     }
-
 }
