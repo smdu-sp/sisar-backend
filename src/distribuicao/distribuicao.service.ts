@@ -39,7 +39,6 @@ export class DistribuicaoService {
     }).catch(error => {
       console.log(error);
     });
-    console.log(atualiza_distribuicao);
     if (!atualiza_distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Tente novamente.');
     return atualiza_distribuicao;
   }

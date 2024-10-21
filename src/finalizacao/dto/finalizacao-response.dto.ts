@@ -12,29 +12,6 @@ export class FinalizacaoPaginado {
     limite: number;
 }
 
-export class FinalizacaoResponseDTO {
-    @ApiProperty()
-    inicial: InicialResponseDTO
-    @ApiProperty()
-    data_apostilamento: Date
-    @ApiProperty()
-    data_conclusao: Date
-    @ApiProperty()
-    data_emissao: Date
-    @ApiProperty()
-    data_outorga: Date
-    @ApiProperty()
-    data_resposta: Date
-    @ApiProperty()
-    data_termo: Date
-    @ApiProperty()
-    num_alvara: string
-    @ApiProperty()
-    obs: string
-    @ApiProperty()
-    outorga: boolean
-}
-
 export class InicialResponseDTO {
     @ApiProperty()
     id: number
@@ -106,4 +83,27 @@ export class InicialResponseDTO {
     criado_em?: Date
     @ApiProperty()
     alterado_em?: Date
+}
+
+export class FinalizacaoResponseDTO {
+    @ApiProperty()
+    inicial: InicialResponseDTO
+    @ApiProperty()
+    data_apostilamento: Date
+    @ApiProperty()
+    data_conclusao: Date
+    @ApiProperty()
+    data_emissao: Date
+    @ApiProperty()
+    data_outorga: Date
+    @ApiProperty()
+    data_resposta: Date
+    @ApiProperty()
+    data_termo: Date
+    @ApiProperty()
+    num_alvara: string
+    @ApiProperty()
+    obs: string
+    @ApiProperty()
+    outorga: boolean
 }
