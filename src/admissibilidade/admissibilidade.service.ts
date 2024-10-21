@@ -10,6 +10,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+interface DiasUteis {
+  diasUteis: [],
+  dataExpiracao: String
+}
+
 @Injectable()
 export class AdmissibilidadeService {
   constructor(
@@ -161,8 +166,26 @@ export class AdmissibilidadeService {
     return `This action removes a #${id} admissibilidade`;
   }
 
+  async verificaDiasUteis(data: string, dias: number): Promise<DiasUteis> {
+    const feriado = await fetch(`${process.env.API_FERIADOS_URL}/feriados/diasUteisCorridos/${data}/${dias}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then((response) => {
+      return response.json();
+    })
+    return feriado;
+  }
+
+  dataExperacaoNaoUtil(data: string, dias: number) {
+    const dataExperacao = new Date(data);
+    dataExperacao.setDate(dataExperacao.getDate() + dias);
+    return dataExperacao;
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_6AM)
-  async verificaReconsideracao() {
+  async verificaReconsideracao() {    
     const reconsiderados = await this.prisma.admissibilidade.findMany({
       where: {
         AND: [
@@ -188,18 +211,23 @@ export class AdmissibilidadeService {
         }
       }
     })
-  
+
     if (!reconsiderados) throw new InternalServerErrorException('Nenhum processo encontrado');
     
     for (let i = 0; i < reconsiderados.length; i++) {
-  
-      const dataDecisao = new Date(reconsiderados[i].data_decisao_interlocutoria);
-      const diasPassados = Math.floor((new Date().getTime() - dataDecisao.getTime()) / (1000 * 60 * 60 * 24));
-  
-      const diasSubtraidosSmul = diasPassados - (reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul);
-      const diasSubtraidosMulti = diasPassados - (reconsiderados[i].inicial.alvara_tipo.reconsideracao_multi);
       
-      if (reconsiderados[i].inicial.tipo_processo === 1 ? diasSubtraidosSmul >= -12 : diasSubtraidosMulti >= -12) {
+      let dataFinal: Date;
+      
+      if (reconsiderados[i].inicial.tipo_processo === 1 && reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul_tipo === 0) {
+        const diasUteisSmul = await this.verificaDiasUteis(reconsiderados[i].data_decisao_interlocutoria.toString(), reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul);
+        dataFinal = new Date(diasUteisSmul.dataExpiracao.valueOf());
+      } else  {
+        dataFinal = this.dataExperacaoNaoUtil(reconsiderados[i].data_decisao_interlocutoria.toString(), reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul)
+      }  
+
+      console.log(dataFinal);
+      
+      if (new Date() >= dataFinal) {
         await this.prisma.admissibilidade.update({
           where: { inicial_id: reconsiderados[i].inicial_id },
           data: { status: 2 }
@@ -209,7 +237,7 @@ export class AdmissibilidadeService {
           data: { status: 1 }
         })
       }
-    }  
+    }
     return reconsiderados;
   }
 }
