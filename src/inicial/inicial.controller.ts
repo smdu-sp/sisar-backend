@@ -49,10 +49,9 @@ export class InicialController {
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   buscarTudoEmAnalise(
     @Query('pagina') pagina?: string,
-    @Query('limite') limite?: string,
-    @Query('status') status?: string
+    @Query('limite') limite?: string
   ): Promise<IniciaisPaginado> {
-    return this.inicialService.buscarTudoEmAnalise(+pagina, +limite, +status);
+    return this.inicialService.buscarTudoEmAnalise(+pagina, +limite);
   }
 
   @Get('buscar/:mes/:ano') // Definindo os parâmetros na rota
