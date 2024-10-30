@@ -288,7 +288,7 @@ export class InicialService {
     });
     if (!iniciais) throw new ForbiddenException('Nenhum processo encontrado');
     return {
-      total: +total,
+      total: +iniciais.length,
       pagina: +pagina,
       limite: +limite,
       data: iniciais,
