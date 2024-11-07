@@ -244,7 +244,7 @@ export class RelatorioService {
         return {
             "total": analise + inadimissiveis + admissiveis,
             "analise": analise,
-            "inadimissiveis": inadimissiveis,
+            "inadmissiveis": inadimissiveis,
             "admissiveis": admissiveis,
             "data_gerado": data_gerado,
             "em_analise": {
