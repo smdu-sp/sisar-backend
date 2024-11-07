@@ -267,7 +267,7 @@ export class RelatorioService {
                     "quantidade": resultadoFinalDeferidoGrap.length,
                     "data": resultadoFinalDeferidoGrap
                  },
-                 "total_parcial": analiseGeralSmul.length + resultadoFinalDeferidoGrap.length
+                 "total_parcial": deferidoGeralSmul.length + resultadoFinalDeferidoGrap.length
             },
             "indeferidos": {
                 "smul": {
@@ -278,7 +278,7 @@ export class RelatorioService {
                     "quantidade": resultadoFinalIndeferidosGrap.length,
                     "data": resultadoFinalIndeferidosGrap
                  },
-                 "total_parcial": analiseGeralSmul.length + resultadoFinalIndeferidosGrap.length
+                 "total_parcial": indeferidosGeralSmul.length + resultadoFinalIndeferidosGrap.length
             }
         };
     }
