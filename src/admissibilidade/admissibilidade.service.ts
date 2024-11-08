@@ -224,8 +224,6 @@ export class AdmissibilidadeService {
       } else  {
         dataFinal = this.dataExperacaoNaoUtil(reconsiderados[i].data_decisao_interlocutoria.toString(), reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul)
       }  
-
-      console.log(dataFinal);
       
       if (new Date() >= dataFinal) {
         await this.prisma.admissibilidade.update({

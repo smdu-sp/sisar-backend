@@ -249,7 +249,7 @@ export class InicialService {
             { processo_fisico: { contains: busca } }
         ] } : 
         {}),
-        status: status
+        status: status === -1 ? undefined : status
     };
     const total = await this.prisma.inicial.count({where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };

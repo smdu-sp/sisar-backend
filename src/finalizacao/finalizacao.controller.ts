@@ -21,7 +21,6 @@ export class FinalizacaoController {
     @Body() createFinalizacaoDto: CreateFinalizacaoDto,
     @Query('conclusao') conclusao: string
   ) {
-    console.log(conclusao);
     const conclusaoBoolean = conclusao === 'true' ? true : false;
     return this.finalizacaoService.criar(createFinalizacaoDto, conclusaoBoolean);
   }
