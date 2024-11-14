@@ -4,9 +4,7 @@ import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial } from '@prisma/client';
 import { AppService } from 'src/app.service';
-import { promises } from 'dns';
 import { HttpService } from '@nestjs/axios';
-import { ApiProperty } from '@nestjs/swagger';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
 
 @Injectable()
@@ -15,7 +13,7 @@ export class InicialService {
     private prisma: PrismaService,
     private app: AppService,
     private readonly httpService: HttpService
-  ) { }
+  ) {}
 
   async validaSql(sql: string) {
     const dataBusca = new Date();
@@ -146,9 +144,7 @@ export class InicialService {
     }
     const distribuicao_tecnico = await this.prisma.distribuicao.update({
       where: { inicial_id },
-      data: {
-        tecnico_responsavel_id
-      }
+      data: { tecnico_responsavel_id }
     });
     if (!distribuicao_tecnico) throw new ForbiddenException('Erro ao alocar técnico.');
   }
@@ -198,9 +194,7 @@ export class InicialService {
       }
     });
     if (!distribuicao) throw new ForbiddenException('Erro ao criar distribuição.');
-    if (inicial.envio_admissibilidade && distribuicao) {
-      await this.alocaResponsavelTecnico(inicial);
-    }
+    if (inicial.envio_admissibilidade && distribuicao) await this.alocaResponsavelTecnico(inicial);
   }
 
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
@@ -249,7 +243,7 @@ export class InicialService {
             { processo_fisico: { contains: busca } }
         ] } : 
         {}),
-        status: status
+        status: status === -1 ? undefined : status
     };
     const total = await this.prisma.inicial.count({where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
@@ -307,11 +301,9 @@ export class InicialService {
     return iniciais;
   }
 
-
   async buscarPorMesAnoProcesso(mes: any, ano: any) {
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
-
     const processos = await this.prisma.reuniao_Processo.findMany({
       where: {
         AND: [
@@ -320,14 +312,12 @@ export class InicialService {
         ]
       }
     });
-
-    if (!processos || processos.length === 0) {
+    if (!processos || processos.length === 0) 
       throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
-    }
     return processos;
   }
 
-  async verificaFeriado(data: string){
+  async verificaFeriado(data: string) {
     const feriado = await fetch(`${process.env.API_FERIADOS_URL}/feriados/data/${data}`, {
       method: "GET",
       headers: {
@@ -335,18 +325,21 @@ export class InicialService {
       }
     }).then((response) => {
       return response.json();
-    })
+    });
     return feriado;
   }
 
-
-  async geraReuniaoData(inicial: Inicial) {
-    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicial.alvara_tipo_id } });
-    if (!tipoAlvara) throw new ForbiddenException('Erro ao buscar tipo de alvará.');
+  async geraReuniaoData(inicial: Inicial): Promise<void> {
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ 
+      where: { 
+        id: inicial.alvara_tipo_id 
+      } 
+    });
+    if (!tipoAlvara) 
+      throw new ForbiddenException('Erro ao buscar tipo de alvará.');
     const { prazo_analise_multi1 } = tipoAlvara;
     const data = new Date(inicial.envio_admissibilidade);
     data.setDate(data.getDate() + prazo_analise_multi1);
-
     const pegaQuarta = (data: Date) => {
       const diaSemana = data.getDay();
       if (diaSemana !== 3) {
@@ -375,23 +368,14 @@ export class InicialService {
             break;
         }
         return quarta;
-      } else { return data }
+      } else return data;
     }
-
     let data_reuniao = pegaQuarta(new Date(data));
-
     const data_formatada = data_reuniao.toISOString().split('T')[0]
-
     const validaFeriado = await this.verificaFeriado(data_formatada);
-
     data_reuniao.setUTCHours(0, 0, 0, 0);
-
-    if (validaFeriado) {
-      data_reuniao.setDate(data_reuniao.getDate() - 7)
-    }
-
+    if (validaFeriado) data_reuniao.setDate(data_reuniao.getDate() - 7);
     let dataProcesso = new Date(inicial.envio_admissibilidade);
-
     dataProcesso.setDate(
       dataProcesso.getDate() +
       tipoAlvara.prazo_admissibilidade_multi +
@@ -400,7 +384,6 @@ export class InicialService {
       tipoAlvara.prazo_emissao_alvara_multi
     );
     dataProcesso.setUTCHours(0, 0, 0, 0);
-
     const reuniao = await this.prisma.reuniao_Processo.upsert({
       where: { inicial_id: inicial.id },
       create: {
@@ -412,9 +395,9 @@ export class InicialService {
         data_reuniao
       }
     });
-
     if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
   }
+
   async buscarPorDataProcesso(data: Date) {
     const reuniao_data = new Date(data).toISOString();
     const processos = await this.prisma.reuniao_Processo.findMany({
@@ -425,24 +408,17 @@ export class InicialService {
         data_processo: { equals: reuniao_data }
       }
     });
-
-
-    if (!processos) {
-      throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
-    }
+    if (!processos) throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
     return processos;
   }
 
   async buscarPorId(id: number): Promise<Inicial> {
-    if (id < 1) throw new ForbiddenException('Id inválido');
-    if (!id) throw new ForbiddenException('Id inválido');
+    if (!id || id < 1) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({
       where: { id },
       include: {
         iniciais_sqls: {
-          orderBy: {
-            sql: 'asc'
-          }
+          orderBy: { sql: 'asc' }
         },
         interfaces: true,
         admissibilidade: true,
@@ -462,7 +438,9 @@ export class InicialService {
     id: number,
     updateInicialDto: UpdateInicialDto,
   ): Promise<Inicial> {
-    const inicial = await this.prisma.inicial.findUnique({ where: { id } });
+    const inicial = await this.prisma.inicial.findUnique({ 
+      where: { id } 
+    });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;

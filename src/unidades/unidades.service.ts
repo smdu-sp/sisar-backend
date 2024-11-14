@@ -3,16 +3,14 @@ import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { contains } from 'class-validator';
 import { UnidadeResponseDTO } from './dto/unidade-response.dto';
-// import { Connection } from 'oracledb';
 
 @Injectable()
 export class UnidadesService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) { }
+  ) {}
 
   async listaCompleta() {
     const lista = await this.prisma.unidade.findMany({
@@ -26,6 +24,8 @@ export class UnidadesService {
     const unidade = await this.prisma.unidade.findUnique({
       where: { codigo }
     });
+    if (!unidade) 
+      throw new ForbiddenException(`Nenhuma unidade encontrada com o código ${codigo}`);
     return unidade;
   }
 
@@ -33,6 +33,7 @@ export class UnidadesService {
     const unidade = await this.prisma.unidade.findUnique({
       where: { sigla }
     });
+    if (!unidade) throw new ForbiddenException(`Nenhuma unidade encontrada com a sigla ${sigla}`);
     return unidade;
   }
 
@@ -40,18 +41,24 @@ export class UnidadesService {
     const unidade = await this.prisma.unidade.findUnique({
       where: { nome }
     });
+    if (!unidade) 
+      throw new ForbiddenException(`Nenhuma unidade encontrada com o nome ${nome}`);
     return unidade;
   }
 
   async criar(createUnidadeDto: CreateUnidadeDto): Promise<UnidadeResponseDTO> {
     const { nome, sigla, codigo, status } = createUnidadeDto;
-    if (await this.buscaPorCodigo(codigo)) throw new ForbiddenException('Ja existe uma unidade com o mesmo código');
-    if (await this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma unidade com o mesmo nome');
-    if (await this.buscaPorSigla(sigla)) throw new ForbiddenException('Ja existe uma unidade com a mesmo sigla');
+    if (await this.buscaPorCodigo(codigo)) 
+      throw new ForbiddenException(`Ja existe uma unidade com o mesmo código (${codigo})`);
+    if (await this.buscaPorNome(nome)) 
+      throw new ForbiddenException(`Ja existe uma unidade com o mesmo nome (${nome})`);
+    if (await this.buscaPorSigla(sigla)) 
+      throw new ForbiddenException(`Ja existe uma unidade com a mesmo sigla (${sigla})`);
     const novaUnidade = await this.prisma.unidade.create({
       data: { nome, sigla, status, codigo }
     });
-    if (!novaUnidade) throw new InternalServerErrorException('Não foi possível criar a unidade. Tente novamente.');
+    if (!novaUnidade) 
+      throw new InternalServerErrorException('Não foi possível criar a unidade. Tente novamente.');
     return novaUnidade;
   }
 
@@ -106,21 +113,25 @@ export class UnidadesService {
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
     if (nome) {
       const unidadeNome = await this.buscaPorNome(nome);
-      if (unidadeNome && unidadeNome.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo nome.');
+      if (unidadeNome && unidadeNome.id != id) 
+        throw new ForbiddenException(`Já existe uma unidade com o mesmo nome (${nome}).`);
     }
     if (sigla) {
       const unidadeSigla = await this.buscaPorSigla(sigla);
-      if (unidadeSigla && unidadeSigla.id != id) throw new ForbiddenException('Já existe uma unidade com a mesma sigla.');
+      if (unidadeSigla && unidadeSigla.id != id) 
+        throw new ForbiddenException(`Já existe uma unidade com a mesma sigla (${sigla}).`);
     }
     if (codigo) {
       const unidadeCodigo = await this.buscaPorCodigo(codigo);
-      if (unidadeCodigo && unidadeCodigo.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo código.');
+      if (unidadeCodigo && unidadeCodigo.id != id) 
+        throw new ForbiddenException(`Já existe uma unidade com o mesmo código (${codigo}).`);
     }
     const updatedUnidade = await this.prisma.unidade.update({
       where: { id },
       data: updateUnidadeDto
     });
-    if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível atualizar a unidade. Tente novamente.');
+    if (!updatedUnidade) 
+      throw new InternalServerErrorException('Não foi possível atualizar a unidade. Tente novamente.');
     return updatedUnidade;
   }
 
@@ -131,7 +142,8 @@ export class UnidadesService {
       where: { id },
       data: updateUnidadeDto
     });
-    if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
+    if (!updatedUnidade) 
+      throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
     return {
       message: 'Unidade desativada com sucesso.'
     }

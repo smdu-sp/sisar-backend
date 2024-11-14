@@ -4,7 +4,6 @@ import { UpdateSubprefeituraDto } from './dto/update-subprefeitura.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { CreateResponseSubprefeituraDTO } from './dto/subprefeitura-response.dto';
-// import { Connection } from 'oracledb';
 
 @Injectable()
 export class SubprefeituraService {
@@ -17,7 +16,8 @@ export class SubprefeituraService {
     const lista = await this.prisma.subprefeitura.findMany({
       orderBy: { nome: 'asc' }
     });
-    if (!lista || lista.length == 0) throw new ForbiddenException('Nenhuma subprefeitura encontrada');
+    if (!lista || lista.length == 0) 
+      throw new ForbiddenException('Nenhuma subprefeitura encontrada');
     return lista;
   }
 
@@ -25,16 +25,20 @@ export class SubprefeituraService {
     const subprefeitura = await this.prisma.subprefeitura.findUnique({
       where: { nome }
     });
+    if (!subprefeitura) 
+      throw new ForbiddenException('subprefeitura não encontrada.');
     return subprefeitura;
   }
 
   async criar(createsubprefeituraDto: CreateSubprefeituraDto): Promise<CreateResponseSubprefeituraDTO> {
     const { nome, sigla, status } = createsubprefeituraDto;
-    if (await this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma subprefeitura com o mesmo nome');
+    if (await this.buscaPorNome(nome)) 
+      throw new ForbiddenException('Ja existe uma subprefeitura com o mesmo nome');
     const novasubprefeitura = await this.prisma.subprefeitura.create({
       data: { nome, sigla, status }
     });
-    if (!novasubprefeitura) throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
+    if (!novasubprefeitura) 
+      throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
     return novasubprefeitura;
   }
 
@@ -80,13 +84,15 @@ export class SubprefeituraService {
     if (!subprefeitura) throw new ForbiddenException('subprefeitura não encontrada.');
     if (nome) {
       const subprefeituraNome = await this.buscaPorNome(nome);
-      if (subprefeituraNome && subprefeituraNome.id != id) throw new ForbiddenException('Já existe uma subprefeitura com o mesmo nome.');
+      if (subprefeituraNome && subprefeituraNome.id != id) 
+        throw new ForbiddenException('Já existe uma subprefeitura com o mesmo nome.');
     }
     const updatedsubprefeitura = await this.prisma.subprefeitura.update({
       where: { id },
       data: updatesubprefeituraDto
     });
-    if (!updatedsubprefeitura) throw new InternalServerErrorException('Não foi possível atualizar a subprefeitura. Tente novamente.');
+    if (!updatedsubprefeitura) 
+      throw new InternalServerErrorException('Não foi possível atualizar a subprefeitura. Tente novamente.');
     return updatedsubprefeitura;
   }
 
@@ -97,7 +103,8 @@ export class SubprefeituraService {
       where: { id },
       data: { status: 0 }
     });
-    if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
+    if (!updatedUnidade) 
+      throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
     return {
       message: 'Unidade desativada com sucesso.'
     }

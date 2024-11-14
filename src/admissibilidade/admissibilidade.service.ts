@@ -4,10 +4,7 @@ import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Admissibilidade, Interface } from '@prisma/client';
-import { equal } from 'assert';
-import { equals } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { Admissibilidade } from '@prisma/client';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -21,7 +18,7 @@ export class AdmissibilidadeService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) { }
+  ) {}
 
   async create(
     createAdmissibilidadeDto: CreateAdmissibilidadeDto
@@ -55,8 +52,7 @@ export class AdmissibilidadeService {
   }
 
   async listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
-    const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany({
-    });
+    const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany();
     if (!admissibilidade || admissibilidade.length == 0)
       throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
@@ -266,9 +262,7 @@ export class AdmissibilidadeService {
       headers: {
         "Content-Type": "application/json"
       }
-    }).then((response) => {
-      return response.json();
-    })
+    }).then((response) => response.json())
     return feriado;
   }
 
@@ -281,7 +275,7 @@ export class AdmissibilidadeService {
 
 
   @Cron(CronExpression.EVERY_DAY_AT_6AM)
-  async verificaReconsideracao() {    
+  async verificaReconsideracao() { 
     const reconsiderados = await this.prisma.admissibilidade.findMany({
       where: {
         AND: [
@@ -306,32 +300,34 @@ export class AdmissibilidadeService {
           }
         }
       }
-    })
-
+    });
     if (!reconsiderados) throw new InternalServerErrorException('Nenhum processo encontrado');
-    
     for (let i = 0; i < reconsiderados.length; i++) {
-      
       let dataFinal: Date;
-      
-      if (reconsiderados[i].inicial.tipo_processo === 1 && reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul_tipo === 0) {
-        const diasUteisSmul = await this.verificaDiasUteis(reconsiderados[i].data_decisao_interlocutoria.toString(), reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul);
+      if (
+        reconsiderados[i].inicial.tipo_processo === 1 
+        && reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul_tipo === 0
+      ) {
+        const diasUteisSmul = await this.verificaDiasUteis(
+          reconsiderados[i].data_decisao_interlocutoria.toString(), 
+          reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
+        );
         dataFinal = new Date(diasUteisSmul.dataExpiracao.valueOf());
       } else  {
-        dataFinal = this.dataExperacaoNaoUtil(reconsiderados[i].data_decisao_interlocutoria.toString(), reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul)
+        dataFinal = this.dataExperacaoNaoUtil(
+          reconsiderados[i].data_decisao_interlocutoria.toString(), 
+          reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
+        );
       }  
-
-      console.log(dataFinal);
-      
       if (new Date() >= dataFinal) {
         await this.prisma.admissibilidade.update({
           where: { inicial_id: reconsiderados[i].inicial_id },
           data: { status: 2 }
-        })
+        });
         await this.prisma.inicial.update({
           where: { id: reconsiderados[i].inicial_id },
           data: { status: 1 }
-        })
+        });
       }
     }
     return reconsiderados;

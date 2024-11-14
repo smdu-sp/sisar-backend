@@ -8,7 +8,7 @@ import {
 import { AddFeriasDto, CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { $Enums, Ferias, Permissao, Usuario } from '@prisma/client';
+import { $Enums, Ferias, Usuario } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { SGUService } from 'src/sgu/sgu.service';
 import { Client, createClient } from 'ldapjs';
@@ -157,10 +157,9 @@ export class UsuariosService {
   }
 
   async buscarPorLogin(login: string): Promise<UsuarioResponseDTO> {
-    const usuario = await this.prisma.usuario.findUnique({
+    return await this.prisma.usuario.findUnique({
       where: { login },
     });
-    return usuario;
   }
 
   async atualizar(
@@ -247,7 +246,10 @@ export class UsuariosService {
     const usuarioExiste = await this.buscarPorLogin(login);
     if (usuarioExiste && usuarioExiste.status === 1) throw new ForbiddenException('Login já cadastrado.');
     if (usuarioExiste && usuarioExiste.status !== 1){
-      const usuarioReativado = await this.prisma.usuario.update({ where: { id: usuarioExiste.id }, data: { status: 1 } });
+      const usuarioReativado = await this.prisma.usuario.update({ 
+        where: { id: usuarioExiste.id }, 
+        data: { status: 1 } 
+      });
       return usuarioReativado;
     }
     const client: Client = createClient({
@@ -310,7 +312,8 @@ export class UsuariosService {
     usuario_id: string, 
     substituto_id: string
   ): Promise<AddSubstitutoDTO> {
-    if (usuario_id === substituto_id) throw new ForbiddenException('Substituto não pode ser o usuário.');
+    if (usuario_id === substituto_id) 
+      throw new ForbiddenException('Substituto não pode ser o usuário.');
     const substituto = await this.prisma.substituto.findFirst({
       where: { substituto_id, usuario_id },
     });
@@ -335,7 +338,8 @@ export class UsuariosService {
     const administrativos = await this.prisma.usuario.findMany({
       where: { cargo: 'ADM' },
     });
-    if (!administrativos) throw new ForbiddenException('Nenhum administrativo encontrado.');
+    if (!administrativos) 
+      throw new ForbiddenException('Nenhum administrativo encontrado.');
     return administrativos;
   }
 
