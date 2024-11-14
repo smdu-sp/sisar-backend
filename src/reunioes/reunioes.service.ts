@@ -1,45 +1,44 @@
-import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateReunioesDto } from './dto/create-reunioes.dto';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UpdateReunioesDto } from './dto/update-reunioes.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AppService } from 'src/app.service';
-import { ReunioesResponseDTO } from './dto/response.dto';
-// import { Connection } from 'oracledb';
 
 @Injectable()
 export class ReunioesService {
   constructor(
     private prisma: PrismaService,
-    private app: AppService
-  ) { }
+  ) {}
 
   async listaCompleta() {
     const lista = await this.prisma.reuniao_Processo.findMany({
       orderBy: { data_reuniao: 'asc' }
     });
-    if (!lista || lista.length == 0) throw new ForbiddenException('Nenhuma subprefeitura encontrada');
+    if (!lista || lista.length == 0) 
+      throw new ForbiddenException('Nenhuma subprefeitura encontrada');
     return lista;
   }
 
   async buscarPorMesAno(mes: number, ano: number) {
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
-
     const reunioes = await this.prisma.reuniao_Processo.findMany({
       where: {
         OR: [
-          { AND: [{ nova_data_reuniao: { gte: primeiroDiaMes } }, 
-                  { nova_data_reuniao: { lte: ultimoDiaMes } }] },
-                  
-          { AND: [{ nova_data_reuniao: null }, { data_reuniao: { gte: primeiroDiaMes } }, 
-                  { nova_data_reuniao: null }, { data_reuniao: { lte: ultimoDiaMes } }] }
+          { AND: [
+              { nova_data_reuniao: { gte: primeiroDiaMes } }, 
+              { nova_data_reuniao: { lte: ultimoDiaMes } }
+            ] 
+          },
+          { 
+            AND: [
+              { nova_data_reuniao: null }, { data_reuniao: { gte: primeiroDiaMes } }, 
+              { nova_data_reuniao: null }, { data_reuniao: { lte: ultimoDiaMes } }
+            ] 
+          }
         ]
       }
     });
-
-    if (!reunioes || reunioes.length === 0) {
+    if (!reunioes || reunioes.length === 0)
       throw new ForbiddenException('Nenhuma reunião encontrada para o mês/ano especificado.');
-    }
     return reunioes;
   }
 
@@ -76,9 +75,8 @@ export class ReunioesService {
         inicial: true
       }
     });
-    if (!reunioes) {
+    if (!reunioes)
       throw new ForbiddenException('Nenhuma reunião encontrada para a data especificada.');
-    }
     return reunioes;
   }
 }

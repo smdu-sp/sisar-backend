@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRelatorioDto } from './dto/create-relatorio.dto';
 import { AppService } from 'src/app.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RelatorioResopnseDto } from './dto/response-relatorio.dto';
 
 @Injectable()
 export class RelatorioService {
     constructor(
         private prisma: PrismaService,
-        private app: AppService
-    ) { }
+    ) {}
 
     async relatorioQuantitativo(data: Date) {
         const primeiroDia = new Date(data.getFullYear(), data.getMonth(), 1);
