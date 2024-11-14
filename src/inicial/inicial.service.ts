@@ -413,15 +413,12 @@ export class InicialService {
   }
 
   async buscarPorId(id: number): Promise<Inicial> {
-    if (id < 1) throw new ForbiddenException('Id inválido');
-    if (!id) throw new ForbiddenException('Id inválido');
+    if (!id || id < 1) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({
       where: { id },
       include: {
         iniciais_sqls: {
-          orderBy: {
-            sql: 'asc'
-          }
+          orderBy: { sql: 'asc' }
         },
         interfaces: true,
         admissibilidade: true,
@@ -441,7 +438,9 @@ export class InicialService {
     id: number,
     updateInicialDto: UpdateInicialDto,
   ): Promise<Inicial> {
-    const inicial = await this.prisma.inicial.findUnique({ where: { id } });
+    const inicial = await this.prisma.inicial.findUnique({ 
+      where: { id } 
+    });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;
