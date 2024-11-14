@@ -36,9 +36,7 @@ export class AlvaraTipoService {
 
   async listaCompleta(): Promise<AlvaraTipoResponseDTO[]> {
     const tipos: AlvaraTipoResponseDTO[] = await this.prisma.alvara_Tipo.findMany({ 
-      where: { 
-        status: 1 
-      }
+      where: { status: 1 }
     });
     if (!tipos) 
       throw new ForbiddenException('Não foi possível listar os tipos de alvará.');
