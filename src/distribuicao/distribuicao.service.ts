@@ -36,9 +36,7 @@ export class DistribuicaoService {
         ...(administrativo_responsavel_id && { administrativo_responsavel_id }),
         ...(tecnico_responsavel_id && { tecnico_responsavel_id })
       }
-    }).catch(error => {
-      console.log(error);
-    });
+    }).catch(error => console.log(error));
     if (!atualiza_distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Tente novamente.');
     return atualiza_distribuicao;
   }

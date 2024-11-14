@@ -19,16 +19,13 @@ export class AvisosService {
     const criar = await this.prisma.avisos.create({
       data: { titulo, descricao, data, usuario_id, inicial_id }
     });
-    if (!criar) {
+    if (!criar) 
       throw new InternalServerErrorException('Não foi possível criar o aviso. Tente novamente.');
-    }
     return criar;
   }
 
   async findOne(data: Date, usuario_id: string) {
-    if (data instanceof Date) {
-      data.setHours(0, 0, 0, 0);
-    }
+    if (data instanceof Date) data.setHours(0, 0, 0, 0);
     const reuniao_data = new Date(data).toISOString();
     const reunioes = await this.prisma.avisos.findMany({
       include: {
@@ -46,16 +43,14 @@ export class AvisosService {
         ]
       }
     });
-    if (!reunioes) {
+    if (!reunioes) 
       throw new InternalServerErrorException('Nenhuma reunião encontrada para a data especificada.');
-    }
     return reunioes;
   }
 
   async buscarPorMesAno(mes: number, ano: number, usuario_id: string) {
     const primeiroDiaMes = new Date(ano, mes - 1, 1);
     const ultimoDiaMes = new Date(ano, mes, 0);
-
     const avisos = await this.prisma.avisos.findMany({
       where: {
         AND: [
@@ -70,10 +65,8 @@ export class AvisosService {
         ]
       }
     });
-
-    if (!avisos || avisos.length === 0) {
+    if (!avisos || avisos.length === 0)
       throw new InternalServerErrorException('Nenhuma reunião encontrada para o mês/ano especificado.');
-    }
     return avisos;
   }
 
