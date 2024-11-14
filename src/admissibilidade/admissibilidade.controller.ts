@@ -7,6 +7,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, 
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
+
 @ApiTags('Admissibilidade')
 @ApiBearerAuth()
 @Controller('admissibilidade')
@@ -102,5 +103,29 @@ export class AdmissibilidadeController {
   @Get('verifica-reconsideracao')
   verificaReconsideracao() {
     return this.admissibilidadeService.verificaReconsideracao();
+  }
+  
+  @IsPublic()
+  @Get('contar-fora-prazo')
+  async contarRegistros() {
+    return this.admissibilidadeService.contarForaDoPrazo();
+  }  
+
+  @IsPublic()
+  @Get('contar-dentro-prazo')
+  async contarDentroPrazo() {
+    return this.admissibilidadeService.contarDentroDoPrazo();
+  }
+  
+  @IsPublic()
+  @Get('admissibilidade-finalizada')
+  async admissibilidadeFinalizada() {
+    return this.admissibilidadeService.admissibilidadeFinalizada();
+  }
+  
+  @IsPublic()
+  @Get('mediana-admissibilidade')
+  async medianaAdmissibilidade(){
+    return this.admissibilidadeService.medianaTempoAdmissibilidade();
   }
 }
