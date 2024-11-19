@@ -208,6 +208,7 @@ export class AdmissibilidadeService {
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     return admissibilidade;
   }
+  
 
   async ultimaAtualizacao(id: number) {
     const inicial = await this.prisma.inicial.update({
@@ -271,8 +272,6 @@ export class AdmissibilidadeService {
     dataExperacao.setDate(dataExperacao.getDate() + dias);
     return dataExperacao;
   }
-
-
 
   @Cron(CronExpression.EVERY_DAY_AT_6AM)
   async verificaReconsideracao() { 
@@ -381,5 +380,58 @@ export class AdmissibilidadeService {
       return diffsInDays[middle];
     }
   }
+
+  async registrosAdmissibilidadeFinalizada(): Promise<
+  Array<{
+    dataDecisaoInterlocutoria: Date;
+    sei: string;
+    envioAdmissibilidade: Date;
+    dias: number;
+    status: string;
+  }>
+> {
+ 
+  const registros = await this.prisma.admissibilidade.findMany({
+    where: {
+      data_decisao_interlocutoria: {
+        not: null,
+      },
+    },
+    include: {
+      inicial: {
+        select: {
+          sei: true,
+          envio_admissibilidade: true,
+        },
+      },
+    },
+  });
+
+  
+  const resultado = registros.map((registro) => {
+    const dataDecisaoInterlocutoria = new Date(
+      registro.data_decisao_interlocutoria
+    );
+    const envioAdmissibilidade = new Date(registro.inicial.envio_admissibilidade);
+
+  
+    const diffTime =
+      dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
+    const dias = Math.floor(diffTime / (1000 * 3600 * 24));
+
+
+    const status = dias > 15 ? "Fora do Prazo" : "Dentro do Prazo";
+
+    return {
+      dataDecisaoInterlocutoria,
+      sei: registro.inicial.sei,
+      envioAdmissibilidade,
+      dias,
+      status,
+    };
+  });
+
+  return resultado;
+}
   
 }

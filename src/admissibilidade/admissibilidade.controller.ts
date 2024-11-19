@@ -128,4 +128,9 @@ export class AdmissibilidadeController {
   async medianaAdmissibilidade(){
     return this.admissibilidadeService.medianaTempoAdmissibilidade();
   }
+  @IsPublic()
+  @Get('registros-admissibilidade')
+  async registrosAdmibilidade(){
+    return this.admissibilidadeService.registrosAdmissibilidadeFinalizada();
+  }
 }
