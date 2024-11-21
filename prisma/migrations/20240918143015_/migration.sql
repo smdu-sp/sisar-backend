@@ -1,14 +1,26 @@
 -- CreateTable
+CREATE TABLE `pareceres_admissibilidade` (
+    `id` VARCHAR(191) NOT NULL,
+    `parecer` VARCHAR(191) NOT NULL,
+    `status` INTEGER NOT NULL DEFAULT 1,
+    `criado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `alterado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `pareceres_admissibilidade_parecer_key`(`parecer`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `admissibilidades` (
     `inicial_id` INTEGER NOT NULL,
     `unidade_id` VARCHAR(191) NULL,
-    `data_envio` DATETIME(3) NULL,
-    `data_decisao_interlocutoria` DATETIME(3) NULL,
+    `data_envio` DATE NULL,
+    `data_decisao_interlocutoria` DATE NULL,
     `parecer` INTEGER NOT NULL DEFAULT 0,
     `subprefeitura_id` VARCHAR(191) NULL,
     `categoria_id` VARCHAR(191) NULL,
     `status` INTEGER NOT NULL DEFAULT 1,
-    `reconsiderado` BOOLEAN NULL,
+    `reconsiderado` BOOLEAN NOT NULL DEFAULT false,
     `motivo` INTEGER NULL,
     `criado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `alterado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -375,7 +387,7 @@ CREATE TABLE `avisos` (
     `id` VARCHAR(191) NOT NULL,
     `titulo` VARCHAR(191) NOT NULL,
     `descricao` VARCHAR(191) NOT NULL,
-    `data` DATETIME(3) NOT NULL,
+    `data` DATE NOT NULL,
     `usuario_id` VARCHAR(191) NULL,
     `inicial_id` INTEGER NOT NULL,
     `criado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

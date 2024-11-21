@@ -56,8 +56,7 @@ export class AdmissibilidadeService {
     if (!admissibilidade || admissibilidade.length == 0)
       throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
-  } 
-
+  }
 
   async contarForaDoPrazo(): Promise<number> {
     const registros = await this.prisma.inicial.findMany({
@@ -150,7 +149,6 @@ export class AdmissibilidadeService {
     return count;    
   }
 
-
   async buscarTudo(
     pagina: number, limite: number, filtro: number, busca?: string
   ): Promise<AdmissibilidadePaginado> {
@@ -208,7 +206,6 @@ export class AdmissibilidadeService {
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     return admissibilidade;
   }
-  
 
   async ultimaAtualizacao(id: number) {
     const inicial = await this.prisma.inicial.update({
@@ -368,11 +365,9 @@ export class AdmissibilidadeService {
     
     if (diffsInDays.length === 0) return null; 
     
-    
     diffsInDays.sort((a, b) => a - b);
     
     const middle = Math.floor(diffsInDays.length / 2);
-  
     
     if (diffsInDays.length % 2 === 0) {
       return (diffsInDays[middle - 1] + diffsInDays[middle]) / 2;
@@ -382,56 +377,47 @@ export class AdmissibilidadeService {
   }
 
   async registrosAdmissibilidadeFinalizada(): Promise<
-  Array<{
-    dataDecisaoInterlocutoria: Date;
-    sei: string;
-    envioAdmissibilidade: Date;
-    dias: number;
-    status: string;
-  }>
-> {
- 
-  const registros = await this.prisma.admissibilidade.findMany({
-    where: {
-      data_decisao_interlocutoria: {
-        not: null,
-      },
-    },
-    include: {
-      inicial: {
-        select: {
-          sei: true,
-          envio_admissibilidade: true,
+    Array<{
+      dataDecisaoInterlocutoria: Date;
+      sei: string;
+      envioAdmissibilidade: Date;
+      dias: number;
+      status: string;
+    }>
+  > {
+    const registros = await this.prisma.admissibilidade.findMany({
+      where: {
+        data_decisao_interlocutoria: {
+          not: null,
         },
       },
-    },
-  });
+      include: {
+        inicial: {
+          select: {
+            sei: true,
+            envio_admissibilidade: true,
+          },
+        },
+      },
+    });
 
-  
-  const resultado = registros.map((registro) => {
-    const dataDecisaoInterlocutoria = new Date(
-      registro.data_decisao_interlocutoria
-    );
-    const envioAdmissibilidade = new Date(registro.inicial.envio_admissibilidade);
-
-  
-    const diffTime =
-      dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
-    const dias = Math.floor(diffTime / (1000 * 3600 * 24));
-
-
-    const status = dias > 15 ? "Fora do Prazo" : "Dentro do Prazo";
-
-    return {
-      dataDecisaoInterlocutoria,
-      sei: registro.inicial.sei,
-      envioAdmissibilidade,
-      dias,
-      status,
-    };
-  });
-
-  return resultado;
-}
-  
+    const resultado = registros.map((registro) => {
+      const dataDecisaoInterlocutoria = new Date(
+        registro.data_decisao_interlocutoria
+      );
+      const envioAdmissibilidade = new Date(registro.inicial.envio_admissibilidade);
+      const diffTime =
+        dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
+      const dias = Math.floor(diffTime / (1000 * 3600 * 24));
+      const status = dias > 15 ? "Fora do Prazo" : "Dentro do Prazo";
+      return {
+        dataDecisaoInterlocutoria,
+        sei: registro.inicial.sei,
+        envioAdmissibilidade,
+        dias,
+        status,
+      };
+    });
+    return resultado;
+  }
 }
