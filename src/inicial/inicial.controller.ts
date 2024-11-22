@@ -65,7 +65,7 @@ export class InicialController {
     @Param('mes') mes: string, 
     @Param('ano') ano: string
   ): Promise<InicialProcessosMesAnoResponseDTO[]> {
-    return this.inicialService.buscarPorMesAnoProcesso(parseInt(mes), parseInt(ano)); // Passando os parâmetros corretos
+    return this.inicialService.buscarPorMesAnoProcesso(parseInt(mes), parseInt(ano));
   }
 
   @Get('buscar-por-id/:id')
@@ -105,7 +105,6 @@ export class InicialController {
   @Patch('adiciona-sql/:inicial_id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'inicial_id', type: 'string', required: true })
-  // @ApiBody({ type: })
   @ApiOperation({ description: "Adicionar sql por ID.", summary: 'Adicione sql por ID.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se adicionar sql à inicial por ID com sucesso.', type: SqlResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })

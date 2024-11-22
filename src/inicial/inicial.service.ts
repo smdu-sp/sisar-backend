@@ -103,7 +103,7 @@ export class InicialService {
     const distribuicao = await this.prisma.distribuicao.findFirst({ where: { inicial_id } });
     if (!distribuicao) throw new ForbiddenException('Erro ao buscar distribuição.');
     const agora = new Date();
-    var tecnico_responsavel_id = '';
+    let tecnico_responsavel_id = '';
     const include = {
       ferias: {
         where: {
@@ -121,7 +121,7 @@ export class InicialService {
         }
       }
     };
-    var tecnicos = await this.prisma.usuario.findMany({
+    let tecnicos = await this.prisma.usuario.findMany({
       where: {
         cargo: 'TEC'
       },
@@ -130,15 +130,15 @@ export class InicialService {
       },
       include
     });
-    var tecnicos_id = tecnicos.filter(admin => admin.ferias.length === 0).map(admin => admin.id);
-    var ultimo_tec = await this.prisma.distribuicao.findFirst({
+    let tecnicos_id = tecnicos.filter(admin => admin.ferias.length === 0).map(admin => admin.id);
+    let ultimo_tec = await this.prisma.distribuicao.findFirst({
       where: { NOT: { tecnico_responsavel_id: null } },
       orderBy: { criado_em: 'desc' }
     });
     if (!ultimo_tec) tecnico_responsavel_id = tecnicos_id[0];
     else {
       tecnico_responsavel_id = ultimo_tec.tecnico_responsavel_id;
-      var ultimo_tec_index = tecnicos_id.findIndex(id => id === tecnico_responsavel_id);
+      let ultimo_tec_index = tecnicos_id.findIndex(id => id === tecnico_responsavel_id);
       ultimo_tec_index = ultimo_tec_index === tecnicos_id.length - 1 ? 0 : (ultimo_tec_index + 1);
       tecnico_responsavel_id = tecnicos_id[ultimo_tec_index];
     }
@@ -151,7 +151,7 @@ export class InicialService {
 
   async criaDistribuicao(inicial: Inicial) {
     const agora = new Date();
-    var administrativo_responsavel_id = '';
+    let administrativo_responsavel_id = '';
     const include = {
       ferias: {
         where: {
@@ -169,7 +169,7 @@ export class InicialService {
         }
       }
     };
-    var administrativos = await this.prisma.usuario.findMany({
+    let administrativos = await this.prisma.usuario.findMany({
       where: {
         cargo: 'ADM'
       },
@@ -178,12 +178,12 @@ export class InicialService {
       },
       include
     });
-    var administrativosId = administrativos.filter(admin => admin.ferias.length === 0).map(admin => admin.id);
-    var ultimo_adm = await this.prisma.distribuicao.findFirst({ orderBy: { criado_em: 'desc' } });
+    let administrativosId = administrativos.filter(admin => admin.ferias.length === 0).map(admin => admin.id);
+    let ultimo_adm = await this.prisma.distribuicao.findFirst({ orderBy: { criado_em: 'desc' } });
     if (!ultimo_adm) administrativo_responsavel_id = administrativosId[0];
     else {
       administrativo_responsavel_id = ultimo_adm.administrativo_responsavel_id;
-      var ultimo_adm_index = administrativosId.findIndex(id => id === administrativo_responsavel_id);
+      let ultimo_adm_index = administrativosId.findIndex(id => id === administrativo_responsavel_id);
       ultimo_adm_index = ultimo_adm_index === administrativosId.length - 1 ? 0 : (ultimo_adm_index + 1);
       administrativo_responsavel_id = administrativosId[ultimo_adm_index];
     }
@@ -318,14 +318,13 @@ export class InicialService {
   }
 
   async verificaFeriado(data: string) {
-    const feriado = await fetch(`${process.env.API_FERIADOS_URL}/feriados/data/${data}`, {
+    const response: Response = await fetch(`${process.env.API_FERIADOS_URL}/feriados/data/${data}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
       }
-    }).then((response) => {
-      return response.json();
-    });
+    })
+    const feriado = await response.json();
     return feriado;
   }
 
