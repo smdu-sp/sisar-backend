@@ -85,16 +85,13 @@ export class AdmissibilidadeService {
     const count = registros.filter((registro) => {
       const dataDecisao = registro.admissibilidade?.data_decisao_interlocutoria;
       const envioAdmissibilidade = registro.envio_admissibilidade;
-
       if (dataDecisao && envioAdmissibilidade) {
         const diffTime = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
         const diffDays = diffTime / (1000 * 3600 * 24);
-
         return diffDays > registro.alvara_tipo.prazo_admissibilidade_smul;
       }
       return false;
     }).length;
-
     return count;
   }
 
@@ -121,20 +118,16 @@ export class AdmissibilidadeService {
         },
       },
     });
-    
     const count = registros.filter((registro) => {
       const dataDecisao = registro.admissibilidade?.data_decisao_interlocutoria;
       const envioAdmissibilidade = registro.envio_admissibilidade;
-
       if (dataDecisao && envioAdmissibilidade) {
         const diffTime = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
         const diffDays = diffTime / (1000 * 3600 * 24);
-
         return diffDays <= registro.alvara_tipo.prazo_admissibilidade_smul;
       }
       return false;
     }).length;
-
     return count;
   }
 
@@ -349,12 +342,10 @@ export class AdmissibilidadeService {
         },
       },
     });
-    
     const diffsInDays = registros
       .map((registro) => {
         const dataDecisao = registro.admissibilidade?.data_decisao_interlocutoria;
         const envioAdmissibilidade = registro.envio_admissibilidade;
-  
         if (dataDecisao && envioAdmissibilidade) {
           const diffTime = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
           return diffTime / (1000 * 3600 * 24); 
@@ -362,18 +353,12 @@ export class AdmissibilidadeService {
         return null;
       })
       .filter((diff) => diff !== null) as number[]; 
-    
     if (diffsInDays.length === 0) return null; 
-    
     diffsInDays.sort((a, b) => a - b);
-    
     const middle = Math.floor(diffsInDays.length / 2);
-    
-    if (diffsInDays.length % 2 === 0) {
+    if (diffsInDays.length % 2 === 0) 
       return (diffsInDays[middle - 1] + diffsInDays[middle]) / 2;
-    } else {
-      return diffsInDays[middle];
-    }
+    return diffsInDays[middle];
   }
 
   async registrosAdmissibilidadeFinalizada(): Promise<
@@ -400,14 +385,10 @@ export class AdmissibilidadeService {
         },
       },
     });
-
     const resultado = registros.map((registro) => {
-      const dataDecisaoInterlocutoria = new Date(
-        registro.data_decisao_interlocutoria
-      );
+      const dataDecisaoInterlocutoria = new Date(registro.data_decisao_interlocutoria);
       const envioAdmissibilidade = new Date(registro.inicial.envio_admissibilidade);
-      const diffTime =
-        dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
+      const diffTime = dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
       const dias = Math.floor(diffTime / (1000 * 3600 * 24));
       const status = dias > 15 ? "Fora do Prazo" : "Dentro do Prazo";
       return {
