@@ -228,7 +228,7 @@ export class UsuariosService {
   }
 
   async buscaUnidade(login: string) {
-    var unidade_id = '';
+    let unidade_id = '';
     const usuario_sgu = await this.sgu.tblUsuarios.findFirst({
       where: {
         cpRF: { startsWith: login.substring(1) },
@@ -255,7 +255,7 @@ export class UsuariosService {
     const client: Client = createClient({
       url: process.env.LDAP_SERVER,
     });
-    var unidade_id = await this.buscaUnidade(login);
+    let unidade_id = await this.buscaUnidade(login);
     await new Promise<void>((resolve, reject) => {
       client.bind(`${process.env.USER_LDAP}${process.env.LDAP_DOMAIN}`, process.env.PASS_LDAP, (err) => {
         if (err) {
