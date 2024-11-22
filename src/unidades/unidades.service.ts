@@ -77,7 +77,7 @@ export class UnidadesService {
       where: {
         AND: [
           searchParams,
-          { status: !filtro ? undefined : filtro },
+          { status: filtro < 0 || !filtro && filtro !== 0 ? undefined : filtro },
         ]
       },
       skip: (pagina - 1) * limite,
