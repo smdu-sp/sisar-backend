@@ -16,8 +16,6 @@ export class SubprefeituraService {
     const lista = await this.prisma.subprefeitura.findMany({
       orderBy: { nome: 'asc' }
     });
-    if (!lista || lista.length == 0) 
-      throw new ForbiddenException('Nenhuma subprefeitura encontrada');
     return lista;
   }
 
@@ -25,8 +23,6 @@ export class SubprefeituraService {
     const subprefeitura = await this.prisma.subprefeitura.findUnique({
       where: { nome }
     });
-    if (!subprefeitura) 
-      throw new ForbiddenException('subprefeitura não encontrada.');
     return subprefeitura;
   }
 
