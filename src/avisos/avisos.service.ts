@@ -3,8 +3,6 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { AvisosResponseDTO } from './dto/response.dto';
-import { Avisos, Inicial } from '@prisma/client';
 
 @Injectable()
 export class AvisosService {
