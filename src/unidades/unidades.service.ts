@@ -13,37 +13,27 @@ export class UnidadesService {
   ) {}
 
   async listaCompleta() {
-    const lista = await this.prisma.unidade.findMany({
+    return await this.prisma.unidade.findMany({
       orderBy: { nome: 'asc' }
     });
-    if (!lista || lista.length == 0) throw new ForbiddenException('Nenhuma unidade encontrada');
-    return lista;
   }
 
   async buscaPorCodigo(codigo: string) {
-    const unidade = await this.prisma.unidade.findUnique({
+    return await this.prisma.unidade.findUnique({
       where: { codigo }
     });
-    if (!unidade) 
-      throw new ForbiddenException(`Nenhuma unidade encontrada com o código ${codigo}`);
-    return unidade;
   }
 
   async buscaPorSigla(sigla: string) {
-    const unidade = await this.prisma.unidade.findUnique({
+    return await this.prisma.unidade.findUnique({
       where: { sigla }
     });
-    if (!unidade) throw new ForbiddenException(`Nenhuma unidade encontrada com a sigla ${sigla}`);
-    return unidade;
   }
 
   async buscaPorNome(nome: string) {
-    const unidade = await this.prisma.unidade.findUnique({
+    return await this.prisma.unidade.findUnique({
       where: { nome }
     });
-    if (!unidade) 
-      throw new ForbiddenException(`Nenhuma unidade encontrada com o nome ${nome}`);
-    return unidade;
   }
 
   async criar(createUnidadeDto: CreateUnidadeDto): Promise<UnidadeResponseDTO> {
@@ -87,7 +77,7 @@ export class UnidadesService {
       where: {
         AND: [
           searchParams,
-          { status: filtro === -1 ? undefined : filtro },
+          { status: !filtro ? undefined : filtro },
         ]
       },
       skip: (pagina - 1) * limite,
@@ -102,9 +92,7 @@ export class UnidadesService {
   }
 
   async buscarPorId(id: string) {
-    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
-    if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
-    return unidade;
+    return await this.prisma.unidade.findUnique({ where: { id } });
   }
 
   async atualizar(id: string, updateUnidadeDto: UpdateUnidadeDto) {
@@ -135,12 +123,12 @@ export class UnidadesService {
     return updatedUnidade;
   }
 
-  async desativar(id: string, updateUnidadeDto: UpdateUnidadeDto) {
+  async desativar(id: string) {
     const unidade = await this.prisma.unidade.findUnique({ where: { id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
     const updatedUnidade = await this.prisma.unidade.update({
       where: { id },
-      data: updateUnidadeDto
+      data: { status: 0 }
     });
     if (!updatedUnidade) 
       throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');

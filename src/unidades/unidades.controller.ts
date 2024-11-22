@@ -84,7 +84,7 @@ export class UnidadesController {
   @ApiResponse({ status: 200, description: 'Retorna 200 se desativar com sucesso.' })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Desativar uma unidade.", summary: 'Desative uma unidade.' })
-  desativar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateUnidadeDto) {
-    return this.unidadesService.desativar(id, updateUnidadeDto);
+  desativar(@Param('id') id: string) {
+    return this.unidadesService.desativar(id);
   }
 }
