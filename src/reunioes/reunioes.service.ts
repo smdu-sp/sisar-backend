@@ -43,7 +43,7 @@ export class ReunioesService {
   }
 
   async buscarPorId(idInt: string) {
-    var id = parseInt(idInt.toString());
+    let id = parseInt(idInt.toString());
     const inicial = await this.prisma.inicial.findUnique({ where: { id } });
     if (!inicial) throw new ForbiddenException('Inicial não encontrada.');
     return inicial;

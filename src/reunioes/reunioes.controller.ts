@@ -28,13 +28,13 @@ export class ReunioesController {
   // }
 
   @Permissoes('SUP', 'ADM')
-  @Get('buscar/:mes/:ano') // Definindo os parâmetros na rota
+  @Get('buscar/:mes/:ano')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: 'Retorna 200 se filtrando por mês e ano com sucesso.', type: [ReunioesResponseDTO] })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Buscar as reuniões filtradas por mês e ano.", summary: 'Busque reuniões por mês e ano.' })
   buscarPorMesAno(@Param('mes') mes: string, @Param('ano') ano: string) {
-    return this.unidadesService.buscarPorMesAno(parseInt(mes), parseInt(ano)); // Passando os parâmetros corretos
+    return this.unidadesService.buscarPorMesAno(parseInt(mes), parseInt(ano));
   }
 
   @Permissoes('SUP', 'ADM')
