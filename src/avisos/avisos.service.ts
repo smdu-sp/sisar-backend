@@ -3,6 +3,8 @@ import { CreateAvisoDto } from './dto/create-aviso.dto';
 import { UpdateAvisoDto } from './dto/update-aviso.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { AvisosResponseDTO } from './dto/response.dto';
+import { Avisos } from '@prisma/client';
 
 @Injectable()
 export class AvisosService {
@@ -12,9 +14,9 @@ export class AvisosService {
     private app: AppService
   ) {}
 
-  async create(createAvisoDto: CreateAvisoDto, usuario_id?: string) {
+  async create(createAvisoDto: CreateAvisoDto, usuario_id?: string): Promise<AvisosResponseDTO> {
     let { titulo, descricao, data, inicial_id } = createAvisoDto;
-    const criar = await this.prisma.avisos.create({
+    const criar: Avisos = await this.prisma.avisos.create({
       data: { titulo, descricao, data, usuario_id, inicial_id }
     });
     if (!criar) 
@@ -68,16 +70,16 @@ export class AvisosService {
     return avisos;
   }
 
-  async update(id: string, updateAvisoDto: UpdateAvisoDto) {
-    const atualizar = await this.prisma.avisos.update({
+  async update(id: string, updateAvisoDto: UpdateAvisoDto): Promise<AvisosResponseDTO> {
+    const atualizar: Avisos = await this.prisma.avisos.update({
       where: { id },
       data: updateAvisoDto
     });
     return atualizar;
   }
 
-  async remove(id: string) {
-    const deletar = await this.prisma.avisos.delete({
+  async remove(id: string): Promise<AvisosResponseDTO> {
+    const deletar: Avisos = await this.prisma.avisos.delete({
       where: { id }
     });
     return deletar;
