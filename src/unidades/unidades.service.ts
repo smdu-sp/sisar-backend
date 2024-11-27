@@ -4,6 +4,7 @@ import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { UnidadeResponseDTO } from './dto/unidade-response.dto';
+import { Unidade } from '@prisma/client';
 
 @Injectable()
 export class UnidadesService {
@@ -12,25 +13,25 @@ export class UnidadesService {
     private app: AppService
   ) {}
 
-  async listaCompleta() {
+  async listaCompleta(): Promise<UnidadeResponseDTO[]> {
     return await this.prisma.unidade.findMany({
       orderBy: { nome: 'asc' }
     });
   }
 
-  async buscaPorCodigo(codigo: string) {
+  async buscaPorCodigo(codigo: string): Promise<UnidadeResponseDTO> {
     return await this.prisma.unidade.findUnique({
       where: { codigo }
     });
   }
 
-  async buscaPorSigla(sigla: string) {
+  async buscaPorSigla(sigla: string): Promise<UnidadeResponseDTO> {
     return await this.prisma.unidade.findUnique({
       where: { sigla }
     });
   }
 
-  async buscaPorNome(nome: string) {
+  async buscaPorNome(nome: string): Promise<UnidadeResponseDTO> {
     return await this.prisma.unidade.findUnique({
       where: { nome }
     });
@@ -44,7 +45,7 @@ export class UnidadesService {
       throw new ForbiddenException(`Ja existe uma unidade com o mesmo nome (${nome})`);
     if (await this.buscaPorSigla(sigla)) 
       throw new ForbiddenException(`Ja existe uma unidade com a mesmo sigla (${sigla})`);
-    const novaUnidade = await this.prisma.unidade.create({
+    const novaUnidade: Unidade = await this.prisma.unidade.create({
       data: { nome, sigla, status, codigo }
     });
     if (!novaUnidade) 
@@ -57,7 +58,7 @@ export class UnidadesService {
     limite: number = 10,
     busca?: string,
     filtro?: number
-  ) {
+  ): Promise<{ total: number, pagina: number, limite: number, data: Unidade[] }> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca ?
@@ -70,10 +71,10 @@ export class UnidadesService {
         } :
         {}),
     };
-    const total = await this.prisma.unidade.count({ where: searchParams });
-    if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
+    const total: number = await this.prisma.unidade.count({ where: searchParams });
+    if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
-    const unidades = await this.prisma.unidade.findMany({
+    const unidades: Unidade[] = await this.prisma.unidade.findMany({
       where: {
         AND: [
           searchParams,
@@ -91,30 +92,30 @@ export class UnidadesService {
     };
   }
 
-  async buscarPorId(id: string) {
+  async buscarPorId(id: string): Promise<UnidadeResponseDTO> {
     return await this.prisma.unidade.findUnique({ where: { id } });
   }
 
-  async atualizar(id: string, updateUnidadeDto: UpdateUnidadeDto) {
+  async atualizar(id: string, updateUnidadeDto: UpdateUnidadeDto): Promise<UnidadeResponseDTO> {
     const { nome, sigla, codigo } = updateUnidadeDto;
-    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
+    const unidade: Unidade = await this.prisma.unidade.findUnique({ where: { id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
     if (nome) {
-      const unidadeNome = await this.buscaPorNome(nome);
+      const unidadeNome: Unidade = await this.buscaPorNome(nome);
       if (unidadeNome && unidadeNome.id != id) 
         throw new ForbiddenException(`Já existe uma unidade com o mesmo nome (${nome}).`);
     }
     if (sigla) {
-      const unidadeSigla = await this.buscaPorSigla(sigla);
+      const unidadeSigla: Unidade = await this.buscaPorSigla(sigla);
       if (unidadeSigla && unidadeSigla.id != id) 
         throw new ForbiddenException(`Já existe uma unidade com a mesma sigla (${sigla}).`);
     }
     if (codigo) {
-      const unidadeCodigo = await this.buscaPorCodigo(codigo);
+      const unidadeCodigo: Unidade = await this.buscaPorCodigo(codigo);
       if (unidadeCodigo && unidadeCodigo.id != id) 
         throw new ForbiddenException(`Já existe uma unidade com o mesmo código (${codigo}).`);
     }
-    const updatedUnidade = await this.prisma.unidade.update({
+    const updatedUnidade: Unidade = await this.prisma.unidade.update({
       where: { id },
       data: updateUnidadeDto
     });
@@ -123,10 +124,10 @@ export class UnidadesService {
     return updatedUnidade;
   }
 
-  async desativar(id: string) {
-    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
+  async desativar(id: string): Promise<{ message: string }> {
+    const unidade: Unidade = await this.prisma.unidade.findUnique({ where: { id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
-    const updatedUnidade = await this.prisma.unidade.update({
+    const updatedUnidade: Unidade = await this.prisma.unidade.update({
       where: { id },
       data: { status: 0 }
     });
