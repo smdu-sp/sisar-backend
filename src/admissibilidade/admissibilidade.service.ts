@@ -4,7 +4,7 @@ import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Admissibilidade } from '@prisma/client';
+import { Admissibilidade, Inicial } from '@prisma/client';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -81,13 +81,12 @@ export class AdmissibilidadeService {
         },
       },
     });
-    
-    const count = registros.filter((registro) => {
-      const dataDecisao = registro.admissibilidade?.data_decisao_interlocutoria;
-      const envioAdmissibilidade = registro.envio_admissibilidade;
+    const count: number = registros.filter((registro) => {
+      const dataDecisao: Date = registro.admissibilidade?.data_decisao_interlocutoria;
+      const envioAdmissibilidade: Date = registro.envio_admissibilidade;
       if (dataDecisao && envioAdmissibilidade) {
-        const diffTime = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
-        const diffDays = diffTime / (1000 * 3600 * 24);
+        const diffTime: number = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
+        const diffDays: number = diffTime / (1000 * 3600 * 24);
         return diffDays > registro.alvara_tipo.prazo_admissibilidade_smul;
       }
       return false;
@@ -118,12 +117,12 @@ export class AdmissibilidadeService {
         },
       },
     });
-    const count = registros.filter((registro) => {
-      const dataDecisao = registro.admissibilidade?.data_decisao_interlocutoria;
-      const envioAdmissibilidade = registro.envio_admissibilidade;
+    const count: number = registros.filter((registro) => {
+      const dataDecisao: Date = registro.admissibilidade?.data_decisao_interlocutoria;
+      const envioAdmissibilidade: Date = registro.envio_admissibilidade;
       if (dataDecisao && envioAdmissibilidade) {
-        const diffTime = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
-        const diffDays = diffTime / (1000 * 3600 * 24);
+        const diffTime: number = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
+        const diffDays: number = diffTime / (1000 * 3600 * 24);
         return diffDays <= registro.alvara_tipo.prazo_admissibilidade_smul;
       }
       return false;
@@ -132,7 +131,7 @@ export class AdmissibilidadeService {
   }
 
   async admissibilidadeFinalizada(): Promise<number> {
-    const count = await this.prisma.admissibilidade.count({
+    const count: number = await this.prisma.admissibilidade.count({
       where: {        
           data_decisao_interlocutoria: {
             not: null,
@@ -184,14 +183,14 @@ export class AdmissibilidadeService {
   }
 
   async findAll(): Promise<AdmissibilidadeResponseDTO[]> {
-    const admissibilidade: AdmissibilidadeResponseDTO[] = await this.prisma.admissibilidade.findMany();
+    const admissibilidade: Admissibilidade[] = await this.prisma.admissibilidade.findMany();
     if (!admissibilidade || admissibilidade.length == 0)
       throw new InternalServerErrorException('Nenhuma subprefeitura encontrada');
     return admissibilidade;
   }
 
   async buscarPorId(id: number): Promise<Admissibilidade> {
-    const admissibilidade = await this.prisma.admissibilidade.findUnique({
+    const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.findUnique({
       where: { inicial_id: id },
       include: { inicial: true }
     });
@@ -200,8 +199,8 @@ export class AdmissibilidadeService {
     return admissibilidade;
   }
 
-  async ultimaAtualizacao(id: number) {
-    const inicial = await this.prisma.inicial.update({
+  async ultimaAtualizacao(id: number): Promise<Inicial> {
+    const inicial: Inicial = await this.prisma.inicial.update({
       where: { id },
       data: { alterado_em: new Date() }
     })
@@ -224,7 +223,7 @@ export class AdmissibilidadeService {
         where: { id: inicial_id },
         data: { tipo_processo }
       });
-      this.ultimaAtualizacao(id)
+      this.ultimaAtualizacao(id);
     };
     if (tipo_processo === 2 && interfaces) {
       this.ultimaAtualizacao(id)
@@ -257,8 +256,8 @@ export class AdmissibilidadeService {
     return feriado;
   }
 
-  dataExperacaoNaoUtil(data: string, dias: number) {
-    const dataExperacao = new Date(data);
+  dataExperacaoNaoUtil(data: string, dias: number): Date {
+    const dataExperacao: Date = new Date(data);
     dataExperacao.setDate(dataExperacao.getDate() + dias);
     return dataExperacao;
   }
@@ -297,7 +296,7 @@ export class AdmissibilidadeService {
         reconsiderados[i].inicial.tipo_processo === 1 
         && reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul_tipo === 0
       ) {
-        const diasUteisSmul = await this.verificaDiasUteis(
+        const diasUteisSmul: DiasUteis = await this.verificaDiasUteis(
           reconsiderados[i].data_decisao_interlocutoria.toString(), 
           reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
         );
@@ -342,34 +341,31 @@ export class AdmissibilidadeService {
         },
       },
     });
-    const diffsInDays = registros
+    const diffsInDays: number[] = registros
       .map((registro) => {
-        const dataDecisao = registro.admissibilidade?.data_decisao_interlocutoria;
-        const envioAdmissibilidade = registro.envio_admissibilidade;
+        const dataDecisao: Date = registro.admissibilidade?.data_decisao_interlocutoria;
+        const envioAdmissibilidade: Date = registro.envio_admissibilidade;
         if (dataDecisao && envioAdmissibilidade) {
-          const diffTime = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
+          const diffTime: number = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
           return diffTime / (1000 * 3600 * 24); 
         }
         return null;
-      })
-      .filter((diff) => diff !== null) as number[]; 
+      }).filter((diff) => diff !== null) as number[]; 
     if (diffsInDays.length === 0) return null; 
     diffsInDays.sort((a, b) => a - b);
-    const middle = Math.floor(diffsInDays.length / 2);
+    const middle: number = Math.floor(diffsInDays.length / 2);
     if (diffsInDays.length % 2 === 0) 
       return (diffsInDays[middle - 1] + diffsInDays[middle]) / 2;
     return diffsInDays[middle];
   }
 
-  async registrosAdmissibilidadeFinalizada(): Promise<
-    Array<{
-      dataDecisaoInterlocutoria: Date;
-      sei: string;
-      envioAdmissibilidade: Date;
-      dias: number;
-      status: string;
-    }>
-  > {
+  async registrosAdmissibilidadeFinalizada(): Promise<{
+    dataDecisaoInterlocutoria: Date;
+    sei: string;
+    envioAdmissibilidade: Date;
+    dias: number;
+    status: string;
+  }[]> {
     const registros = await this.prisma.admissibilidade.findMany({
       where: {
         data_decisao_interlocutoria: {
@@ -385,12 +381,18 @@ export class AdmissibilidadeService {
         },
       },
     });
-    const resultado = registros.map((registro) => {
-      const dataDecisaoInterlocutoria = new Date(registro.data_decisao_interlocutoria);
-      const envioAdmissibilidade = new Date(registro.inicial.envio_admissibilidade);
-      const diffTime = dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
-      const dias = Math.floor(diffTime / (1000 * 3600 * 24));
-      const status = dias > 15 ? "Fora do Prazo" : "Dentro do Prazo";
+    const resultado: {
+      dataDecisaoInterlocutoria: Date;
+      sei: string;
+      envioAdmissibilidade: Date;
+      dias: number;
+      status: string;
+    }[] = registros.map((registro) => {
+      const dataDecisaoInterlocutoria: Date = new Date(registro.data_decisao_interlocutoria);
+      const envioAdmissibilidade: Date = new Date(registro.inicial.envio_admissibilidade);
+      const diffTime: number = dataDecisaoInterlocutoria.getTime() - envioAdmissibilidade.getTime();
+      const dias: number = Math.floor(diffTime / (1000 * 3600 * 24));
+      const status: string = dias > 15 ? "Fora do Prazo" : "Dentro do Prazo";
       return {
         dataDecisaoInterlocutoria,
         sei: registro.inicial.sei,
