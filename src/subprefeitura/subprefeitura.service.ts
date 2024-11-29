@@ -27,9 +27,7 @@ export class SubprefeituraService {
     return subprefeitura;
   }
 
-  async criar(
-    createsubprefeituraDto: CreateSubprefeituraDto
-  ): Promise<CreateResponseSubprefeituraDTO> {
+  async criar(createsubprefeituraDto: CreateSubprefeituraDto): Promise<CreateResponseSubprefeituraDTO> {
     const { nome, sigla, status } = createsubprefeituraDto;
     if (await this.buscaPorNome(nome)) 
       throw new ForbiddenException('Ja existe uma subprefeitura com o mesmo nome');
