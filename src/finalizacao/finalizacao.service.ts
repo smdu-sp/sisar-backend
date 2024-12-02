@@ -3,25 +3,23 @@ import { CreateFinalizacaoDto } from './dto/create-finalizacao.dto';
 import { UpdateFinalizacaoDto } from './dto/update-finalizacao.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { FinalizacaoPaginado } from './dto/finalizacao-response.dto';
+import { FinalizacaoPaginado, FinalizacaoResponseDTO } from './dto/finalizacao-response.dto';
+import { Conclusao } from '@prisma/client';
 
 @Injectable()
 export class FinalizacaoService {
-  constructor(
-    private prisma: PrismaService,
-    private app: AppService
-  ) {}
+  constructor(private prisma: PrismaService, private app: AppService) {}
 
-  async criar(createFinalizacaoDto: CreateFinalizacaoDto, conclusao: boolean) {
+  async criar(createFinalizacaoDto: CreateFinalizacaoDto, conclusao: boolean): Promise<Conclusao> {
     let { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga } = createFinalizacaoDto;
-    const criar = await this.prisma.conclusao.create({
+    const criar: Conclusao = await this.prisma.conclusao.create({
       data: { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga }
     })
     if (!criar) throw new InternalServerErrorException('Erro ao criar a finalização')
     await this.prisma.inicial.update({
       where: { id: inicial_id },
       data: { status: conclusao ? 3 : 4 }
-    })
+    });
     return criar;
   }
 
@@ -40,16 +38,14 @@ export class FinalizacaoService {
         } :
         {})
     };
-    const total = await this.prisma.conclusao.count({ where: searchParams });
+    const total: number = await this.prisma.conclusao.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
-    const iniciais = await this.prisma.conclusao.findMany({
+    const iniciais: FinalizacaoResponseDTO[] = await this.prisma.conclusao.findMany({
       where: searchParams,
-      include: {
-        inicial: true,
-      },
+      include: { inicial: true },
       skip: (pagina - 1) * limite,
-      take: limite,
+      take: limite
     });
     if (!iniciais) throw new InternalServerErrorException('Nenhum processo encontrado');
     return {
@@ -60,17 +56,17 @@ export class FinalizacaoService {
     };
   }
 
-  async buscaId(id: number) {
-    const buscaId = await this.prisma.conclusao.findUnique({
+  async buscaId(id: number): Promise<Conclusao> {
+    const buscaId: Conclusao = await this.prisma.conclusao.findUnique({
       where: { inicial_id: id }
     })
     if (!buscaId) throw new InternalServerErrorException('Processo não encontrado');
     return buscaId
   }
 
-  async atualizar(id: number, updateFinalizacaoDto: UpdateFinalizacaoDto) {
+  async atualizar(id: number, updateFinalizacaoDto: UpdateFinalizacaoDto): Promise<Conclusao> {
     let { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga } = updateFinalizacaoDto;
-    const atualizar = await this.prisma.conclusao.update({
+    const atualizar: Conclusao = await this.prisma.conclusao.update({
       where: { inicial_id: id },
       data: { inicial_id, data_apostilamento, data_conclusao, data_emissao, data_outorga, data_resposta, data_termo, num_alvara, obs, outorga }
     })
