@@ -23,11 +23,7 @@ export class FinalizacaoService {
     return criar;
   }
 
-  async buscarTudo(
-    pagina: number = 1,
-    limite: number = 10,
-    busca?: string
-  ): Promise<FinalizacaoPaginado> {
+  async buscarTudo(pagina: number = 1, limite: number = 10, busca?: string): Promise<FinalizacaoPaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca ?
