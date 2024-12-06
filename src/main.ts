@@ -16,5 +16,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   await app.listen(port);
   console.log("API Aprova Rápido rodando em http://localhost:" + port);
+  console.log("Swagger UI rodando em http://localhost:" + port + "/api");
 }
 bootstrap();

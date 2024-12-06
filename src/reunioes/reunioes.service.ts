@@ -1,15 +1,14 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UpdateReunioesDto } from './dto/update-reunioes.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Inicial, Reuniao_Processo } from '@prisma/client';
 
 @Injectable()
 export class ReunioesService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async listaCompleta() {
-    const lista = await this.prisma.reuniao_Processo.findMany({
+  async listaCompleta(): Promise<Reuniao_Processo[]> {
+    const lista: Reuniao_Processo[] = await this.prisma.reuniao_Processo.findMany({
       orderBy: { data_reuniao: 'asc' }
     });
     if (!lista || lista.length == 0) 
@@ -17,10 +16,10 @@ export class ReunioesService {
     return lista;
   }
 
-  async buscarPorMesAno(mes: number, ano: number) {
-    const primeiroDiaMes = new Date(ano, mes - 1, 1);
-    const ultimoDiaMes = new Date(ano, mes, 0);
-    const reunioes = await this.prisma.reuniao_Processo.findMany({
+  async buscarPorMesAno(mes: number, ano: number): Promise<Reuniao_Processo[]> {
+    const primeiroDiaMes: Date = new Date(ano, mes - 1, 1);
+    const ultimoDiaMes: Date = new Date(ano, mes, 0);
+    const reunioes: Reuniao_Processo[] = await this.prisma.reuniao_Processo.findMany({
       where: {
         OR: [
           { AND: [
@@ -42,17 +41,17 @@ export class ReunioesService {
     return reunioes;
   }
 
-  async buscarPorId(idInt: string) {
-    let id = parseInt(idInt.toString());
-    const inicial = await this.prisma.inicial.findUnique({ where: { id } });
+  async buscarPorId(idInt: string): Promise<Inicial> {
+    let id: number = parseInt(idInt.toString());
+    const inicial: Inicial = await this.prisma.inicial.findUnique({ where: { id } });
     if (!inicial) throw new ForbiddenException('Inicial não encontrada.');
     return inicial;
   }
 
-  async atualizarData(id: string, updateReunioesDto: UpdateReunioesDto) {
+  async atualizarData(id: string, updateReunioesDto: UpdateReunioesDto): Promise<Reuniao_Processo> {
     updateReunioesDto.nova_data_reuniao = new Date(updateReunioesDto.nova_data_reuniao);
     updateReunioesDto.nova_data_reuniao.setUTCHours(updateReunioesDto.nova_data_reuniao.getUTCHours() - 3);
-    const reuniao = await this.prisma.reuniao_Processo.update({
+    const reuniao: Reuniao_Processo = await this.prisma.reuniao_Processo.update({
       where: { id },
       data: {
         nova_data_reuniao: updateReunioesDto.nova_data_reuniao,
@@ -62,9 +61,9 @@ export class ReunioesService {
     return reuniao;
   }
 
-  async buscarPorData(data: Date) {
-    const reuniao_data = new Date(data).toISOString();
-    const reunioes = await this.prisma.reuniao_Processo.findMany({
+  async buscarPorData(data: Date): Promise<Reuniao_Processo[]> {
+    const reuniao_data: string = new Date(data).toISOString();
+    const reunioes: Reuniao_Processo[] = await this.prisma.reuniao_Processo.findMany({
       where: {
         OR: [
           { nova_data_reuniao: { equals: reuniao_data } },
