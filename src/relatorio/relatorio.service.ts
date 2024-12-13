@@ -25,6 +25,7 @@ export class RelatorioService {
       },
       select: { unidade: { select: { nome: true, id: true } } }
     });
+    console.log({countByUnidade: resultados})
     return resultados.reduce((acc, item): Record<string, number> => {
       const nome: string = item.unidade.nome;
       acc[nome] = (acc[nome] || 0) + 1;
@@ -55,9 +56,9 @@ export class RelatorioService {
     });
   };
 
-  async getRelatorio(data: Date) {
-    const primeiroDia: Date = new Date(data.getFullYear(), data.getMonth(), 1);
-    const ultimoDia: Date = new Date(data.getFullYear(), data.getMonth() + 1, 0);
+  async getRelatorio(mes: string, ano: string) {
+    const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
+    const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
     const unidades: Partial<Unidade>[] = await this.getUnidades();
     const periodFilter: { gte: Date, lte: Date } = { gte: primeiroDia, lte: ultimoDia };
     const unidadeIds: string[] = unidades.map(u => u.id);
