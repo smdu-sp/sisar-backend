@@ -11,7 +11,7 @@ export class CreateResponseAdmissibilidadeDTO {
     @ApiProperty()
     data_decisao_interlocutoria: Date;
     @ApiProperty()
-    parecer: number;
+    parecer_admissibilidade_id: string;
     @ApiProperty()
     subprefeitura_id: string;
     @ApiProperty()
@@ -38,7 +38,7 @@ export class AdmissibilidadeResponseDTO {
     @ApiProperty()
     data_decisao_interlocutoria: Date;
     @ApiProperty()
-    parecer: number;
+    parecer_admissibilidade_id: string;
     @ApiProperty()
     subprefeitura_id: string;
     @ApiProperty()

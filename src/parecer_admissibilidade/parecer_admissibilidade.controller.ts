@@ -2,10 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, Htt
 import { ParecerAdmissibilidadeService } from './parecer_admissibilidade.service';
 import { CreateParecerAdmissibilidadeDto } from './dto/create-parecer_admissibilidade.dto';
 import { UpdateParecerAdmissibilidadeDto } from './dto/update-parecer_admissibilidade.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ParecerAdmissibilidadePaginadoDTO, ParecerAdmissibilidadeResponseDTO } from './dto/parecer_admissibilidade-resopnse.dto';
 
 @ApiTags('Parecer-Admissibilidade')
+@ApiBearerAuth()
 @Controller('parecer-admissibilidade')
 export class ParecerAdmissibilidadeController {
   constructor(private readonly parecerAdmissibilidadeService: ParecerAdmissibilidadeService) {}

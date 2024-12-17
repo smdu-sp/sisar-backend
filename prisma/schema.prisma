@@ -11,12 +11,13 @@ datasource db {
 }
 
 model Parecer_Admissibilidade {
-  id          String    @id @default(uuid())
-  parecer     String    @unique
-  status      Int       @default(1)
+  id                String    @id @default(uuid())
+  parecer           String    @unique
+  status            Int       @default(1)
+  admissibilidades  Admissibilidade[]
 
-  criado_em   DateTime  @default(now())
-  alterado_em DateTime  @default(now()) @updatedAt
+  criado_em         DateTime  @default(now())
+  alterado_em       DateTime  @default(now()) @updatedAt
 
   @@map("pareceres_admissibilidade")
 }
@@ -28,7 +29,8 @@ model Admissibilidade {
   unidade_id                  String?
   data_envio                  DateTime?      @db.Date
   data_decisao_interlocutoria DateTime?      @db.Date
-  parecer                     Int            @default(0)
+  parecer_admissibilidade_id  String?
+  parecer_admissibilidade     Parecer_Admissibilidade? @relation(fields: [parecer_admissibilidade_id], references: [id])
   subprefeitura               Subprefeitura? @relation(fields: [subprefeitura_id], references: [id])
   subprefeitura_id            String?
   categoria                   Categoria?     @relation(fields: [categoria_id], references: [id])
@@ -466,6 +468,8 @@ model Substituto {
 
   criado_em     DateTime  @default(now())
   alterado_em   DateTime  @default(now()) @updatedAt
+
+  @@map("substitutos")
 }
 
 enum Cargo {

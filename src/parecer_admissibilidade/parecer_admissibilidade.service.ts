@@ -20,7 +20,7 @@ export class ParecerAdmissibilidadeService {
     const parecerAdmissibilidade = await this.prisma.parecer_Admissibilidade.create({ 
       data: { parecer, status }
     });
-    if (!parecerAdmissibilidade) 
+    if (!parecerAdmissibilidade)
       throw new InternalServerErrorException('Não foi possível criar o parecer. Tente novamente.');
     return parecerAdmissibilidade;
   }
