@@ -1,8 +1,8 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Query } from '@nestjs/common';
-import { RelatorioService } from './relatorio.service';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RelatorioResopnseDto } from './dto/response-relatorio.dto';
+import { RelatorioService } from './relatorio.service';
 
 @Controller('relatorio')
 @ApiTags('Relatórios')

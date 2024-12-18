@@ -15,10 +15,7 @@ interface DiasUteis {
 
 @Injectable()
 export class AdmissibilidadeService {
-  constructor(
-    private prisma: PrismaService,
-    private app: AppService
-  ) {}
+  constructor(private prisma: PrismaService, private app: AppService) {}
 
   async create(
     createAdmissibilidadeDto: CreateAdmissibilidadeDto

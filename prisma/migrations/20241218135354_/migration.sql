@@ -16,7 +16,7 @@ CREATE TABLE `admissibilidades` (
     `unidade_id` VARCHAR(191) NULL,
     `data_envio` DATE NULL,
     `data_decisao_interlocutoria` DATE NULL,
-    `parecer` INTEGER NOT NULL DEFAULT 0,
+    `parecer_admissibilidade_id` VARCHAR(191) NULL,
     `subprefeitura_id` VARCHAR(191) NULL,
     `categoria_id` VARCHAR(191) NULL,
     `status` INTEGER NOT NULL DEFAULT 1,
@@ -88,12 +88,12 @@ CREATE TABLE `comunique_ses` (
 -- CreateTable
 CREATE TABLE `conclusoes` (
     `inicial_id` INTEGER NOT NULL,
-    `data_apostilamento` DATETIME(3) NULL,
-    `data_conclusao` DATETIME(3) NULL,
-    `data_emissao` DATETIME(3) NULL,
-    `data_outorga` DATETIME(3) NULL,
-    `data_resposta` DATETIME(3) NULL,
-    `data_termo` DATETIME(3) NULL,
+    `data_apostilamento` DATE NULL,
+    `data_conclusao` DATE NULL,
+    `data_emissao` DATE NULL,
+    `data_outorga` DATE NULL,
+    `data_resposta` DATE NULL,
+    `data_termo` DATE NULL,
     `num_alvara` VARCHAR(191) NOT NULL,
     `obs` VARCHAR(191) NOT NULL,
     `outorga` BOOLEAN NOT NULL DEFAULT false,
@@ -191,8 +191,8 @@ CREATE TABLE `iniciais` (
     `requerimento` VARCHAR(191) NOT NULL,
     `aprova_digital` VARCHAR(191) NULL,
     `processo_fisico` VARCHAR(191) NULL,
-    `data_protocolo` DATETIME(3) NOT NULL,
-    `envio_admissibilidade` DATETIME(3) NULL,
+    `data_protocolo` DATE NOT NULL,
+    `envio_admissibilidade` DATE NULL,
     `alvara_tipo_id` VARCHAR(191) NOT NULL,
     `tipo_processo` INTEGER NULL DEFAULT 1,
     `obs` VARCHAR(191) NULL,
@@ -200,8 +200,8 @@ CREATE TABLE `iniciais` (
     `pagamento` INTEGER NULL DEFAULT 1,
     `requalifica_rapido` BOOLEAN NULL DEFAULT false,
     `associado_reforma` BOOLEAN NULL DEFAULT false,
-    `data_limiteSmul` DATETIME(3) NULL,
-    `data_limiteMulti` DATETIME(3) NULL,
+    `data_limiteSmul` DATE NULL,
+    `data_limiteMulti` DATE NULL,
     `criado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `alterado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -266,9 +266,9 @@ CREATE TABLE `pedidos_inicial` (
 -- CreateTable
 CREATE TABLE `reconsideracoes_admissibilidade` (
     `inicial_id` INTEGER NOT NULL,
-    `envio` DATETIME(3) NULL,
-    `publicacao` DATETIME(3) NULL,
-    `pedido_reconsideracao` DATETIME(3) NULL,
+    `envio` DATE NULL,
+    `publicacao` DATE NULL,
+    `pedido_reconsideracao` DATE NULL,
     `parecer` BOOLEAN NOT NULL DEFAULT false,
     `criado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `alterado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -280,9 +280,9 @@ CREATE TABLE `reconsideracoes_admissibilidade` (
 CREATE TABLE `reuniao_processos` (
     `id` VARCHAR(191) NOT NULL,
     `inicial_id` INTEGER NOT NULL,
-    `data_reuniao` DATETIME(3) NOT NULL,
-    `data_processo` DATETIME(0) NOT NULL,
-    `nova_data_reuniao` DATETIME(3) NULL,
+    `data_reuniao` DATE NOT NULL,
+    `data_processo` DATE NOT NULL,
+    `nova_data_reuniao` DATE NULL,
     `justificativa_remarcacao` VARCHAR(191) NULL,
     `criado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `alterado_em` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -397,7 +397,7 @@ CREATE TABLE `avisos` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Substituto` (
+CREATE TABLE `substitutos` (
     `id` VARCHAR(191) NOT NULL,
     `usuario_id` VARCHAR(191) NOT NULL,
     `substituto_id` VARCHAR(191) NOT NULL,
@@ -412,6 +412,9 @@ ALTER TABLE `admissibilidades` ADD CONSTRAINT `admissibilidades_inicial_id_fkey`
 
 -- AddForeignKey
 ALTER TABLE `admissibilidades` ADD CONSTRAINT `admissibilidades_unidade_id_fkey` FOREIGN KEY (`unidade_id`) REFERENCES `unidades`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `admissibilidades` ADD CONSTRAINT `admissibilidades_parecer_admissibilidade_id_fkey` FOREIGN KEY (`parecer_admissibilidade_id`) REFERENCES `pareceres_admissibilidade`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `admissibilidades` ADD CONSTRAINT `admissibilidades_subprefeitura_id_fkey` FOREIGN KEY (`subprefeitura_id`) REFERENCES `subprefeituras`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
@@ -486,7 +489,7 @@ ALTER TABLE `avisos` ADD CONSTRAINT `avisos_usuario_id_fkey` FOREIGN KEY (`usuar
 ALTER TABLE `avisos` ADD CONSTRAINT `avisos_inicial_id_fkey` FOREIGN KEY (`inicial_id`) REFERENCES `iniciais`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Substituto` ADD CONSTRAINT `Substituto_usuario_id_fkey` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `substitutos` ADD CONSTRAINT `substitutos_usuario_id_fkey` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Substituto` ADD CONSTRAINT `Substituto_substituto_id_fkey` FOREIGN KEY (`substituto_id`) REFERENCES `usuarios`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `substitutos` ADD CONSTRAINT `substitutos_substituto_id_fkey` FOREIGN KEY (`substituto_id`) REFERENCES `usuarios`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

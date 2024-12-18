@@ -25,7 +25,6 @@ export class RelatorioService {
       },
       select: { unidade: { select: { nome: true, id: true } } }
     });
-    console.log({countByUnidade: resultados})
     return resultados.reduce((acc, item): Record<string, number> => {
       const nome: string = item.unidade.nome;
       acc[nome] = (acc[nome] || 0) + 1;
