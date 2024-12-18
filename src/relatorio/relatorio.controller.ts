@@ -13,9 +13,9 @@ export class RelatorioController {
   @IsPublic()
   @Get("ar/quantitativo/:mes/:ano")
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar os relatórios com sucesso.', type: RelatorioResopnseDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório Aprova Rápido com sucesso.', type: RelatorioResopnseDto })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  @ApiOperation({ description: "Buscar todos os relatórios.", summary: 'Busque relatórios.' })
+  @ApiOperation({ description: "Buscar o relatório Aprova Rápido.", summary: 'Busque relatório Aprova Rápido.' })
   async relatorioQuantitativo(@Param('mes') mes: string, @Param('ano') ano: string) {
     return await this.relatorioService.getRelatorio(mes, ano);
   }
@@ -23,9 +23,9 @@ export class RelatorioController {
   @IsPublic()
   @Get("rr/quantitativo/:mes/:ano")
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar os relatórios com sucesso.', type: RelatorioResopnseDto })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório Requalifica Rápido com sucesso.', type: RelatorioResopnseDto })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  @ApiOperation({ description: "Buscar todos os relatórios.", summary: 'Busque relatórios.' })
+  @ApiOperation({ description: "Buscar o relatório Requalifica Rápido.", summary: 'Busque relatório Requalifica Rápido.' })
   async relatorioRequalificaRapido(@Param('mes') mes: string, @Param('ano') ano: string) {
     return await this.relatorioRRService.getRelatorio(mes, ano);
   }
