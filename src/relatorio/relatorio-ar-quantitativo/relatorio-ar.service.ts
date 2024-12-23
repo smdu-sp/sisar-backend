@@ -91,7 +91,8 @@ export class RelatorioService {
         "graproem": {
           "quantidade": Object.values(analiseGeralGrap).reduce((a, b) => a + b, 0),
           "data": analiseGeralGrap
-        }
+        },
+        "total_parcial": (Object.values(analiseGeralSmul).reduce((a, b) => a + b, 0) + Object.values(analiseGeralGrap).reduce((a, b) => a + b, 0)) 
       },
       "deferidos": {
         "smul": {
@@ -101,7 +102,8 @@ export class RelatorioService {
         "graproem": {
           "quantidade": Object.values(deferidoGeralGrap).reduce((a, b) => a + b, 0),
           "data": deferidoGeralGrap
-        }
+        },
+        "total_parcial": (Object.values(deferidoGeralSmul).reduce((a, b) => a + b, 0) + Object.values(deferidoGeralGrap).reduce((a, b) => a + b, 0)) 
       },
       "indeferidos": {
         "smul": {
@@ -111,7 +113,8 @@ export class RelatorioService {
         "graproem": {
           "quantidade": Object.values(indeferidosGeralGrap).reduce((a, b) => a + b, 0),
           "data": indeferidosGeralGrap
-        }
+        },
+        "total_parcial": (Object.values(indeferidosGeralSmul).reduce((a, b) => a + b, 0) + Object.values(indeferidosGeralGrap).reduce((a, b) => a + b, 0)) 
       },
       "inadmissiveis_dados": await this.getData(2, true, periodFilter),
       "admissiveis_dados": await this.getData(0, null, periodFilter),
