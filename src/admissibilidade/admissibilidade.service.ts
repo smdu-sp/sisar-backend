@@ -210,7 +210,6 @@ export class AdmissibilidadeService {
     id: number,
     updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
   ): Promise<Admissibilidade> {
-    console.log(updateAdmissibilidadeDto)
     const { interfaces, tipo_processo, inicial_id } = updateAdmissibilidadeDto;
     const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },

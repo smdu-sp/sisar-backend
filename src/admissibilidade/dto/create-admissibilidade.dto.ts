@@ -10,7 +10,7 @@ export class CreateAdmissibilidadeDto {
     @ApiProperty()
     data_decisao_interlocutoria: Date
     @ApiProperty()
-    parecer: number
+    parecer_admissibilidade_id?: string
     @ApiProperty()
     subprefeitura_id: string
     @ApiProperty()

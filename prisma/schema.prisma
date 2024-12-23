@@ -221,7 +221,7 @@ model Inicial {
   alvara_tipo                    Alvara_Tipo                     @relation(fields: [alvara_tipo_id], references: [id])
   alvara_tipo_id                 String
   tipo_processo                  Int?                            @default(1)
-  obs                            String?
+  obs                            String?                         @db.Text
   status                         Int?                            @default(1)
   pagamento                      Int?                            @default(1)
   requalifica_rapido             Boolean?                        @default(false)
