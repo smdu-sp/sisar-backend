@@ -118,7 +118,10 @@ export class RelatorioService {
       },
       "inadmissiveis_dados": await this.getData(2, true, periodFilter),
       "admissiveis_dados": await this.getData(0, null, periodFilter),
-      "em_analise_dados": await this.getData(1, true, periodFilter)
+      "em_analise_dados": await this.getData(1, true, periodFilter),
+      "deferidos_dados": await this.getData(3, false, periodFilter),
+      "indeferidos_dados": await this.getData(4, false, periodFilter),
+      "via_ordinaria_dados": await this.getData(5, false, periodFilter)
     };
   }
 }
