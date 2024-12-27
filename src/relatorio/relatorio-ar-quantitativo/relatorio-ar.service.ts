@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Admissibilidade, Unidade } from '@prisma/client';
+import { Admissibilidade, Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -55,6 +55,16 @@ export class RelatorioService {
     });
   };
 
+  // Função para obter dados completos de iniciais
+  async getInicialData(status: number, periodFilter: { gte: Date, lte: Date }): Promise<Inicial[]> {
+    return await this.prisma.inicial.findMany({
+      where: {
+        status,
+        criado_em: periodFilter
+      }
+    });
+  };
+
   async getRelatorio(mes: string, ano: string) {
     const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
     const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
@@ -63,9 +73,9 @@ export class RelatorioService {
     const unidadeIds: string[] = unidades.map(u => u.id);
 
     // Contagens
-    const analise: number = await this.countTotal(1, true, periodFilter);
-    const inadmissiveis: number = await this.countTotal(2, true, periodFilter);
-    const admissiveis: number = await this.countTotal(0, null, periodFilter);
+    const analise: number = (await this.getInicialData(0, periodFilter)).length;
+    const inadmissiveis: number = (await this.getInicialData(1, periodFilter)).length;
+    const admissiveis: number = (await this.getInicialData(2, periodFilter)).length;
 
     // Dados por tipo e status
     const analiseGeralSmul: Record<string, number> = await this.countByUnidade(2, 1, unidadeIds, periodFilter);
@@ -116,12 +126,12 @@ export class RelatorioService {
         },
         "total_parcial": (Object.values(indeferidosGeralSmul).reduce((a, b) => a + b, 0) + Object.values(indeferidosGeralGrap).reduce((a, b) => a + b, 0)) 
       },
-      "inadmissiveis_dados": await this.getData(2, true, periodFilter),
-      "admissiveis_dados": await this.getData(0, null, periodFilter),
-      "em_analise_dados": await this.getData(1, true, periodFilter),
-      "deferidos_dados": await this.getData(3, false, periodFilter),
-      "indeferidos_dados": await this.getData(4, false, periodFilter),
-      "via_ordinaria_dados": await this.getData(5, false, periodFilter)
+      "analise_admissiveis_dados": await this.getInicialData(0, periodFilter),
+      "inadmissiveis_dados": await this.getInicialData(1, periodFilter),
+      "em_analise_dados": await this.getInicialData(2, periodFilter),
+      "deferidos_dados": await this.getInicialData(3, periodFilter),
+      "indeferidos_dados": await this.getInicialData(4, periodFilter),
+      "via_ordinaria_dados": await this.getInicialData(5, periodFilter)
     };
   }
 }
