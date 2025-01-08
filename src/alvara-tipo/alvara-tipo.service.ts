@@ -4,7 +4,6 @@ import { UpdateAlvaraTipoDto } from './dto/update-alvara-tipo.dto';
 import { Alvara_Tipo } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { contains } from 'class-validator';
 import { AlvaraTipoPaginadoDTO, AlvaraTipoResponseDTO } from './dto/alvara-tipo-responses.dto';
 
 @Injectable()
@@ -86,10 +85,7 @@ export class AlvaraTipoService {
     return alvara_tipo;
   }
 
-  async atualizar(
-    id: string, 
-    updateAlvaraTipoDto: UpdateAlvaraTipoDto
-  ): Promise<AlvaraTipoResponseDTO> {
+  async atualizar(id: string, updateAlvaraTipoDto: UpdateAlvaraTipoDto): Promise<AlvaraTipoResponseDTO> {
     const alvara_tipo: AlvaraTipoResponseDTO = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });
@@ -104,10 +100,7 @@ export class AlvaraTipoService {
     return alvara_tipo_atualizado;
   }
 
-  async alterarStatus(
-    id: string, 
-    status: number
-  ): Promise<AlvaraTipoResponseDTO> {
+  async alterarStatus(id: string, status: number): Promise<AlvaraTipoResponseDTO> {
     const alvaraTipo: AlvaraTipoResponseDTO = await this.prisma.alvara_Tipo.findFirst({
       where: { id },
     });

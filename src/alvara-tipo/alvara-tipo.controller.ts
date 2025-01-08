@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { AlvaraTipoService } from './alvara-tipo.service';
 import { CreateAlvaraTipoDto } from './dto/create-alvara-tipo.dto';
 import { UpdateAlvaraTipoDto } from './dto/update-alvara-tipo.dto';
