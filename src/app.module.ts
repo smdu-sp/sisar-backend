@@ -17,12 +17,11 @@ import { DistribuicaoModule } from './distribuicao/distribuicao.module';
 import { AvisosModule } from './avisos/avisos.module';
 import { ParecerAdmissibilidadeModule } from './parecer_admissibilidade/parecer_admissibilidade.module';
 import { FinalizacaoModule } from './finalizacao/finalizacao.module';
-import { RelatorioRRModule } from './relatorio/relatorio-rr-quantitativo/relatorio-rr.module';
-import { RelatorioModule } from './relatorio/relatorio-ar-quantitativo/relatorio-ar.module';
+import { RelatorioModule } from './relatorio/relatorio.module';
 
 @Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, SGUModule, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule, AdmissibilidadeModule, DistribuicaoModule, AvisosModule, ParecerAdmissibilidadeModule, RelatorioRRModule, RelatorioModule, FinalizacaoModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, SGUModule, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule, AdmissibilidadeModule, DistribuicaoModule, AvisosModule, ParecerAdmissibilidadeModule, RelatorioModule, FinalizacaoModule],
   controllers: [],
   providers: [
     AppService,

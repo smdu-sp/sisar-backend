@@ -4,11 +4,16 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RelatorioResopnseDto } from './relatorio-ar-quantitativo/dto/response-relatorio.dto';
 import { RelatorioService } from './relatorio-ar-quantitativo/relatorio-ar.service';
 import { RelatorioRRService } from './relatorio-rr-quantitativo/relatorio-rr.service';
+import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal/ar-grafico-progressao-mensal.service';
 
 @Controller('relatorio')
 @ApiTags('Relatórios')
 export class RelatorioController {
-  constructor(private readonly relatorioService: RelatorioService, private readonly relatorioRRService: RelatorioRRService) {}
+  constructor(
+    private readonly relatorioService: RelatorioService, 
+    private readonly relatorioRRService: RelatorioRRService,
+    private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService
+  ) {}
   
   @IsPublic()
   @Get("ar/quantitativo/:mes/:ano")
@@ -28,5 +33,11 @@ export class RelatorioController {
   @ApiOperation({ description: "Buscar o relatório Requalifica Rápido.", summary: 'Busque relatório Requalifica Rápido.' })
   async relatorioRequalificaRapido(@Param('mes') mes: string, @Param('ano') ano: string) {
     return await this.relatorioRRService.getRelatorio(mes, ano);
+  }
+
+  @IsPublic()
+  @Get('ar/progressao-mensal/:ano')
+  async relatorioArGraficoProgressaoMensal(@Param('ano') ano: number) {
+    return await this.arGraficoProgressaoMensal.getAllByYear(ano);
   }
 }
