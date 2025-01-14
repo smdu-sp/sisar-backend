@@ -41,3 +41,8 @@ export class RelatorioResopnseDto {
   @ApiProperty()
   indeferidos?: RelatorioData;
 }
+
+export class PeriodFilterDto { 
+  gte: Date; 
+  lte: Date 
+}

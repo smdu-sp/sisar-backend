@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Admissibilidade, Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PeriodFilterDto } from './dto/response-relatorio.dto';
 
 @Injectable()
 export class RelatorioService {
@@ -14,9 +15,7 @@ export class RelatorioService {
   }
 
   // Função auxiliar para contagem e agrupamento
-  async countByUnidade(
-    status: number, tipo: number, unidadeIds: string[], periodFilter: { gte: Date, lte: Date }
-  ): Promise<Record<string, number>> {
+  async countByUnidade(status: number, tipo: number, unidadeIds: string[], periodFilter: PeriodFilterDto): Promise<Record<string, number>> {
     const resultados: { unidade: { nome: string, id: string } }[] = await this.prisma.admissibilidade.findMany({
       where: {
         inicial: { status, tipo_processo: tipo },
@@ -33,7 +32,7 @@ export class RelatorioService {
   };
 
   // Função auxiliar para contagem total
-  async countTotal(status: number, decisaoNull = false, periodFilter: { gte: Date, lte: Date }): Promise<number> {
+  async countTotal(status: number, decisaoNull = false, periodFilter: PeriodFilterDto): Promise<number> {
     return await this.prisma.admissibilidade.count({
       where: {
         status,
@@ -69,7 +68,7 @@ export class RelatorioService {
     const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
     const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
     const unidades: Partial<Unidade>[] = await this.getUnidades();
-    const periodFilter: { gte: Date, lte: Date } = { gte: primeiroDia, lte: ultimoDia };
+    const periodFilter: PeriodFilterDto = { gte: primeiroDia, lte: ultimoDia };
     const unidadeIds: string[] = unidades.map(u => u.id);
 
     // Contagens
