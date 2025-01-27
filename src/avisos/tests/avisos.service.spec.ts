@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AvisosService } from '../avisos.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Avisos } from '@prisma/client';
+import { UpdateAvisoDto } from '../dto/update-aviso.dto';
+import { AvisosResponseDTO } from '../dto/response.dto';
 
 describe('AvisosService tests', () => {
   let service: AvisosService;
@@ -95,5 +97,29 @@ describe('AvisosService tests', () => {
     });
     // Verifica se o retorno está correto.
     expect(result).toEqual(mockCreateResult);
+  });
+
+  /**
+   * Testando chamada do serviço de "update"
+   * 
+   */
+  it('should call prisma.avisos.update', async () => {
+    // Criando o objeto mockado de retorno da chamada "update".
+    const mockUpdateResult: UpdateAvisoDto = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2 };
+    // Configura o retorno do método mockado.
+    (prisma.avisos.update as jest.Mock).mockResolvedValue(mockUpdateResult);
+
+    // Chama o método do serviço, fornecendo o id do aviso e objeto UpdateAvisoDto.
+    const result: AvisosResponseDTO = await service.update('123', mockUpdateResult);
+
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método do prisma mockado foi chamado corretamente.
+    expect(prisma.avisos.update).toHaveBeenCalledWith({
+      where: { id: expect.any(String) },
+      data: mockUpdateResult
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockUpdateResult);
   });
 });
