@@ -122,4 +122,27 @@ describe('AvisosService tests', () => {
     // Verifica se o retorno está correto.
     expect(result).toEqual(mockUpdateResult);
   });
+
+  /**
+   * Testando chamada do serviço de "remove"
+   * 
+   */
+  it('should call prisma.avisos.delete', async () => {
+    // Criando o objeto mockado de retorno da chamada "remove".
+    const mockDeleteResult: UpdateAvisoDto = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2 };
+    // Configura o retorno do método mockado.
+    (prisma.avisos.delete as jest.Mock).mockResolvedValue(mockDeleteResult);
+
+    // Chama o método do serviço, fornecendo o id do aviso.
+    const result: AvisosResponseDTO = await service.remove('123');
+
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método do prisma mockado foi chamado corretamente.
+    expect(prisma.avisos.delete).toHaveBeenCalledWith({
+      where: { id: expect.any(String) }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockDeleteResult);
+  });
 });
