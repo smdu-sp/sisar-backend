@@ -66,7 +66,7 @@ describe('AvisosService tests', () => {
    * Testando chamada do serviço de "buscarPorMesAno"
    * 
    */
-  it('should call prisma.avisos.findOne', async () => {
+  it('should call prisma.avisos.findMany', async () => {
     // Criando o objeto mockado de retorno da chamada "buscarPorMesAno".
     const mockCreateResult: Avisos[] = [
       { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2, criado_em: null, alterado_em: null },
@@ -129,7 +129,7 @@ describe('AvisosService tests', () => {
    */
   it('should call prisma.avisos.delete', async () => {
     // Criando o objeto mockado de retorno da chamada "remove".
-    const mockDeleteResult: UpdateAvisoDto = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2 };
+    const mockDeleteResult: AvisosResponseDTO = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2, criado_em: null, alterado_em: null };
     // Configura o retorno do método mockado.
     (prisma.avisos.delete as jest.Mock).mockResolvedValue(mockDeleteResult);
 
