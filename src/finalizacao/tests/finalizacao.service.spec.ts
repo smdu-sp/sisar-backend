@@ -4,6 +4,7 @@ import { FinalizacaoService } from '../finalizacao.service';
 import { AppService } from 'src/app.service';
 import { CreateFinalizacaoDto } from '../dto/create-finalizacao.dto';
 import { Conclusao } from '@prisma/client';
+import { FinalizacaoPaginado } from '../dto/finalizacao-response.dto';
 
 describe('FinalizacaoService tests', () => {
   let service: FinalizacaoService;
@@ -31,9 +32,8 @@ describe('FinalizacaoService tests', () => {
   };
   // Configurando mock para o serviço do app.
   const mockAppService = {
-    app: {
-      verificaPagina: jest.fn()
-    },
+    verificaPagina: jest.fn(),
+    verificaLimite: jest.fn()
   };
 
   beforeEach(async () => {
@@ -90,4 +90,42 @@ describe('FinalizacaoService tests', () => {
     expect(result).toEqual(mockCreateResult);
   });
 
+  /**
+   * 
+   * Testando chamada do serviço de "buscarTudo"
+   * 
+   */
+  it('should call prisma.inicial.findMany when find all is called', async () => {
+    // Configura o retorno dos métodos mockados
+    (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
+    (prisma.conclusao.count as jest.Mock).mockResolvedValue(10);
+    (app.verificaLimite as jest.Mock).mockReturnValue([0, 10]);
+    (prisma.conclusao.findMany as jest.Mock).mockResolvedValue([]);
+
+    // Chama o método do serviço, fornecendo pagina e limite.
+    const result: FinalizacaoPaginado = await service.buscarTudo(0, 10, 'search');
+
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método count mockado de conclusão foi chamado corretamente.
+    expect(prisma.conclusao.count).toHaveBeenCalled();
+    // Verifica se o método findMany mockado de conclusão foi chamado corretamente.
+    expect(prisma.conclusao.findMany).toHaveBeenCalledWith({ 
+      where: {
+        OR: [
+          { 
+            obs: { contains: expect.any(String) }
+          },
+        ]
+      },
+      include: { 
+        inicial: expect.any(Boolean) 
+      },
+      skip: expect.any(Number),
+      take: expect.any(Number)
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
+    expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
+  });
 });
