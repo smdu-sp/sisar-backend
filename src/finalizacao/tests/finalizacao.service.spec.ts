@@ -5,6 +5,7 @@ import { AppService } from 'src/app.service';
 import { CreateFinalizacaoDto } from '../dto/create-finalizacao.dto';
 import { Conclusao } from '@prisma/client';
 import { FinalizacaoPaginado } from '../dto/finalizacao-response.dto';
+import { UpdateFinalizacaoDto } from '../dto/update-finalizacao.dto';
 
 describe('FinalizacaoService tests', () => {
   let service: FinalizacaoService;
@@ -153,5 +154,33 @@ describe('FinalizacaoService tests', () => {
     // Verifica se o retorno está correto.
     expect(result).toEqual(mockFindUniqueResult);
     expect(result.outorga).toEqual(mockFindUniqueResult.outorga);
+  });
+
+  /**
+   * 
+   * Testando chamada do serviço de "atualizar"
+   * 
+   */
+  it('should call prisma.conclusao.update when update is called', async () => {
+    const mockUpdateResult: Conclusao = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false, criado_em: new Date(), alterado_em: new Date() };
+    const mockUpdateDto: UpdateFinalizacaoDto = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false };
+    // Configura o retorno dos métodos mockados
+    (prisma.conclusao.update as jest.Mock).mockResolvedValue(mockUpdateResult);
+
+    // Chama o método do serviço, id e UpdateFinalizacaoDto.
+    const result: Conclusao = await service.atualizar(3, mockUpdateDto);
+
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método update mockado de conclusão foi chamado corretamente.
+    expect(prisma.conclusao.update).toHaveBeenCalledWith({ 
+      where: {
+        inicial_id: expect.any(Number)
+      },
+      data: mockUpdateDto
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockUpdateResult);
+    expect(result.num_alvara).toEqual(mockUpdateResult.num_alvara);
   });
 });
