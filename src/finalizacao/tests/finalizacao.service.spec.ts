@@ -128,4 +128,30 @@ describe('FinalizacaoService tests', () => {
     expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
     expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
   });
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscaId"
+   * 
+   */
+  it('should call prisma.inicial.findUnique when find by id is called', async () => {
+    const mockFindUniqueResult: Conclusao = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false, criado_em: new Date(), alterado_em: new Date() };
+    // Configura o retorno dos métodos mockados
+    (prisma.conclusao.findUnique as jest.Mock).mockResolvedValue(mockFindUniqueResult);
+
+    // Chama o método do serviço, fornecendo pagina e limite.
+    const result: Conclusao = await service.buscaId(3);
+
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método findUnique mockado de conclusão foi chamado corretamente.
+    expect(prisma.conclusao.findUnique).toHaveBeenCalledWith({ 
+      where: {
+        inicial_id: expect.any(Number)
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockFindUniqueResult);
+    expect(result.outorga).toEqual(mockFindUniqueResult.outorga);
+  });
 });
