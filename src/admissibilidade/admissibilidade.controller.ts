@@ -7,7 +7,6 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, 
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
-
 @ApiTags('Admissibilidade')
 @ApiBearerAuth()
 @Controller('admissibilidade')
@@ -59,9 +58,7 @@ export class AdmissibilidadeController {
   @ApiParam({ name: 'id', type: 'string', required: false })
   @ApiResponse({ status: 200, description: 'Retorna 200 se buscar a admissibilidade por ID com sucesso.', type: AdmissibilidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  buscarPorId(
-    @Param('id') id: string
-  ): Promise<AdmissibilidadeResponseDTO> {
+  buscarPorId(@Param('id') id: string): Promise<AdmissibilidadeResponseDTO> {
     return this.admissibilidadeService.buscarPorId(+id);
   }
 
