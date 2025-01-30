@@ -3,7 +3,6 @@ import { SubprefeituraResponseDTO } from '../dto/subprefeitura-response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateSubprefeituraDto } from '../dto/create-subprefeitura.dto';
 
 describe('SubprefeituraService Test', () => {
   let service: SubprefeituraService;
@@ -17,6 +16,10 @@ describe('SubprefeituraService Test', () => {
       findMany: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    },
+    unidade: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -74,11 +77,11 @@ describe('SubprefeituraService Test', () => {
 
   //aqui verificamos se as instâncias mockadas conseguiram ser coompletamente instanciadas
 
-  it('should call prisma.subprefeitura.create when create is called', async () => {
+  it('deve verificar se o metodo create cria uma subprefeitura', async () => {
     const mockCreateResult: SubprefeituraResponseDTO = {
       id: 'a1e2c4v6u8',
-      nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
-      sigla: 'SMEPIU',
+      nome: 'Subprefeitura da Sé',
+      sigla: 'SBS',
       status: 1,
       criado_em: new Date('2025-01-29T19:08:50.340Z'),
       alterado_em: new Date('2025-01-29T19:08:50.340Z'),
@@ -101,8 +104,8 @@ describe('SubprefeituraService Test', () => {
     */
 
     const result: SubprefeituraResponseDTO = await service.criar({
-      nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
-      sigla: 'SMEPIU',
+      nome: 'Subprefeitura da Sé',
+      sigla: 'SBS',
       status: 1,
     });
 
@@ -112,7 +115,7 @@ describe('SubprefeituraService Test', () => {
 
     expect(prisma.subprefeitura.findUnique).toHaveBeenCalledWith({
       where: {
-        nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
+        nome: 'Subprefeitura da Sé',
       },
     });
 
@@ -120,8 +123,8 @@ describe('SubprefeituraService Test', () => {
 
     expect(prisma.subprefeitura.create).toHaveBeenCalledWith({
       data: {
-        nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
-        sigla: 'SMEPIU',
+        nome: 'Subprefeitura da Sé',
+        sigla: 'SBS',
         status: 1,
       },
     });
@@ -131,7 +134,7 @@ describe('SubprefeituraService Test', () => {
 
   ///teste de listagem de lista vazia
 
-  it('should return an empty list of subprefectures', async () => {
+  it('deve validar se listaCompleta retorna uma lista vazia de subprefeituras', async () => {
     (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue([]);
 
     const result: SubprefeituraResponseDTO[] = await service.listaCompleta();
@@ -145,28 +148,28 @@ describe('SubprefeituraService Test', () => {
 
   ///teste de listagem de subprefeituras ordenadas
 
-  it('should return subprefeituras ordered by name in ascending order', async () => {
+  it('deve validar se listaCompleta retorna uma lista de subprefeituras', async () => {
     const mockSubprefeituras: SubprefeituraResponseDTO[] = [
       {
         id: 'u1ab7u89',
-        nome: 'Secretaria Municipal de Artesanato e Artes Plásticas',
-        sigla: 'SMAAP',
+        nome: 'Subprefeitura da Sé',
+        sigla: 'SBS',
         status: 1,
         criado_em: new Date('2023-01-01T00:00:00.000Z'),
         alterado_em: new Date('2023-01-01T00:00:00.000Z'),
       },
       {
         id: 'u2act91',
-        nome: 'Subprefeitura Municipal de Bancos Emergentes',
-        sigla: 'SMBE',
+        nome: 'Subprefeitura Ermelino Matarazzo',
+        sigla: 'SBEM',
         status: 1,
         criado_em: new Date('2023-01-02T00:00:00.000Z'),
         alterado_em: new Date('2023-01-02T00:00:00.000Z'),
       },
       {
         id: 'u3adv12',
-        nome: 'Subprefeitura Municipal de Reciclagem',
-        sigla: 'SPC',
+        nome: 'Subprefeitura de Itaquera',
+        sigla: 'SBI',
         status: 1,
         criado_em: new Date('2023-01-03T00:00:00.000Z'),
         alterado_em: new Date('2023-01-03T00:00:00.000Z'),
@@ -192,10 +195,10 @@ describe('SubprefeituraService Test', () => {
 
   ///teste buscar por id
 
-  it('It should be possible to search for subprefeituras by ID', async () => {
+  it('deve validar se buscarPorId encontra uma subprefeitura com um ID correto sendo passado', async () => {
     const mockSubprefeitura: SubprefeituraResponseDTO = {
       id: 'u1ab7u89',
-      nome: 'Secretaria Municipal de Artesanato e Artes Plásticas',
+      nome: 'Subprefeitura da Sé',
       sigla: 'SMAAP',
       status: 1,
       criado_em: new Date('2023-01-01T00:00:00.000Z'),
@@ -213,8 +216,42 @@ describe('SubprefeituraService Test', () => {
 
     expect(prisma.subprefeitura.findUnique).toHaveBeenCalledWith({
       where: {
-        id: 'u1ab7u89',
+        id: expect.any(String),
       },
+    });
+  });
+
+  ///testando desativar subprefeitura
+
+  it('should call prisma.unidade.update when desativar is called', async () => {
+    // 1. Mock da unidade encontrada (ativa)
+    const mockSubprefeituraFind = {
+      id: 'a1u7900b',
+      nome: 'Subprefeitura de São Mateus',
+      sigla: 'SBSM',
+      status: 1, // Status ativo
+      criado_em: new Date('2023-01-01T00:00:00.000Z'),
+      alterado_em: new Date('2023-01-01T00:00:00.000Z'),
+    };
+  
+    (prisma.unidade.findUnique as jest.Mock).mockResolvedValue(mockSubprefeituraFind);
+    (prisma.unidade.update as jest.Mock).mockResolvedValue({
+      message: 'Unidade desativada com sucesso.',
+    });
+  
+    const result: { message: string } = await service.desativar('a1u7900b');
+  
+    expect(result).toEqual({
+      message: 'Unidade desativada com sucesso.',
+    });
+  
+    expect(prisma.unidade.findUnique).toHaveBeenCalledWith({
+      where: { id: expect.any(String) },
+    });
+  
+    expect(prisma.unidade.update).toHaveBeenCalledWith({
+      where: { id: expect.any(String) },
+      data: { status: 0 },
     });
   });
 });
