@@ -127,15 +127,60 @@ describe('SubprefeituraService Test', () => {
     expect(result).toEqual(mockCreateResult);
   });
 
-  ///teste de listagem
+  ///teste de listagem de lista vazia
 
-  it('should return an empty list if there are no subprefeituras', async () => {
+  it('should return an empty list of subprefectures', async () => {
 
     (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue([]);
   
     const result: SubprefeituraResponseDTO[] = await service.listaCompleta();
   
     expect(result).toEqual([]);
+  
+    expect(prisma.subprefeitura.findMany).toHaveBeenCalledWith({
+      orderBy: { nome: 'asc' },
+    });
+  });
+
+  ///teste de listagem de subprefeituras ordenadas
+
+  it('should return subprefeituras ordered by name in ascending order', async () => {
+    const mockSubprefeituras: SubprefeituraResponseDTO[] = [
+      {
+        id: '1',
+        nome: 'Secretaria Municipal de Artesanato e Artes Plásticas',
+        sigla: 'SMAAP',
+        status: 1,
+        criado_em: new Date('2023-01-01T00:00:00.000Z'),
+        alterado_em: new Date('2023-01-01T00:00:00.000Z'),
+      },
+      {
+        id: '2',
+        nome: 'Subprefeitura Municipal de Bancos Emergentes',
+        sigla: 'SMBE',
+        status: 1,
+        criado_em: new Date('2023-01-02T00:00:00.000Z'),
+        alterado_em: new Date('2023-01-02T00:00:00.000Z'),
+      },
+      {
+        id: '3',
+        nome: 'Subprefeitura Municipal de Reciclagem',
+        sigla: 'SPC',
+        status: 1,
+        criado_em: new Date('2023-01-03T00:00:00.000Z'),
+        alterado_em: new Date('2023-01-03T00:00:00.000Z'),
+      },
+    ];
+  
+    (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue(mockSubprefeituras);
+
+    //o meu resolve força o retorno de uma lista ordenada
+  
+    const result: SubprefeituraResponseDTO[] = await service.listaCompleta();
+
+    //indiretamente, o meu findMany esta retornando a lista mockada
+  
+    expect(result).toEqual(mockSubprefeituras);
   
     expect(prisma.subprefeitura.findMany).toHaveBeenCalledWith({
       orderBy: { nome: 'asc' },
