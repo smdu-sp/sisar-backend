@@ -39,7 +39,7 @@ describe('SubprefeituraService Test', () => {
   /*
   o mock do AppService repete o mesmo comportamento do mock do Prisma,
   ele é utilizado no subprefeitura.service para fazer paginações
-  */ 
+  */
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -85,9 +85,11 @@ describe('SubprefeituraService Test', () => {
     };
 
     //este é o objeto de comparação, o resultado do teste será comparado a ele para validação.
-  
+
     (prisma.subprefeitura.findUnique as jest.Mock).mockResolvedValue(null);
-    (prisma.subprefeitura.create as jest.Mock).mockResolvedValue(mockCreateResult);
+    (prisma.subprefeitura.create as jest.Mock).mockResolvedValue(
+      mockCreateResult,
+    );
 
     /*
     em SubPrefeituraService, antes de uma subprefeitura ser criada, um metodo busca no banco
@@ -97,7 +99,7 @@ describe('SubprefeituraService Test', () => {
     o metodo create só consegue ser startado se um metodo findUnique retorna um null antes dele
     graçar ao mockResolvedValue, podemos forçar uma resposta de uma promise resolvida da forma que setamos
     */
-  
+
     const result: SubprefeituraResponseDTO = await service.criar({
       nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
       sigla: 'SMEPIU',
@@ -105,9 +107,9 @@ describe('SubprefeituraService Test', () => {
     });
 
     ///teste de criação
-  
+
     expect(result).not.toBeNull();
-  
+
     expect(prisma.subprefeitura.findUnique).toHaveBeenCalledWith({
       where: {
         nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
@@ -115,7 +117,7 @@ describe('SubprefeituraService Test', () => {
     });
 
     //verifica se existe uma subprefeitura com o mesmo nome
-  
+
     expect(prisma.subprefeitura.create).toHaveBeenCalledWith({
       data: {
         nome: 'Secretaria Municipal de Etnias e Povoados Indígenas Urbanos',
@@ -123,20 +125,19 @@ describe('SubprefeituraService Test', () => {
         status: 1,
       },
     });
-  
+
     expect(result).toEqual(mockCreateResult);
   });
 
   ///teste de listagem de lista vazia
 
   it('should return an empty list of subprefectures', async () => {
-
     (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue([]);
-  
+
     const result: SubprefeituraResponseDTO[] = await service.listaCompleta();
-  
+
     expect(result).toEqual([]);
-  
+
     expect(prisma.subprefeitura.findMany).toHaveBeenCalledWith({
       orderBy: { nome: 'asc' },
     });
@@ -147,7 +148,7 @@ describe('SubprefeituraService Test', () => {
   it('should return subprefeituras ordered by name in ascending order', async () => {
     const mockSubprefeituras: SubprefeituraResponseDTO[] = [
       {
-        id: '1',
+        id: 'u1ab7u89',
         nome: 'Secretaria Municipal de Artesanato e Artes Plásticas',
         sigla: 'SMAAP',
         status: 1,
@@ -155,7 +156,7 @@ describe('SubprefeituraService Test', () => {
         alterado_em: new Date('2023-01-01T00:00:00.000Z'),
       },
       {
-        id: '2',
+        id: 'u2act91',
         nome: 'Subprefeitura Municipal de Bancos Emergentes',
         sigla: 'SMBE',
         status: 1,
@@ -163,7 +164,7 @@ describe('SubprefeituraService Test', () => {
         alterado_em: new Date('2023-01-02T00:00:00.000Z'),
       },
       {
-        id: '3',
+        id: 'u3adv12',
         nome: 'Subprefeitura Municipal de Reciclagem',
         sigla: 'SPC',
         status: 1,
@@ -171,19 +172,49 @@ describe('SubprefeituraService Test', () => {
         alterado_em: new Date('2023-01-03T00:00:00.000Z'),
       },
     ];
-  
-    (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue(mockSubprefeituras);
+
+    (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue(
+      mockSubprefeituras,
+    );
 
     //o meu resolve força o retorno de uma lista ordenada
-  
+
     const result: SubprefeituraResponseDTO[] = await service.listaCompleta();
 
     //indiretamente, o meu findMany esta retornando a lista mockada
-  
+
     expect(result).toEqual(mockSubprefeituras);
-  
+
     expect(prisma.subprefeitura.findMany).toHaveBeenCalledWith({
       orderBy: { nome: 'asc' },
+    });
+  });
+
+  ///teste buscar por id
+
+  it('It should be possible to search for subprefeituras by ID', async () => {
+    const mockSubprefeitura: SubprefeituraResponseDTO = {
+      id: 'u1ab7u89',
+      nome: 'Secretaria Municipal de Artesanato e Artes Plásticas',
+      sigla: 'SMAAP',
+      status: 1,
+      criado_em: new Date('2023-01-01T00:00:00.000Z'),
+      alterado_em: new Date('2023-01-01T00:00:00.000Z'),
+    };
+
+    (prisma.subprefeitura.findUnique as jest.Mock).mockResolvedValue(
+      mockSubprefeitura,
+    );
+
+    const result: SubprefeituraResponseDTO =
+      await service.buscarPorId('u1ab7u89');
+
+    expect(result).toEqual(mockSubprefeitura);
+
+    expect(prisma.subprefeitura.findUnique).toHaveBeenCalledWith({
+      where: {
+        id: 'u1ab7u89',
+      },
     });
   });
 });
