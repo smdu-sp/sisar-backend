@@ -3,6 +3,7 @@ import { SubprefeituraResponseDTO } from '../dto/subprefeitura-response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Subprefeitura } from '@prisma/client';
 import { CreateSubprefeituraDto } from '../dto/create-subprefeitura.dto';
 
 describe('SubprefeituraService Test', () => {
@@ -17,6 +18,7 @@ describe('SubprefeituraService Test', () => {
       findMany: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
     unidade: {
       findUnique: jest.fn(),
@@ -305,4 +307,78 @@ describe('SubprefeituraService Test', () => {
     expect(result).toEqual(mockSubprefeituraUpdate);
   });
 
+  ///testando a funcionalidade buscarTudo
+
+  it('deve retornar uma lista de subprefeituras com a paginação correta', async () => {
+    const mockSubprefeituraList = [
+      {
+        id: 'u1ab7u89',
+        nome: 'Subprefeitura da Sé',
+        sigla: 'SBS',
+        status: 1,
+        criado_em: new Date('2023-01-01T00:00:00.000Z'),
+        alterado_em: new Date('2023-01-01T00:00:00.000Z'),
+      },
+      {
+        id: 'u2act91',
+        nome: 'Subprefeitura Ermelino Matarazzo',
+        sigla: 'SBEM',
+        status: 1,
+        criado_em: new Date('2023-01-02T00:00:00.000Z'),
+        alterado_em: new Date('2023-01-02T00:00:00.000Z'),
+      },
+      {
+        id: 'u3adv12',
+        nome: 'Subprefeitura de Itaquera',
+        sigla: 'SBI',
+        status: 1,
+        criado_em: new Date('2023-01-03T00:00:00.000Z'),
+        alterado_em: new Date('2023-01-03T00:00:00.000Z'),
+      },
+    ];
+  
+    const mockExpected = {
+      total: 3,
+      pagina: 1,
+      limite: 10,
+      data: mockSubprefeituraList,
+    };
+  
+    const mockParams = {
+      pagina: 1,
+      limite: 10,
+      busca: 'Subprefeitura',
+    };
+  
+    (prisma.subprefeitura.count as jest.Mock).mockResolvedValue(3);
+  
+    jest.spyOn(app, 'verificaPagina').mockReturnValue([1, 10]);
+  
+    (prisma.subprefeitura.findMany as jest.Mock).mockResolvedValue(mockSubprefeituraList);
+  
+    const result = await service.buscarTudo(mockParams.pagina, mockParams.limite, mockParams.busca);
+  
+    expect(result).not.toBeNull(); 
+    expect(result).toEqual(mockExpected); 
+  
+    expect(app.verificaPagina).toHaveBeenCalledWith(mockParams.pagina, mockParams.limite); 
+    expect(prisma.subprefeitura.count).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { nome: { contains: mockParams.busca } },
+          { sigla: { contains: mockParams.busca } },
+        ],
+      },
+    }); 
+    expect(prisma.subprefeitura.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { nome: { contains: mockParams.busca } },
+          { sigla: { contains: mockParams.busca } },
+        ],
+      },
+      skip: (mockParams.pagina - 1) * mockParams.limite, 
+      take: mockParams.limite,
+    }); 
+  });
 });
