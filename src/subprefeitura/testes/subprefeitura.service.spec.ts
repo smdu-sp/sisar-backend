@@ -3,8 +3,6 @@ import { SubprefeituraResponseDTO } from '../dto/subprefeitura-response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Subprefeitura } from '@prisma/client';
-import { CreateSubprefeituraDto } from '../dto/create-subprefeitura.dto';
 
 describe('SubprefeituraService Test', () => {
   let service: SubprefeituraService;
@@ -26,13 +24,6 @@ describe('SubprefeituraService Test', () => {
     },
   };
 
-  /*
-  O prisma é uma camada de abstração do prisma client que facilita a utilização das operações do prisma
-  no nosso app
-  O mock é uma versão mockada (clone temporário) que será utilizado dentro do escopo de testes, ele
-  ajuda a isolar o teste e evitar requisições no banco de dados, evitando efeitos colaterais no app
-  cada operação prisma client esta sendo substituida por uma função mock do jest (jest.fn())*/
-
   const MockAppService = {
     verificaPagina: jest
       .fn()
@@ -41,11 +32,6 @@ describe('SubprefeituraService Test', () => {
       .fn()
       .mockImplementation((pagina, limite, total) => [pagina, limite]),
   };
-
-  /*
-  o mock do AppService repete o mesmo comportamento do mock do Prisma,
-  ele é utilizado no subprefeitura.service para fazer paginações
-  */
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -66,19 +52,11 @@ describe('SubprefeituraService Test', () => {
     app = module.get<AppService>(AppService);
   });
 
-  /* 
-  TestingModule é uma classe do NestJs que cria o módulo de testes do nossp app.
-  Aqui, você usa as funcionalidades da aplicação real sem que ela seja startada de fato.
-  Ele é criado através da função createTestingModule da class Test do Nest. 
-  */
-
   it('should be defined / se os serviços estão definidos', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
     expect(app).toBeDefined();
   });
-
-  //aqui verificamos se as instâncias mockadas conseguiram ser coompletamente instanciadas
 
   it('deve verificar se o metodo create cria uma subprefeitura', async () => {
     const mockCreateResult: SubprefeituraResponseDTO = {
@@ -90,21 +68,10 @@ describe('SubprefeituraService Test', () => {
       alterado_em: new Date('2025-01-29T19:08:50.340Z'),
     };
 
-    //este é o objeto de comparação, o resultado do teste será comparado a ele para validação.
-
     (prisma.subprefeitura.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.subprefeitura.create as jest.Mock).mockResolvedValue(
       mockCreateResult,
     );
-
-    /*
-    em SubPrefeituraService, antes de uma subprefeitura ser criada, um metodo busca no banco
-    se há uma subprefeitura com o mesmo nome.
-    aqui forçamos o mesmo comportamento, fazendo um mock do metodo findUnique de subprefeitura
-    e o forçamos a retornar um null
-    o metodo create só consegue ser startado se um metodo findUnique retorna um null antes dele
-    graçar ao mockResolvedValue, podemos forçar uma resposta de uma promise resolvida da forma que setamos
-    */
 
     const result: SubprefeituraResponseDTO = await service.criar({
       nome: 'Subprefeitura da Sé',
@@ -183,11 +150,7 @@ describe('SubprefeituraService Test', () => {
       mockSubprefeituras,
     );
 
-    //o meu resolve força o retorno de uma lista ordenada
-
     const result: SubprefeituraResponseDTO[] = await service.listaCompleta();
-
-    //indiretamente, o meu findMany esta retornando a lista mockada
 
     expect(result).toEqual(mockSubprefeituras);
 
@@ -271,13 +234,7 @@ describe('SubprefeituraService Test', () => {
   
     (prisma.subprefeitura.findUnique as jest.Mock).mockResolvedValue(mockSubprefeituraUpdate);
     jest.spyOn(service, 'buscaPorNome').mockResolvedValue(null);
-    /*
-    O spyon permite espionar métodos de um objeto existente qualquer (nesse caro, service)
-    nesse caso, estamos o usando para alterar um comportamento de um metodo, o buscarPorNome
-    em vez de startat o metodo, nós o forçamos a retornar um null, já que não há banco de dados pra consulta
-    este método é uma ferramente da biblioteca do jest
-    nós usamos o spyon aqui porque não fizemos um mock de service, então o spyon serviu como opção 2
-     */
+
     (prisma.subprefeitura.update as jest.Mock).mockResolvedValue(mockSubprefeituraUpdate);
   
     const mockUpdateParam = {
