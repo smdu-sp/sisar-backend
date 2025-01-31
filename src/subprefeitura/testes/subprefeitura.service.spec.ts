@@ -3,6 +3,7 @@ import { SubprefeituraResponseDTO } from '../dto/subprefeitura-response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CreateSubprefeituraDto } from '../dto/create-subprefeitura.dto';
 
 describe('SubprefeituraService Test', () => {
   let service: SubprefeituraService;
@@ -223,13 +224,12 @@ describe('SubprefeituraService Test', () => {
 
   ///testando desativar subprefeitura
 
-  it('should call prisma.unidade.update when desativar is called', async () => {
-    // 1. Mock da unidade encontrada (ativa)
+  it('deve validar se delete modifica o status de uma subprefeitura para inativo', async () => {
     const mockSubprefeituraFind = {
       id: 'a1u7900b',
       nome: 'Subprefeitura de São Mateus',
       sigla: 'SBSM',
-      status: 1, // Status ativo
+      status: 1,
       criado_em: new Date('2023-01-01T00:00:00.000Z'),
       alterado_em: new Date('2023-01-01T00:00:00.000Z'),
     };
@@ -254,4 +254,55 @@ describe('SubprefeituraService Test', () => {
       data: { status: 0 },
     });
   });
+
+  ///testando atualizar subprefeitura
+
+  it('deve ser capaz de atualizar uma subprefeitura', async () => {
+    const mockSubprefeituraUpdate = {
+      id: 'a1u7900b',
+      nome: 'Subprefeitura da Vila Romana',
+      sigla: 'SBVR',
+      status: 1,
+      criado_em: new Date('2023-01-01T00:00:00.000Z'),
+      alterado_em: new Date('2023-01-01T00:00:00.000Z'),
+    };
+  
+    (prisma.subprefeitura.findUnique as jest.Mock).mockResolvedValue(mockSubprefeituraUpdate);
+    jest.spyOn(service, 'buscaPorNome').mockResolvedValue(null);
+    /*
+    O spyon permite espionar métodos de um objeto existente qualquer (nesse caro, service)
+    nesse caso, estamos o usando para alterar um comportamento de um metodo, o buscarPorNome
+    em vez de startat o metodo, nós o forçamos a retornar um null, já que não há banco de dados pra consulta
+    este método é uma ferramente da biblioteca do jest
+    nós usamos o spyon aqui porque não fizemos um mock de service, então o spyon serviu como opção 2
+     */
+    (prisma.subprefeitura.update as jest.Mock).mockResolvedValue(mockSubprefeituraUpdate);
+  
+    const mockUpdateParam = {
+      nome: 'Subprefeitura da Sé',
+      sigla: 'SBVR',
+    };
+  
+    const result: SubprefeituraResponseDTO = await service.atualizar('a1u7900b', mockUpdateParam);
+  
+    expect(result).not.toBeNull();
+  
+    expect(prisma.subprefeitura.findUnique).toHaveBeenCalledWith({
+      where: {
+        id: expect.any(String),
+      },
+    });
+  
+    expect(service.buscaPorNome).toHaveBeenCalledWith(mockUpdateParam.nome);
+  
+    expect(prisma.subprefeitura.update).toHaveBeenCalledWith({
+      where: {
+        id: expect.any(String), 
+      },
+      data: mockUpdateParam, 
+    });
+  
+    expect(result).toEqual(mockSubprefeituraUpdate);
+  });
+
 });
