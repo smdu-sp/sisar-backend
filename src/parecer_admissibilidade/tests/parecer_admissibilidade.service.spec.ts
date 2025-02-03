@@ -5,6 +5,7 @@ import { ParecerAdmissibilidadeService } from '../parecer_admissibilidade.servic
 import { CreateParecerAdmissibilidadeDto } from '../dto/create-parecer_admissibilidade.dto';
 import { Parecer_Admissibilidade } from '@prisma/client';
 import { ParecerAdmissibilidadeResponseDTO } from '../dto/parecer_admissibilidade-resopnse.dto';
+import { UpdateParecerAdmissibilidadeDto } from '../dto/update-parecer_admissibilidade.dto';
 
 describe('ParecerAdmissibilidadeService tests', () => {
   let service: ParecerAdmissibilidadeService;
@@ -148,31 +149,38 @@ describe('ParecerAdmissibilidadeService tests', () => {
     expect(result.id).toEqual(mockFindUniqueResult.id);
   });
 
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "atualizar"
-  //  * 
-  //  */
-  // it('Deve chamar prisma.conclusao.update quando função atualizar é executada.', async () => {
-  //   const mockUpdateResult: Conclusao = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false, criado_em: new Date(), alterado_em: new Date() };
-  //   const mockUpdateDto: UpdateFinalizacaoDto = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false };
-  //   // Configura o retorno dos métodos mockados
-  //   (prisma.conclusao.update as jest.Mock).mockResolvedValue(mockUpdateResult);
+  /**
+   * 
+   * Testando chamada do serviço de "atualizar"
+   * 
+   */
+  it('Deve chamar prisma.parecer_Admissibilidade.update quando função atualizar é executada.', async () => {
+    const mockFindUniqueResult: ParecerAdmissibilidadeResponseDTO = { id: '2', parecer: "", status: 1, criado_em: new Date(), alterado_em: new Date() };
+    const mockUpdateRequest: UpdateParecerAdmissibilidadeDto = { parecer: "", status: 1 };
+    // Configura o retorno dos métodos mockados
+    (prisma.parecer_Admissibilidade.findUnique as jest.Mock).mockResolvedValue(mockFindUniqueResult);
+    (prisma.parecer_Admissibilidade.update as jest.Mock).mockResolvedValue(mockFindUniqueResult);
 
-  //   // Chama o método do serviço, id e UpdateFinalizacaoDto.
-  //   const result: Conclusao = await service.atualizar(3, mockUpdateDto);
+    // Chama o método do serviço, id e UpdateFinalizacaoDto.
+    const result: ParecerAdmissibilidadeResponseDTO = await service.atualizar('3', mockUpdateRequest);
 
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se o método update mockado de conclusão foi chamado corretamente.
-  //   expect(prisma.conclusao.update).toHaveBeenCalledWith({ 
-  //     where: {
-  //       inicial_id: expect.any(Number)
-  //     },
-  //     data: mockUpdateDto
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual(mockUpdateResult);
-  //   expect(result.num_alvara).toEqual(mockUpdateResult.num_alvara);
-  // });
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se findUnique foi chamado corretamente.
+    expect(prisma.parecer_Admissibilidade.findUnique).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      },
+    });
+    // Verifica se o método update mockado de conclusão foi chamado corretamente.
+    expect(prisma.parecer_Admissibilidade.update).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      },
+      data: mockUpdateRequest
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockFindUniqueResult);
+    expect(result.status).toEqual(mockFindUniqueResult.status);
+  });
 });
