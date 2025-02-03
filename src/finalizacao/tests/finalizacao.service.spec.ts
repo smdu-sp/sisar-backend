@@ -51,7 +51,7 @@ describe('FinalizacaoService tests', () => {
   });
 
   // Testando a definição do service, prisma e app
-  it('should be defined', () => {
+  it('Testando a definição do service, prisma e app', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
     expect(app).toBeDefined();
@@ -62,7 +62,7 @@ describe('FinalizacaoService tests', () => {
    * Testando chamada do serviço de "criar"
    * 
    */
-  it('should call prisma.conclusao.create and prisma.inicial.update when create is called', async () => {
+  it('Deve envocar prisma.conclusao.create e prisma.inicial.update quando executar função criar.', async () => {
     // Criando o objeto mockado de retorno da chamada "criar".
     const mockCreateResult: CreateFinalizacaoDto = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false };
     // Configura o retorno do método mockado
@@ -96,7 +96,7 @@ describe('FinalizacaoService tests', () => {
    * Testando chamada do serviço de "buscarTudo"
    * 
    */
-  it('should call prisma.inicial.findMany when find all is called', async () => {
+  it('Deve envocar prisma.inicial.findMany quando buscarTudo é executada.', async () => {
     // Configura o retorno dos métodos mockados
     (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
     (prisma.conclusao.count as jest.Mock).mockResolvedValue(10);
@@ -135,7 +135,7 @@ describe('FinalizacaoService tests', () => {
    * Testando chamada do serviço de "buscaId"
    * 
    */
-  it('should call prisma.inicial.findUnique when find by id is called', async () => {
+  it('Deve envocar prisma.inicial.findUnique quando função buscarUm é executada.', async () => {
     const mockFindUniqueResult: Conclusao = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false, criado_em: new Date(), alterado_em: new Date() };
     // Configura o retorno dos métodos mockados
     (prisma.conclusao.findUnique as jest.Mock).mockResolvedValue(mockFindUniqueResult);
@@ -161,7 +161,7 @@ describe('FinalizacaoService tests', () => {
    * Testando chamada do serviço de "atualizar"
    * 
    */
-  it('should call prisma.conclusao.update when update is called', async () => {
+  it('Deve chamar prisma.conclusao.update quando função atualizar é executada.', async () => {
     const mockUpdateResult: Conclusao = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false, criado_em: new Date(), alterado_em: new Date() };
     const mockUpdateDto: UpdateFinalizacaoDto = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false };
     // Configura o retorno dos métodos mockados
