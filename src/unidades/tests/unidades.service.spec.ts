@@ -6,6 +6,7 @@ import { UnidadeResponseDTO } from "../dto/unidade-response.dto";
 import { Prisma } from "@prisma/client";
 import { Test, TestingModule } from "@nestjs/testing";
 import exp from "constants";
+import { count } from "console";
 
 describe('UnidadesService Test', () => {
     let service: UnidadesService; 
@@ -19,6 +20,7 @@ describe('UnidadesService Test', () => {
             create: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
+            count: jest.fn()
         }
     };
 
@@ -92,6 +94,80 @@ describe('UnidadesService Test', () => {
         })
 
         expect(result).toEqual(mockUnidadeResult)
+    })
+
+    it('testando o buscar tudo de unidades.service', async ()=>{
+        const mockUnidadesListResult = [
+            {
+                nome: 'Unidade de Saneamento',
+                sigla: 'UDS',
+                codigo: '4Brv',
+                status: 0
+            },
+            {
+                nome: 'Unidade de Tecnologia',
+                sigla: 'UDT',
+                codigo: '4crU',
+                status: 0
+            },
+            {
+                nome: 'Unidade de Amparo Social',
+                sigla: 'UDAS',
+                codigo: '4BT1',
+                status: 0
+            }
+        ]
+
+        const mockPaginacao = {
+            total: 3,
+            pagina: 1,
+            limite: 10,
+            data: mockUnidadesListResult
+            }
+
+
+        const mockParams = {
+            pagina: 1,
+            limite: 10,
+            busca: 'Unidade',
+            };
+    
+        (prisma.unidade.count as jest.Mock).mockResolvedValue(3);
+        jest.spyOn(app, 'verificaLimite').mockReturnValue([1, 10]);
+        (prisma.unidade.findMany as jest.Mock).mockResolvedValue(mockUnidadesListResult)
+
+        const result = await service.buscarTudo(mockParams.pagina, mockParams.limite, mockParams.busca)
+
+        expect(result).not.toBeNull();
+        expect(result).toEqual(mockPaginacao)
+            
+        expect(prisma.unidade.count).toHaveBeenCalledWith({
+            where:{
+                OR: [
+                    { nome: { contains: expect.any(String) } },
+                    { sigla: { contains: expect.any(String) } },
+                    { codigo: { contains: expect.any(String)} }
+                ]
+            }
+        })
+
+        expect(prisma.unidade.findMany).toHaveBeenCalledWith({
+            where: {
+                AND: [
+                    {
+                        OR: [
+                            { nome: { contains: mockParams.busca } },
+                            { sigla: { contains: mockParams.busca } },
+                            { codigo: { contains: mockParams.busca } }
+                        ]
+                    },
+                    { status: undefined } 
+                ]
+            },
+            skip: (mockParams.pagina - 1) * mockParams.limite,
+            take: mockParams.limite
+        });
+        
     })
 
 });
