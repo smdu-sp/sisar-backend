@@ -208,6 +208,14 @@ model Distribuicao {
   @@map("distribuicoes")
 }
 
+
+//Status
+//0 - Em analise de admissibilidade
+//1 - Inadmitido
+//2 - Em análise
+//3 - Deferido
+//4 - Indeferido
+
 model Inicial {
   id                             Int                             @id @default(autoincrement())
   decreto                        Boolean                         @default(false)
