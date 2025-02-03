@@ -54,13 +54,13 @@ describe('UnidadesService Test', () => {
     app = module.get<AppService>(AppService);
   });
 
-  it('verificando se os mocks estão definidos', () => {
+  it('os mocks deverão estar definidos', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
     expect(app).toBeDefined();
   });
 
-  it('testando a criação de uma unidade', async () => {
+  it('deverá criar uma unidade', async () => {
     const mockUnidadeResult = {
       id: 'abr4kd8R4',
       nome: 'Unidade de Saneamento',
@@ -103,7 +103,7 @@ describe('UnidadesService Test', () => {
     expect(result).toEqual(mockUnidadeResult);
   });
 
-  it('testando o buscar tudo de unidades.service', async () => {
+  it('deverá buscar todas as unidades', async () => {
     const mockUnidadesListResult = [
       {
         nome: 'Unidade de Saneamento',
@@ -181,7 +181,7 @@ describe('UnidadesService Test', () => {
     });
   });
 
-  it('buscar unidade por id', async () => {
+  it('deverá buscar uma unidade pelo ID', async () => {
     const mockFindUnidade = {
       id: 'Vbr4kdBRa',
       nome: 'Unidade de Saneamento',
@@ -203,7 +203,7 @@ describe('UnidadesService Test', () => {
     });
   });
 
-  it('teste de atualização do unidades.service', async () => {
+  it('deverá atualizar uma unidade', async () => {
     const mockUpdateUnidade = {
       id: 'Vbr4kdBRa',
       nome: 'Unidade de Saneamento',
@@ -242,7 +242,7 @@ describe('UnidadesService Test', () => {
     });
   });
 
-  it('teste de deletar/desativar unidade em unidades.service', async ()=>{
+  it('deverá desativar uma unidade', async ()=>{
     const mockFindUnidade = {
         id: 'Vbr4kdBRa',
         nome: 'Unidade de Saneamento',
