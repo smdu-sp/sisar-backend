@@ -4,7 +4,7 @@ import { AppService } from 'src/app.service';
 import { ParecerAdmissibilidadeService } from '../parecer_admissibilidade.service';
 import { CreateParecerAdmissibilidadeDto } from '../dto/create-parecer_admissibilidade.dto';
 import { Parecer_Admissibilidade } from '@prisma/client';
-import { ParecerAdmissibilidadeResponseDTO } from '../dto/parecer_admissibilidade-resopnse.dto';
+import { ParecerAdmissibilidadePaginadoDTO, ParecerAdmissibilidadeResponseDTO } from '../dto/parecer_admissibilidade-resopnse.dto';
 import { UpdateParecerAdmissibilidadeDto } from '../dto/update-parecer_admissibilidade.dto';
 
 describe('ParecerAdmissibilidadeService tests', () => {
@@ -84,44 +84,46 @@ describe('ParecerAdmissibilidadeService tests', () => {
     }
   );
 
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "buscarTudo"
-  //  * 
-  //  */
-  // it('Deve envocar prisma.inicial.findMany quando buscarTudo é executada.', async () => {
-  //   // Configura o retorno dos métodos mockados
-  //   (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
-  //   (prisma.conclusao.count as jest.Mock).mockResolvedValue(10);
-  //   (app.verificaLimite as jest.Mock).mockReturnValue([0, 10]);
-  //   (prisma.conclusao.findMany as jest.Mock).mockResolvedValue([]);
+  /**
+   * 
+   * Testando chamada do serviço de "buscarTudo"
+   * 
+   */
+  it('Deve envocar prisma.parecer_Admissibilidade.findMany quando buscarTudo é executada.', async () => {
+    // Configura o retorno dos métodos mockados
+    (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
+    (prisma.parecer_Admissibilidade.count as jest.Mock).mockResolvedValue(10);
+    (app.verificaLimite as jest.Mock).mockReturnValue([0, 10]);
+    (prisma.parecer_Admissibilidade.findMany as jest.Mock).mockResolvedValue([]);
 
-  //   // Chama o método do serviço, fornecendo pagina e limite.
-  //   const result: FinalizacaoPaginado = await service.buscarTudo(0, 10, 'search');
+    // Chama o método do serviço, fornecendo pagina e limite.
+    const result: ParecerAdmissibilidadePaginadoDTO = await service.buscarTudo(0, 10, 'search');
 
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se o método count mockado de conclusão foi chamado corretamente.
-  //   expect(prisma.conclusao.count).toHaveBeenCalled();
-  //   // Verifica se o método findMany mockado de conclusão foi chamado corretamente.
-  //   expect(prisma.conclusao.findMany).toHaveBeenCalledWith({ 
-  //     where: {
-  //       OR: [
-  //         { 
-  //           obs: { contains: expect.any(String) }
-  //         },
-  //       ]
-  //     },
-  //     include: { 
-  //       inicial: expect.any(Boolean) 
-  //     },
-  //     skip: expect.any(Number),
-  //     take: expect.any(Number)
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
-  //   expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
-  // });
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método count mockado de parecer admissibilidade foi chamado corretamente.
+    expect(prisma.parecer_Admissibilidade.count).toHaveBeenCalled();
+    // Verifica se o método findMany mockado de parecer admissibilidade foi chamado corretamente.
+    expect(prisma.parecer_Admissibilidade.findMany).toHaveBeenCalledWith({ 
+      where: {
+        OR: [
+          { 
+            parecer: { 
+              contains: 'search'
+            } 
+          },
+        ]
+      },
+      orderBy: { 
+        parecer: 'asc'
+      },
+      skip: -10,
+      take: 10
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
+    expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
+  });
 
   /**
    * 
