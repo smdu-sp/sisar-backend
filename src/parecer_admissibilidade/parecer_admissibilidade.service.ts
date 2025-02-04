@@ -3,6 +3,7 @@ import { CreateParecerAdmissibilidadeDto } from './dto/create-parecer_admissibil
 import { UpdateParecerAdmissibilidadeDto } from './dto/update-parecer_admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
+import { ParecerAdmissibilidadePaginadoDTO, ParecerAdmissibilidadeResponseDTO } from './dto/parecer_admissibilidade-resopnse.dto';
 
 @Injectable()
 export class ParecerAdmissibilidadeService {
@@ -11,7 +12,7 @@ export class ParecerAdmissibilidadeService {
     private app: AppService,
   ) {}
 
-  async criar(createParecerAdmissibilidadeDto: CreateParecerAdmissibilidadeDto) {
+  async criar(createParecerAdmissibilidadeDto: CreateParecerAdmissibilidadeDto): Promise<ParecerAdmissibilidadeResponseDTO> {
     const { parecer, status } = createParecerAdmissibilidadeDto;
     const parecerAdmissibilidadeTexto = await this.prisma.parecer_Admissibilidade.findFirst({ 
       where: { parecer }
@@ -29,7 +30,7 @@ export class ParecerAdmissibilidadeService {
     pagina: number = 1,
     limite: number = 10,
     busca?: string,
-  ) {
+  ): Promise<ParecerAdmissibilidadePaginadoDTO> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
       ...(busca && { OR: [
@@ -53,7 +54,7 @@ export class ParecerAdmissibilidadeService {
     };
   }
 
-  async buscarPorId(id: string) {
+  async buscarPorId(id: string): Promise<ParecerAdmissibilidadeResponseDTO> {
     if (!id && id === "") throw new BadRequestException('Id inválido.');
     const parecerAdmissibilidade = await this.prisma.parecer_Admissibilidade.findUnique({ 
       where: { id } 
@@ -62,7 +63,10 @@ export class ParecerAdmissibilidadeService {
     return parecerAdmissibilidade;
   }
 
-  async atualizar(id: string, updateParecerAdmissibilidadeDto: UpdateParecerAdmissibilidadeDto) {
+  async atualizar(
+    id: string, 
+    updateParecerAdmissibilidadeDto: UpdateParecerAdmissibilidadeDto
+  ): Promise<ParecerAdmissibilidadeResponseDTO> {
     if (!id && id === "") throw new BadRequestException('Id inválido.');
     const parecerAdmissibilidade = await this.prisma.parecer_Admissibilidade.findUnique({ 
       where: { id } 
@@ -77,7 +81,7 @@ export class ParecerAdmissibilidadeService {
     return parecerAdmissibilidadeAtualizado;
   }
 
-  async desativar(id: string) {
+  async desativar(id: string): Promise<ParecerAdmissibilidadeResponseDTO> {
     if (!id && id === "") throw new BadRequestException('Id inválido.');
     const parecerAdmissibilidade = await this.prisma.parecer_Admissibilidade.findUnique({ 
       where: { id } 
