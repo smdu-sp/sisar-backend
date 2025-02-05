@@ -43,10 +43,10 @@ export class AvisosService {
     return reunioes;
   }
 
-  async buscarPorMesAno(mes: number, ano: number, usuario_id: string) {
-    const primeiroDiaMes = new Date(ano, mes - 1, 1);
-    const ultimoDiaMes = new Date(ano, mes, 0);
-    const avisos = await this.prisma.avisos.findMany({
+  async buscarPorMesAno(mes: number, ano: number, usuario_id: string): Promise<Avisos[]> {
+    const primeiroDiaMes: Date = new Date(ano, mes - 1, 1);
+    const ultimoDiaMes: Date = new Date(ano, mes, 0);
+    const avisos: Avisos[] = await this.prisma.avisos.findMany({
       where: {
         AND: [
           {

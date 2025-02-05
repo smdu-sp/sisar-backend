@@ -5,23 +5,15 @@ describe('AppService tests', () => {
   let service: AppService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AppService],
-    }).compile();
+    const module: TestingModule = await Test.createTestingModule({ providers: [AppService] }).compile();
     service = module.get<AppService>(AppService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  it('should be defined', () => expect(service).toBeDefined());
 
-  it('should return the correct result for getHello()', () => {
-    expect(service.getHello().message).toBe('Hello World!');
-  });
+  it('should return the correct result for getHello()', () => expect(service.getHello().message).toBe('Hello World!'));
 
-  it('should return the correct result for getOla()', () => {
-    expect(service.getOla().message).toBe('Olá, Mundo!');
-  });
+  it('should return the correct result for getOla()', () => expect(service.getOla().message).toBe('Olá, Mundo!'));
 
   it('should return page and limit when verificaPagina is called', () => {
     expect(service.verificaPagina(0, 0)).toBeInstanceOf(Array);
