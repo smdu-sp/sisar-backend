@@ -4,6 +4,7 @@ import { Reuniao_Processo } from '@prisma/client';
 import { ReunioesService } from '../reunioes.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException } from '@nestjs/common';
+import { Inicial } from '@prisma/client';
 
 describe('Reunioes.service test', () => {
   let service: ReunioesService;
@@ -161,4 +162,29 @@ describe('Reunioes.service test', () => {
       }
     })
   });
+
+  it('deverá buscar uma reunião pelo seu id', async ()=>{
+    const mockFindReuniao: Reuniao_Processo[] = [
+      {
+        id: 'M7Hi3w',
+        inicial_id: 112,
+        data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        data_processo: new Date('2025-01-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-01-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-01-05T14:34:21.651Z'),
+      },
+    ];
+
+    (prisma.reuniao_Processo.findUnique as jest.Mock).mockResolvedValue(
+      mockFindReuniao,
+    );
+
+    const result = await service.buscarPorId('M7Hi3w');
+
+    expect(result).not.toBeNull()
+    expect(result).toEqual(mockFindReuniao)
+    
+  })
 });

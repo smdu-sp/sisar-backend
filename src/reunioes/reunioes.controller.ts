@@ -50,7 +50,7 @@ export class ReunioesController {
   @Permissoes('SUP', 'ADM')
   @Get('buscar-inicial/:id')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar por inicial com sucesso.',  type: [ReunioesResponseDTO] })
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar por inicial com sucesso.',  type: ReunioesResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Buscar as reuniões por inicial.", summary: 'Buscar as reuniões por inicial.' })
   buscarPorId(@Param('id') id: string) {
