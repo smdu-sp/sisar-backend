@@ -147,23 +147,82 @@ describe('Reunioes.service test', () => {
     expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({
       where: {
         OR: [
-          { AND: [
-              { nova_data_reuniao: { gte: expect.any(Date) } }, 
-              { nova_data_reuniao: { lte: expect.any(Date)  } }
-            ] 
-          },
-          { 
+          {
             AND: [
-              { nova_data_reuniao: null }, { data_reuniao: { gte: expect.any(Date) } }, 
-              { nova_data_reuniao: null }, { data_reuniao: { lte: expect.any(Date) } }
-            ] 
-          }
-        ]
-      }
-    })
+              { nova_data_reuniao: { gte: expect.any(Date) } },
+              { nova_data_reuniao: { lte: expect.any(Date) } },
+            ],
+          },
+          {
+            AND: [
+              { nova_data_reuniao: null },
+              { data_reuniao: { gte: expect.any(Date) } },
+              { nova_data_reuniao: null },
+              { data_reuniao: { lte: expect.any(Date) } },
+            ],
+          },
+        ],
+      },
+    });
   });
 
-  it('deverá buscar uma reunião pelo seu id', async ()=>{
+  it('deverá buscar uma reunião pelo seu id', async () => {
+    const mockFindReuniao: Reuniao_Processo = {
+      id: 'M7Hi3w',
+      inicial_id: 112,
+      data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+      data_processo: new Date('2025-01-05T14:34:21.651Z'),
+      nova_data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+      justificativa_remarcacao: 'queda de energia na data e horário marcado',
+      criado_em: new Date('2025-01-05T14:34:21.651Z'),
+      alterado_em: new Date('2025-01-05T14:34:21.651Z'),
+    };
+
+    (prisma.reuniao_Processo.findUnique as jest.Mock).mockResolvedValue(
+      mockFindReuniao,
+    );
+
+    const result = await service.buscarPorId('M7Hi3w');
+
+    expect(result).not.toBeNull();
+    expect(result).toEqual(mockFindReuniao);
+    expect(prisma.reuniao_Processo.findUnique).toHaveBeenCalledWith({
+      where: { id: expect.any(String) },
+    });
+  });
+
+  it('deverá atualizar uma reuniao', async () => {
+    const mockReuniaoUpdate = {
+      id: 'M7Hi3w',
+      inicial_id: 112,
+      data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+      data_processo: new Date('2025-01-05T14:34:21.651Z'),
+      nova_data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+      justificativa_remarcacao: 'queda de energia na data e horário marcado',
+      criado_em: new Date('2025-01-05T14:34:21.651Z'),
+      alterado_em: new Date('2025-01-05T14:34:21.651Z'),
+    };
+
+    const mockParams = {
+      nova_data_reuniao: new Date('2025-03-05T14:34:21.651Z'),
+      justificativa_remarcacao: 'atestado médico',
+    };
+
+    (prisma.reuniao_Processo.update as jest.Mock).mockResolvedValue(
+      mockReuniaoUpdate,
+    );
+
+    const result = await service.atualizarData('M7Hi3w', mockParams);
+
+    expect(result).not.toBeNull();
+    expect(result).toEqual(mockReuniaoUpdate);
+    expect(prisma.reuniao_Processo.update).toHaveBeenCalledWith({
+      where: { id: expect.any(String) },
+      data: mockParams,
+    });
+  });
+
+  it('deverá buscar reuniões por uma data especifica', async () => {
     const mockFindReuniao: Reuniao_Processo[] = [
       {
         id: 'M7Hi3w',
@@ -177,14 +236,27 @@ describe('Reunioes.service test', () => {
       },
     ];
 
-    (prisma.reuniao_Processo.findUnique as jest.Mock).mockResolvedValue(
+    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue(
       mockFindReuniao,
     );
 
-    const result = await service.buscarPorId('M7Hi3w');
+    const result: Reuniao_Processo[] = await service.buscarPorData(new Date());
 
-    expect(result).not.toBeNull()
-    expect(result).toEqual(mockFindReuniao)
-    
-  })
+    expect(result).not.toBeNull();
+    expect(result).toEqual(mockFindReuniao);
+    expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { nova_data_reuniao: { equals: new Date().toISOString() } },
+          {
+            nova_data_reuniao: null,
+            data_reuniao: { equals: new Date().toISOString() },
+          },
+        ],
+      },
+      include: {
+        inicial: true,
+      },
+    });
+  });
 });
