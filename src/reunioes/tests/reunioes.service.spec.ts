@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Reuniao_Processo } from '@prisma/client';
 import { ReunioesService } from '../reunioes.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ForbiddenException } from '@nestjs/common';
 
 describe('Reunioes.service test', () => {
   let service: ReunioesService;
@@ -41,38 +42,123 @@ describe('Reunioes.service test', () => {
   it('deverá listar todas as reuniões', async () => {
     const mockListReunioes: Reuniao_Processo[] = [
       {
-        id: "M4Hy3w",
+        id: 'M4Hy3w',
         inicial_id: 111,
-        data_reuniao: new Date("2025-02-05T14:34:21.651Z"),
-        data_processo: new Date("2025-02-05T14:34:21.651Z"),
-        nova_data_reuniao: new Date("2025-02-05T14:34:21.651Z"),
-        justificativa_remarcacao: "queda de energia na data e horário marcado",
-        criado_em: new Date("2025-02-05T14:34:21.651Z"),
-        alterado_em: new Date("2025-02-05T14:34:21.651Z")
+        data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        data_processo: new Date('2025-02-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-02-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-02-05T14:34:21.651Z'),
       },
       {
-        id: "M7Hi3w",
+        id: 'M7Hi3w',
         inicial_id: 112,
-        data_reuniao: new Date("2025-02-05T14:34:21.651Z"),
-        data_processo: new Date("2025-02-05T14:34:21.651Z"),
-        nova_data_reuniao: new Date("2025-02-05T14:34:21.651Z"),
-        justificativa_remarcacao: "queda de energia na data e horário marcado",
-        criado_em: new Date("2025-02-05T14:34:21.651Z"),
-        alterado_em: new Date("2025-02-05T14:34:21.651Z")
-      }
+        data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        data_processo: new Date('2025-02-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-02-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-02-05T14:34:21.651Z'),
+      },
     ];
 
-    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue(mockListReunioes)
+    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue(
+      mockListReunioes,
+    );
 
-    const result = await service.listaCompleta()
+    const result: Reuniao_Processo[] = await service.listaCompleta();
 
-    expect(result).not.toBeNull()
-    expect(result).toEqual(mockListReunioes)
+    expect(result).not.toBeNull();
+    expect(result).toEqual(mockListReunioes);
     expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({
-      orderBy:{
-        data_reuniao: 'asc'
+      orderBy: {
+        data_reuniao: 'asc',
+      },
+    });
+  });
+
+  it('deve lançar uma exceção ForbiddenException quando não houver reuniões', async () => {
+    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue([]);
+
+    await expect(service.listaCompleta()).rejects.toThrow(ForbiddenException);
+
+    expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({
+      orderBy: { data_reuniao: 'asc' },
+    });
+  });
+
+  it('deverá buscar por mês e ano as reuniões', async () => {
+    const mockListReunioes: Reuniao_Processo[] = [
+      {
+        id: 'M4Hy3w',
+        inicial_id: 111,
+        data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        data_processo: new Date('2025-02-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-02-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-02-05T14:34:21.651Z'),
+      },
+      {
+        id: 'M7Hi3w',
+        inicial_id: 112,
+        data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        data_processo: new Date('2025-02-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-02-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-02-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-02-05T14:34:21.651Z'),
+      },
+      {
+        id: 'M7Hi3w',
+        inicial_id: 112,
+        data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        data_processo: new Date('2025-01-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-01-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-01-05T14:34:21.651Z'),
+      },
+    ];
+
+    const mockFindReuniao: Reuniao_Processo[] = [
+      {
+        id: 'M7Hi3w',
+        inicial_id: 112,
+        data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        data_processo: new Date('2025-01-05T14:34:21.651Z'),
+        nova_data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        justificativa_remarcacao: 'queda de energia na data e horário marcado',
+        criado_em: new Date('2025-01-05T14:34:21.651Z'),
+        alterado_em: new Date('2025-01-05T14:34:21.651Z'),
+      },
+    ];
+
+    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue(
+      mockFindReuniao,
+    );
+
+    const result: Reuniao_Processo[] = await service.buscarPorMesAno(1, 2025);
+
+    expect(result).not.toBeNull();
+    expect(result).toEqual(mockFindReuniao);
+    expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { AND: [
+              { nova_data_reuniao: { gte: expect.any(Date) } }, 
+              { nova_data_reuniao: { lte: expect.any(Date)  } }
+            ] 
+          },
+          { 
+            AND: [
+              { nova_data_reuniao: null }, { data_reuniao: { gte: expect.any(Date) } }, 
+              { nova_data_reuniao: null }, { data_reuniao: { lte: expect.any(Date) } }
+            ] 
+          }
+        ]
       }
     })
-
-  })
+  });
 });
