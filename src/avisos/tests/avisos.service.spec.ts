@@ -31,16 +31,17 @@ describe('AvisosService tests', () => {
   });
 
   // Testando a definição do service e do prisma
-  it('should be defined', () => {
+  it('Serviços devem estar definidos.', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
   });
 
   /**
+   * 
    * Testando chamada do serviço de "create"
    * 
    */
-  it('should call prisma.avisos.create when create is called', async () => {
+  it('Deve envocar prisma.avisos.create quando função criar é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "create".
     const mockCreateResult: Avisos = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2, criado_em: null, alterado_em: null };
     // Configura o retorno do método mockado
@@ -63,10 +64,11 @@ describe('AvisosService tests', () => {
   });
 
   /**
+   * 
    * Testando chamada do serviço de "buscarPorMesAno"
    * 
    */
-  it('should call prisma.avisos.findMany', async () => {
+  it('Deve envocar prisma.avisos.findMany quando função buscar buscarPorMesAno é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "buscarPorMesAno".
     const mockCreateResult: Avisos[] = [
       { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2, criado_em: null, alterado_em: null },
@@ -100,10 +102,11 @@ describe('AvisosService tests', () => {
   });
 
   /**
+   * 
    * Testando chamada do serviço de "update"
    * 
    */
-  it('should call prisma.avisos.update', async () => {
+  it('Deve executar prisma.avisos.update quando função atualizar é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "update".
     const mockUpdateResult: UpdateAvisoDto = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2 };
     // Configura o retorno do método mockado.
@@ -124,10 +127,11 @@ describe('AvisosService tests', () => {
   });
 
   /**
+   * 
    * Testando chamada do serviço de "remove"
    * 
    */
-  it('should call prisma.avisos.delete', async () => {
+  it('Deve envocar prisma.avisos.delete quando função remover é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "remove".
     const mockDeleteResult: AvisosResponseDTO = { id: '1', titulo: 'Teste', descricao: 'Descrição do teste', data: null, usuario_id: 'user-id', inicial_id: 2, criado_em: null, alterado_em: null };
     // Configura o retorno do método mockado.
