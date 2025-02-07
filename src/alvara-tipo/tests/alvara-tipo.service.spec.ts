@@ -3,6 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { AlvaraTipoService } from '../alvara-tipo.service';
 import { AlvaraTipoResponseDTO } from '../dto/alvara-tipo-responses.dto';
+import { CreateAlvaraTipoDto } from '../dto/create-alvara-tipo.dto';
+import { Alvara_Tipo } from '@prisma/client';
 
 describe('AlvaraTipoService tests', () => {
   let service: AlvaraTipoService;
@@ -74,39 +76,57 @@ describe('AlvaraTipoService tests', () => {
     }
   );
 
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "criar"
-  //  * 
-  //  */
-  // it(
-  //   'Deve envocar prisma.parecer_Admissibilidade.create e prisma.parecer_Admissibilidade.create quando executar função criar.', 
-  //   async () => {
-  //     // Criando o objeto mockado de retorno da chamada "criar".
-  //     const mockCreateResult: CreateParecerAdmissibilidadeDto = { parecer: "", status: 1 };
-  //     // Configura o retorno do método mockado
-  //     (prisma.parecer_Admissibilidade.findFirst as jest.Mock).mockResolvedValue(null);
-  //     (prisma.parecer_Admissibilidade.create as jest.Mock).mockResolvedValue(mockCreateResult);
+  /**
+   * 
+   * Testando chamada do serviço de "criar"
+   * 
+   */
+  it(
+    'Deve envocar prisma.alvara_Tipo.findFirst e prisma.alvara_Tipo.create quando executar função criar.', 
+    async () => {
+      // Criando o objeto mockado de retorno da chamada "criar".
+      const mockFindResult: CreateAlvaraTipoDto = {
+        nome: "",
+        prazo_admissibilidade_smul: 7,
+        reconsideracao_smul: 6,
+        reconsideracao_smul_tipo: 5,
+        analise_reconsideracao_smul: 4,
+        prazo_analise_smul1: 4,
+        prazo_analise_smul2: 3,
+        prazo_emissao_alvara_smul: 2,
+        prazo_admissibilidade_multi: 2,
+        reconsideracao_multi: 2,
+        reconsideracao_multi_tipo: 1,
+        analise_reconsideracao_multi: 1,
+        prazo_analise_multi1: 1,
+        prazo_analise_multi2: 1,
+        prazo_comunique_se: 1,
+        prazo_encaminhar_coord: 1,
+        status: 1
+      };
+      // Configura o retorno do método mockado
+      (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.alvara_Tipo.create as jest.Mock).mockResolvedValue(mockFindResult);
 
-  //     // Chama o método do serviço, fornecendo o CreateFinalizacaoDto.
-  //     const result: Parecer_Admissibilidade = await service.criar(mockCreateResult);
+      // Chama o método do serviço, fornecendo o CreateAlvaraTipoDto.
+      const result: Alvara_Tipo = await service.criar(mockFindResult);
 
-  //     // Testa se o resultado não é nulo.
-  //     expect(result).not.toBeNull();
-  //     // Verifica se o método update mockado de inicial foi chamado corretamente.
-  //     expect(prisma.parecer_Admissibilidade.findFirst).toHaveBeenCalledWith({ 
-  //       where: { 
-  //         parecer: expect.any(String) 
-  //       }
-  //     });
-  //     // Verifica se o método create mockado de conclusão foi chamado corretamente.
-  //     expect(prisma.parecer_Admissibilidade.create).toHaveBeenCalledWith({ 
-  //       data: mockCreateResult 
-  //     });
-  //     // Verifica se o retorno está correto.
-  //     expect(result).toEqual(mockCreateResult);
-  //   }
-  // );
+      // Testa se o resultado não é nulo.
+      expect(result).not.toBeNull();
+      // Verifica se o método findFirst mockado foi chamado corretamente.
+      expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
+        where: { 
+          nome: expect.any(String) 
+        }
+      });
+      // Verifica se o método create mockado foi chamado corretamente.
+      expect(prisma.alvara_Tipo.create).toHaveBeenCalledWith({ 
+        data: { ...mockFindResult } 
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual(mockFindResult);
+    }
+  );
 
   // /**
   //  * 
