@@ -18,6 +18,15 @@ describe('InicialService tests', () => {
       update: jest.fn(),
       delete: jest.fn(),
       count: jest.fn()
+    },
+    inicial_Sqls: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn()
     }
   };
   // Configurando mock para o serviço do app.
@@ -46,32 +55,36 @@ describe('InicialService tests', () => {
     expect(app).toBeDefined();
   });
 
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "verificaSeExiste"
-  //  * 
-  //  */
-  // it(
-  //   'Deve envocar prisma.alvara_Tipo.findFirst quando executar função verificaSeExiste.', 
-  //   async () => {
-  //     // Configura o retorno do método mockado
-  //     (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(null);
+  /**
+   * 
+   * Testando chamada do serviço de "validaSql"
+   * 
+   */
+  it(
+    'Deve envocar prisma.inicial_Sqls.count quando executar função validaSql.', 
+    async () => {
+      // Configura o retorno do método mockado
+      (prisma.inicial_Sqls.count as jest.Mock).mockResolvedValue(10);
       
-  //     // Chama o método do serviço, fornecendo o nome e id.
-  //     const result_one: void = await service.verificaSeExiste("", "");
+      // Chama o método do serviço, fornecendo id.
+      const result_one: boolean = await service.validaSql("7897293");
       
-  //     // Testa se o resultado não é nulo.
-  //     expect(result_one).not.toBeNull();
-  //     // Verifica se o método findFirst mockado foi chamado corretamente.
-  //     expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
-  //       where: { 
-  //         nome: expect.any(String)
-  //       }
-  //     });
-  //     // Verifica se o retorno está correto.
-  //     expect(result_one).not.toThrow;
-  //   }
-  // );
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método count mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.count).toHaveBeenCalledWith({ 
+        where: {
+          sql: "7897293",
+          criado_em: {
+            gte: expect.any(Date)
+          }
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toBe(true);
+    }
+  );
 
   // /**
   //  * 

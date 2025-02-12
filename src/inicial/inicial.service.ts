@@ -13,10 +13,10 @@ export class InicialService {
     private app: AppService
   ) {}
 
-  async validaSql(sql: string) {
-    const dataBusca = new Date();
+  async validaSql(sql: string): Promise<boolean> {
+    const dataBusca: Date = new Date();
     dataBusca.setDate(dataBusca.getDate() - 90);
-    const sqlBusca = await this.prisma.inicial_Sqls.count({
+    const sqlBusca: number = await this.prisma.inicial_Sqls.count({
       where: {
         sql, criado_em: { gte: dataBusca }
       }
