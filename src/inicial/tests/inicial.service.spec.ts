@@ -86,6 +86,34 @@ describe('InicialService tests', () => {
     }
   );
 
+  /**
+   * 
+   * Testando chamada do serviço de "validaSei"
+   * 
+   */
+  it(
+    'Deve envocar prisma.inicial.count quando executar função validaSei.', 
+    async () => {
+      // Configura o retorno do método mockado
+      (prisma.inicial.count as jest.Mock).mockResolvedValue(10);
+      
+      // Chama o método do serviço, fornecendo id.
+      const result_one: boolean = await service.validaSei("7897293");
+      
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método count mockado foi chamado corretamente.
+      expect(prisma.inicial.count).toHaveBeenCalledWith({ 
+        where: {
+          sei: "7897293"
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toBe(true);
+    }
+  );
+
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"
