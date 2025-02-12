@@ -172,31 +172,51 @@ describe('AlvaraTipoService tests', () => {
     }
   );
 
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "buscaId"
-  //  * 
-  //  */
-  // it('Deve envocar prisma.parecer_Admissibilidade.findUnique quando função buscarUm é executada.', async () => {
-  //   const mockFindUniqueResult: ParecerAdmissibilidadeResponseDTO = { id: '2', parecer: "", status: 1, criado_em: new Date(), alterado_em: new Date() };
-  //   // Configura o retorno dos métodos mockados
-  //   (prisma.parecer_Admissibilidade.findUnique as jest.Mock).mockResolvedValue(mockFindUniqueResult);
+  /**
+   * 
+   * Testando chamada do serviço de "buscaId"
+   * 
+   */
+  it('Deve envocar prisma.alvara_Tipo.findUnique quando função buscarUm é executada.', async () => {
+    const mockFindUniqueResult: AlvaraTipoResponseDTO = { 
+      id: "",
+      nome: "",
+      prazo_admissibilidade_smul: 1,
+      reconsideracao_smul: 1,
+      reconsideracao_smul_tipo: 1,
+      analise_reconsideracao_smul: 2,
+      prazo_analise_smul1: 3,
+      prazo_analise_smul2: 4,
+      prazo_emissao_alvara_smul: 5,
+      prazo_admissibilidade_multi: 6,
+      reconsideracao_multi: 7,
+      reconsideracao_multi_tipo: 8,
+      analise_reconsideracao_multi: 9,
+      prazo_analise_multi1: 10,
+      prazo_analise_multi2: 3,
+      prazo_emissao_alvara_multi: 4,
+      prazo_comunique_se: 5,
+      prazo_encaminhar_coord: 6,
+      status: 1
+    };
+    // Configura o retorno dos métodos mockados
+    (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(mockFindUniqueResult);
 
-  //   // Chama o método do serviço, fornecendo pagina e limite.
-  //   const result: Parecer_Admissibilidade = await service.buscarPorId('3');
+    // Chama o método do serviço, fornecendo pagina e limite.
+    const result: Alvara_Tipo = await service.buscarPorId('3');
 
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se o método findUnique mockado de conclusão foi chamado corretamente.
-  //   expect(prisma.parecer_Admissibilidade.findUnique).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     }
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual(mockFindUniqueResult);
-  //   expect(result.id).toEqual(mockFindUniqueResult.id);
-  // });
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o método findFirst mockado de alvará-tipo foi chamado corretamente.
+    expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockFindUniqueResult);
+    expect(result.id).toEqual(mockFindUniqueResult.id);
+  });
 
   // /**
   //  * 
