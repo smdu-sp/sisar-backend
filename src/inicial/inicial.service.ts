@@ -4,15 +4,13 @@ import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial } from '@prisma/client';
 import { AppService } from 'src/app.service';
-import { HttpService } from '@nestjs/axios';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
 
 @Injectable()
 export class InicialService {
   constructor(
     private prisma: PrismaService,
-    private app: AppService,
-    private readonly httpService: HttpService
+    private app: AppService
   ) {}
 
   async validaSql(sql: string) {
