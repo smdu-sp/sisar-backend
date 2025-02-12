@@ -218,38 +218,57 @@ describe('AlvaraTipoService tests', () => {
     expect(result.id).toEqual(mockFindUniqueResult.id);
   });
 
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "atualizar"
-  //  * 
-  //  */
-  // it('Deve chamar prisma.parecer_Admissibilidade.update quando função atualizar é executada.', async () => {
-  //   const mockFindUniqueResult: ParecerAdmissibilidadeResponseDTO = { id: '2', parecer: "", status: 1, criado_em: new Date(), alterado_em: new Date() };
-  //   const mockUpdateRequest: UpdateParecerAdmissibilidadeDto = { parecer: "", status: 1 };
-  //   // Configura o retorno dos métodos mockados
-  //   (prisma.parecer_Admissibilidade.findUnique as jest.Mock).mockResolvedValue(mockFindUniqueResult);
-  //   (prisma.parecer_Admissibilidade.update as jest.Mock).mockResolvedValue(mockFindUniqueResult);
+  /**
+   * 
+   * Testando chamada do serviço de "atualizar"
+   * 
+   */
+  it('Deve chamar prisma.alvara_Tipo.update e prisma.alvara_Tipo.findFirst quando função atualizar é executada.', async () => {
+    const mockFindFirstResult: AlvaraTipoResponseDTO = { 
+      id: "",
+      nome: "",
+      prazo_admissibilidade_smul: 1,
+      reconsideracao_smul: 1,
+      reconsideracao_smul_tipo: 1,
+      analise_reconsideracao_smul: 2,
+      prazo_analise_smul1: 3,
+      prazo_analise_smul2: 4,
+      prazo_emissao_alvara_smul: 5,
+      prazo_admissibilidade_multi: 6,
+      reconsideracao_multi: 7,
+      reconsideracao_multi_tipo: 8,
+      analise_reconsideracao_multi: 9,
+      prazo_analise_multi1: 10,
+      prazo_analise_multi2: 3,
+      prazo_emissao_alvara_multi: 4,
+      prazo_comunique_se: 5,
+      prazo_encaminhar_coord: 6,
+      status: 1
+    };
+    // Configura o retorno dos métodos mockados
+    (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(mockFindFirstResult);
+    (prisma.alvara_Tipo.update as jest.Mock).mockResolvedValue(mockFindFirstResult);
 
-  //   // Chama o método do serviço, id e UpdateFinalizacaoDto.
-  //   const result: ParecerAdmissibilidadeResponseDTO = await service.atualizar('3', mockUpdateRequest);
+    // Chama o método do serviço, id e objeto.
+    const result: AlvaraTipoResponseDTO = await service.atualizar('3', mockFindFirstResult);
 
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se findUnique foi chamado corretamente.
-  //   expect(prisma.parecer_Admissibilidade.findUnique).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     },
-  //   });
-  //   // Verifica se o método update mockado de conclusão foi chamado corretamente.
-  //   expect(prisma.parecer_Admissibilidade.update).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     },
-  //     data: mockUpdateRequest
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual(mockFindUniqueResult);
-  //   expect(result.status).toEqual(mockFindUniqueResult.status);
-  // });
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se findFirst foi chamado corretamente.
+    expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      },
+    });
+    // Verifica se o método update mockado de alvará-tipo foi chamado corretamente.
+    expect(prisma.alvara_Tipo.update).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      },
+      data: mockFindFirstResult
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockFindFirstResult);
+    expect(result.status).toEqual(mockFindFirstResult.status);
+  });
 });
