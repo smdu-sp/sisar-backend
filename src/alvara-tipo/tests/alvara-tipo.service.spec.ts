@@ -271,4 +271,60 @@ describe('AlvaraTipoService tests', () => {
     expect(result).toEqual(mockFindFirstResult);
     expect(result.status).toEqual(mockFindFirstResult.status);
   });
+
+    /**
+   * 
+   * Testando chamada do serviço de "alterarStatus"
+   * 
+   */
+  it('Deve chamar prisma.alvara_Tipo.update e prisma.alvara_Tipo.findFirst quando função alterarStatus é executada.', async () => {
+    const mockFindFirstResult: AlvaraTipoResponseDTO = { 
+      id: "",
+      nome: "",
+      prazo_admissibilidade_smul: 1,
+      reconsideracao_smul: 1,
+      reconsideracao_smul_tipo: 1,
+      analise_reconsideracao_smul: 2,
+      prazo_analise_smul1: 3,
+      prazo_analise_smul2: 4,
+      prazo_emissao_alvara_smul: 5,
+      prazo_admissibilidade_multi: 6,
+      reconsideracao_multi: 7,
+      reconsideracao_multi_tipo: 8,
+      analise_reconsideracao_multi: 9,
+      prazo_analise_multi1: 10,
+      prazo_analise_multi2: 3,
+      prazo_emissao_alvara_multi: 4,
+      prazo_comunique_se: 5,
+      prazo_encaminhar_coord: 6,
+      status: 1
+    };
+    // Configura o retorno dos métodos mockados
+    (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(mockFindFirstResult);
+    (prisma.alvara_Tipo.update as jest.Mock).mockResolvedValue(mockFindFirstResult);
+
+    // Chama o método do serviço, id e status.
+    const result: AlvaraTipoResponseDTO = await service.alterarStatus('3', 1);
+
+    // Testa se o resultado não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se findFirst foi chamado corretamente.
+    expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      },
+    });
+    // Verifica se o método update mockado de alvará-tipo foi chamado corretamente.
+    expect(prisma.alvara_Tipo.update).toHaveBeenCalledWith({ 
+      where: {
+        id: expect.any(String)
+      },
+      data: {
+        status: 1
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual(mockFindFirstResult);
+    expect(result.status).toEqual(mockFindFirstResult.status);
+  });
 });
