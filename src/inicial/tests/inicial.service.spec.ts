@@ -160,6 +160,28 @@ describe('InicialService tests', () => {
     }
   );
 
+  /**
+   * 
+   * Testando chamada do serviço de "adicionaDiasData"
+   * 
+   */
+  it('Deve adicionar dias na data inicial quando executar função adicionaDiasData.', async () => {
+      // Chama o método do serviço.
+      const result_one: Date = service.adicionaDiasData(new Date(2025, 0, 1), 2);
+      const result_two: Date = service.adicionaDiasData(new Date(2025, 1, 27), 2);
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      expect(result_two).not.toBeNull();
+      // Verifica se o retorno está correto, se a soma de dias foi correta, e se não lançou exceção.
+      expect(result_one).not.toThrow;
+      expect(result_one).toEqual(new Date(2025, 0, 3));
+      expect(result_one.getDate()).toBe(3);
+      // Verifica result_two.
+      expect(result_two).toEqual(new Date(2025, 2, 1));
+      expect(result_two.getDate()).toBe(1);
+    }
+  );
+
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"

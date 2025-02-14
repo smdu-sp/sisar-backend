@@ -46,7 +46,7 @@ export class InicialService {
     return novo_sql;
   }
 
-  adicionaDiasData(dataInicial: Date, dias: number) {
+  adicionaDiasData(dataInicial: Date, dias: number): Date {
     return new Date(dataInicial.valueOf() + (dias * 24 * 60 * 60 * 1000));
   }
 
