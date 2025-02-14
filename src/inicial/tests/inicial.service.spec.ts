@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { InicialService } from '../inicial.service';
+import { Inicial_Sqls } from '@prisma/client';
+import { ForbiddenException } from '@nestjs/common';
 
 describe('InicialService tests', () => {
   let service: InicialService;
@@ -111,6 +113,50 @@ describe('InicialService tests', () => {
       // Verifica se o retorno está correto.
       expect(result_one).not.toThrow;
       expect(result_one).toBe(true);
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "adicionaSql"
+   * 
+   */
+  it('Deve envocar prisma.inicial_Sqls.findFirst e prisma.inicial_Sqls.create quando executar função adicionaSql.', 
+    async () => {
+      // Configurando objetos de mock.
+      const mockReturnValue: Inicial_Sqls = {
+        id: "",
+        inicial_id: 123,
+        sql: "7897293",
+        criado_em: new Date(),
+        alterado_em: new Date()
+      };
+      // Configura o retorno do método mockado
+      (prisma.inicial_Sqls.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.inicial_Sqls.create as jest.Mock).mockResolvedValue(mockReturnValue);
+
+      // Chama o método do serviço, fornecendo id.
+      const result_one: Inicial_Sqls | ForbiddenException = await service.adicionaSql(123, "7897293");
+      
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método findFirst mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.findFirst).toHaveBeenCalledWith({ 
+        where: {
+          sql: "7897293",
+          inicial_id: 123
+        }
+      });
+      // Verifica se o método create mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.create).toHaveBeenCalledWith({ 
+        data: {
+          sql: "7897293",
+          inicial_id: 123
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toEqual(mockReturnValue);
     }
   );
 
