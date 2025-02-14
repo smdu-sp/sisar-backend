@@ -50,21 +50,22 @@ export class InicialService {
     return new Date(dataInicial.valueOf() + (dias * 24 * 60 * 60 * 1000));
   }
 
-  pegaQuarta(data: Date) {
+  pegaQuarta(data: Date): Date {
     switch (data.getDay()) {
-      case 2: return data;
-      case 3:
-        return this.adicionaDiasData(data, -1);
-      case 4:
-        return this.adicionaDiasData(data, -2);
-      case 5:
-        return this.adicionaDiasData(data, -3);
-      case 6:
-        return this.adicionaDiasData(data, -4);
-      case 0:
-        return this.adicionaDiasData(data, -5);
       case 1:
+        return this.adicionaDiasData(data, -5);
+      case 2: 
         return this.adicionaDiasData(data, -6);
+      case 3:
+        return data;
+      case 4:
+        return this.adicionaDiasData(data, -1);
+      case 5:
+        return this.adicionaDiasData(data, -2);
+      case 6:
+        return this.adicionaDiasData(data, -3);
+      case 0:
+        return this.adicionaDiasData(data, -4);
     }
   }
 

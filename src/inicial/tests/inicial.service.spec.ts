@@ -182,6 +182,31 @@ describe('InicialService tests', () => {
     }
   );
 
+  /**
+   * 
+   * Testando chamada do serviço de "pegaQuarta"
+   * 
+   */
+  it('Deve encontrar a quarta-feira quando executar função pegaQuarta.', async () => {
+    // Chama o método do serviço.
+    const result_one: Date = service.pegaQuarta(new Date(2025, 0, 1)); // Deve retornar o mesmo dia 1, visto que cai na quarta.
+    const result_two: Date = service.pegaQuarta(new Date(2025, 1, 28)); // Deve retornar dia 26.
+
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    expect(result_two).not.toBeNull();
+    
+    // Verifica se o retorno está correto, se a soma de dias foi correta, e se não lançou exceção.
+    expect(result_one).not.toThrow;
+    expect(result_one.getDate()).toBe(1);
+    expect(result_one.getDay()).toBe(3);
+    
+    // Verifica result_two.
+    expect(result_two).not.toThrow;
+    expect(result_two.getDate()).toEqual(26);
+    expect(result_two.getDay()).toBe(3);
+  });
+
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"
