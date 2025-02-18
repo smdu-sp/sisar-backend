@@ -5,7 +5,7 @@ import { PeriodFilterDto } from './dto/response-relatorio.dto';
 
 @Injectable()
 export class RelatorioService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getUnidades(): Promise<Partial<Unidade>[]> {
     return await this.prisma.unidade.findMany({
@@ -99,44 +99,148 @@ export class RelatorioService {
       .length;
 
     // Dados por tipo e status
-    const analiseGeralSmul: Record<string, number> = await this.countByUnidade(
-      2,
-      1,
-      unidadeIds,
-      periodFilter,
-    );
-    const deferidoGeralSmul: Record<string, number> = await this.countByUnidade(
-      3,
-      1,
-      unidadeIds,
-      periodFilter,
-    );
+    const analiseGeralSmul: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        1,
+        unidadeIds,
+        periodFilter,
+      );
+    const deferidoGeralSmul: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        1,
+        unidadeIds,
+        periodFilter,
+      );
     const indeferidosGeralSmul: Record<string, number> =
-      await this.countByUnidade(4, 1, unidadeIds, periodFilter);
-    const analiseGeralGrap: Record<string, number> = await this.countByUnidade(
-      2,
-      2,
-      unidadeIds,
-      periodFilter,
-    );
-    const deferidoGeralGrap: Record<string, number> = await this.countByUnidade(
-      3,
-      2,
-      unidadeIds,
-      periodFilter,
-    );
+      await this.countByUnidade(
+        4,
+        1,
+        unidadeIds,
+        periodFilter);
+    const analiseGeralParhis: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        3,
+        unidadeIds,
+        periodFilter,
+      );
+
+    const deferidoGeralParhis: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        3,
+        unidadeIds,
+        periodFilter,
+      );
+    const indeferidosGeralParhis: Record<string, number> =
+      await this.countByUnidade(
+        4,
+        3,
+        unidadeIds,
+        periodFilter);
+
+    const analiseGeralGrap: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        4,
+        unidadeIds,
+        periodFilter,
+      );
+    const deferidoGeralGrap: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        4,
+        unidadeIds,
+        periodFilter,
+      );
     const indeferidosGeralGrap: Record<string, number> =
-      await this.countByUnidade(4, 2, unidadeIds, periodFilter);
-    const analiseGeralResid: Record<string, number> = await this.countByUnidade(
-      2,
-      3,
-      unidadeIds,
-      periodFilter,
-    );
+      await this.countByUnidade(
+        4,
+        4,
+        unidadeIds,
+        periodFilter);
+    const analiseGeralResid: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        5,
+        unidadeIds,
+        periodFilter,
+      );
     const deferidoGeralResid: Record<string, number> =
-      await this.countByUnidade(3, 3, unidadeIds, periodFilter);
+      await this.countByUnidade(
+        3,
+        5,
+        unidadeIds,
+        periodFilter);
     const indeferidosGeralResid: Record<string, number> =
-      await this.countByUnidade(4, 3, unidadeIds, periodFilter);
+      await this.countByUnidade(
+        4,
+        5,
+        unidadeIds,
+        periodFilter);
+
+    const analiseGeralServin: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        6,
+        unidadeIds,
+        periodFilter);
+    const deferidoGeralServin: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        6,
+        unidadeIds,
+        periodFilter);
+    const indeferidosGeralServin: Record<string, number> =
+      await this.countByUnidade(
+        4,
+        6,
+        unidadeIds,
+        periodFilter);
+
+    const analiseGeralComin: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        7,
+        unidadeIds,
+        periodFilter);
+    const deferidoGeralComin: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        7,
+        unidadeIds,
+        periodFilter);
+    const indeferidosGeralComin: Record<string, number> =
+      await this.countByUnidade(
+        4,
+        7,
+        unidadeIds,
+        periodFilter);
+
+    const analiseGeralCaepp: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        8,
+        unidadeIds,
+        periodFilter);
+    const deferidoGeralCaepp: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        8,
+        unidadeIds,
+        periodFilter);
+    const indeferidosGeralCaepp: Record<string, number> =
+      await this.countByUnidade(
+        4,
+        8,
+        unidadeIds,
+        periodFilter);
+
+
+
+
 
     const data_gerado: string = new Date()
       .toISOString()
@@ -167,6 +271,34 @@ export class RelatorioService {
           ),
           data: analiseGeralGrap,
         },
+        parhis: {
+          quantidade: Object.values(analiseGeralParhis).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: analiseGeralParhis,
+        },
+        servin: {
+          quantidade: Object.values(analiseGeralServin).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: analiseGeralServin,
+        },
+        comin: {
+          quantidade: Object.values(analiseGeralComin).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: analiseGeralComin,
+        },
+        caepp: {
+          quantidade: Object.values(analiseGeralCaepp).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: analiseGeralCaepp,
+        },
         resid: {
           quantidade: Object.values(analiseGeralResid).reduce(
             (a, b) => a + b,
@@ -194,6 +326,34 @@ export class RelatorioService {
           ),
           data: deferidoGeralGrap,
         },
+        parhis: {
+          quantidade: Object.values(deferidoGeralParhis).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: deferidoGeralParhis,
+        },
+        servin: {
+          quantidade: Object.values(deferidoGeralServin).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: deferidoGeralServin,
+        },
+        comin: {
+          quantidade: Object.values(deferidoGeralComin).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: deferidoGeralComin,
+        },
+        caepp: {
+          quantidade: Object.values(deferidoGeralCaepp).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: deferidoGeralCaepp,
+        },
         resid: {
           quantidade: Object.values(deferidoGeralResid).reduce(
             (a, b) => a + b,
@@ -220,6 +380,34 @@ export class RelatorioService {
             0,
           ),
           data: indeferidosGeralGrap,
+        },
+        parhis: {
+          quantidade: Object.values(indeferidosGeralParhis).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: indeferidosGeralParhis,
+        },
+        servin: {
+          quantidade: Object.values(indeferidosGeralServin).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: indeferidosGeralServin,
+        },
+        comin: {
+          quantidade: Object.values(indeferidosGeralComin).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: indeferidosGeralComin,
+        },
+        caepp: {
+          quantidade: Object.values(indeferidosGeralCaepp).reduce(
+            (a, b) => a + b,
+            0,
+          ),
+          data: indeferidosGeralCaepp,
         },
         resid: {
           quantidade: Object.values(indeferidosGeralResid).reduce(
