@@ -36,7 +36,7 @@ export class CreateInicialDto {
     @ApiProperty()
     interfaces?: any;
     @ApiProperty()
-    data_limteSmul?: Date;
+    data_limiteSmul?: Date;
 }
 
 export class CreateInterfacesDto {
