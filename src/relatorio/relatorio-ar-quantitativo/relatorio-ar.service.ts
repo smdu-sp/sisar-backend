@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Admissibilidade, Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PeriodFilterDto } from './dto/response-relatorio.dto';
+import { UnidadesController } from 'src/unidades/unidades.controller';
 
 @Injectable()
 export class RelatorioService {
@@ -17,18 +18,23 @@ export class RelatorioService {
   // Função auxiliar para contagem e agrupamento
   async countByUnidade(
     status: number,
-    unidadeIds: string[],
+    unidadeId: string,
     periodFilter: PeriodFilterDto,
   ): Promise<Record<string, number>> {
     const resultados: { unidade: { nome: string; id: string } }[] =
       await this.prisma.admissibilidade.findMany({
         where: {
-          inicial: { status, tipo_processo: { in: [1, 2] } },
+          inicial: {
+            status: status,
+            tipo_processo: { in: [1, 2] },
+          },
           data_decisao_interlocutoria: periodFilter,
-          unidade_id: { in: unidadeIds },
+          unidade_id: unidadeId,
         },
         select: { unidade: { select: { nome: true, id: true } } },
       });
+
+    // Agrupa os resultados por nome de unidade e conta quantos processos
     return resultados.reduce(
       (acc, item): Record<string, number> => {
         const nome: string = item.unidade.nome;
@@ -39,14 +45,16 @@ export class RelatorioService {
     );
   }
 
+
   //buscar ID específico de uma unidade
-  async getIdByUnidade(sigla: string): Promise<string[]> {
+  async getIdByUnidade(sigla: string): Promise<string> {
     const unidade = await this.prisma.unidade.findUnique({
       where: {
         sigla
       }
     })
-    return [unidade.id]
+    // console.log("ids das unidades pegas aqui", unidade.id)
+    return unidade.id
   }
 
   // Função auxiliar para contagem total
@@ -92,6 +100,7 @@ export class RelatorioService {
       },
     });
   }
+
 
   async getRelatorio(mes: string, ano: string) {
     const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
