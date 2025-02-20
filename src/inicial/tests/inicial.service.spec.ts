@@ -207,7 +207,63 @@ describe('InicialService tests', () => {
     expect(result_two.getDay()).toBe(3);
   });
 
-  
+  // async removeSql(inicial_id: number, sql: string) {
+  //   const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
+  //     where: {
+  //       sql,
+  //       inicial_id
+  //     }
+  //   });
+  //   if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
+  //   await this.prisma.inicial_Sqls.delete({
+  //     where: { id: sqlBusca.id }
+  //   });
+  //   return true;
+  // }
+
+  /**
+   * 
+   * Testando chamada do serviço de "removeSql"
+   * 
+   */
+  it('Deve envocar prisma.inicial_Sqls.findFirst e prisma.inicial_Sqls.delete quando executar função removeSql.', 
+    async () => {
+      // Configurando objetos de mock.
+      const mockReturnValue: Inicial_Sqls = {
+        id: "",
+        inicial_id: 123,
+        sql: "7897293",
+        criado_em: new Date(),
+        alterado_em: new Date()
+      };
+      // Configura o retorno do método mockado
+      (prisma.inicial_Sqls.findFirst as jest.Mock).mockResolvedValue(mockReturnValue);
+      (prisma.inicial_Sqls.create as jest.Mock).mockResolvedValue(mockReturnValue);
+
+      // Chama o método do serviço, fornecendo id.
+      const result_one: boolean = await service.removeSql(123, "7897293");
+      
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método findFirst mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.findFirst).toHaveBeenCalledWith({ 
+        where: {
+          sql: "7897293",
+          inicial_id: 123
+        }
+      });
+      // Verifica se o método delete mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.delete).toHaveBeenCalledWith({ 
+        where: {
+          id: expect.any(String)
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toEqual(true);
+    }
+  );
+
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"

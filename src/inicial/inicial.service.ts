@@ -69,7 +69,7 @@ export class InicialService {
     }
   }
 
-  async removeSql(inicial_id: number, sql: string) {
+  async removeSql(inicial_id: number, sql: string): Promise<boolean> {
     const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
       where: {
         sql,
