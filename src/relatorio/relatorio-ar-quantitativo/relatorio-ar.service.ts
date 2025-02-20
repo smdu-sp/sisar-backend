@@ -18,14 +18,31 @@ export class RelatorioService {
   // Função auxiliar para contagem e agrupamento
   async countByUnidade(
     status: number,
-    unidadeId: string,
     periodFilter: PeriodFilterDto,
+    unidadeId: string | null,
+    tipo_processo?: number,
   ): Promise<Record<string, number>> {
-    const resultados: { unidade: { nome: string; id: string } }[] =
-      await this.prisma.admissibilidade.findMany({
+    let resultados: { unidade: { nome: string; id: string } }[];
+
+    if (tipo_processo === 1 || tipo_processo === 2) {
+      const unidadeNome = tipo_processo === 1 ? "SMUL" : "GRAPROEM";
+
+      const processos = await this.prisma.admissibilidade.count({
         where: {
           inicial: {
-            status: status,
+            status,
+            tipo_processo,
+          },
+          data_decisao_interlocutoria: periodFilter,
+        },
+      });
+
+      return { [unidadeNome]: processos };
+    } else {
+      resultados = await this.prisma.admissibilidade.findMany({
+        where: {
+          inicial: {
+            status,
             tipo_processo: { in: [1, 2] },
           },
           data_decisao_interlocutoria: periodFilter,
@@ -34,14 +51,15 @@ export class RelatorioService {
         select: { unidade: { select: { nome: true, id: true } } },
       });
 
-    return resultados.reduce(
-      (acc, item): Record<string, number> => {
-        const nome: string = item.unidade.nome;
-        acc[nome] = (acc[nome] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+      return resultados.reduce(
+        (acc, item): Record<string, number> => {
+          const nome: string = item.unidade.nome;
+          acc[nome] = (acc[nome] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+    }
   }
 
 
@@ -118,120 +136,140 @@ export class RelatorioService {
     const analiseGeralSmul: Record<string, number> =
       await this.countByUnidade(
         2,
-        await this.getIdByUnidade("ATIC"),
         periodFilter,
+        null,
+        1,
       );
     const deferidoGeralSmul: Record<string, number> =
       await this.countByUnidade(
         3,
-        await this.getIdByUnidade("ATIC"),
         periodFilter,
+        null,
+        1,
       );
     const indeferidosGeralSmul: Record<string, number> =
       await this.countByUnidade(
         4,
-        await this.getIdByUnidade("ATIC"),
-        periodFilter);
+        periodFilter,
+        null,
+        1,
+      );
+    const analiseGeralGrap: Record<string, number> =
+      await this.countByUnidade(
+        2,
+        periodFilter,
+        null,
+        2,
+      );
+    const deferidoGeralGrap: Record<string, number> =
+      await this.countByUnidade(
+        3,
+        periodFilter,
+        null,
+        2,
+      );
+    const indeferidosGeralGrap: Record<string, number> =
+      await this.countByUnidade(
+        4,
+        periodFilter,
+        null,
+        2,
+      );
     const analiseGeralParhis: Record<string, number> =
       await this.countByUnidade(
         2,
-        await this.getIdByUnidade("PARHIS"),
         periodFilter,
+        await this.getIdByUnidade("PARHIS"),
       );
 
     const deferidoGeralParhis: Record<string, number> =
       await this.countByUnidade(
         3,
-        await this.getIdByUnidade("PARHIS"),
         periodFilter,
+        await this.getIdByUnidade("PARHIS"),
       );
     const indeferidosGeralParhis: Record<string, number> =
       await this.countByUnidade(
         4,
+        periodFilter,
         await this.getIdByUnidade("PARHIS"),
-        periodFilter);
+      );
 
-    const analiseGeralGrap: Record<string, number> =
-      await this.countByUnidade(
-        2,
-        await this.getIdByUnidade("ASCOM"),
-        periodFilter,
-      );
-    const deferidoGeralGrap: Record<string, number> =
-      await this.countByUnidade(
-        3,
-        await this.getIdByUnidade("ASCOM"),
-        periodFilter,
-      );
-    const indeferidosGeralGrap: Record<string, number> =
-      await this.countByUnidade(
-        4,
-        await this.getIdByUnidade("ASCOM"),
-        periodFilter);
     const analiseGeralResid: Record<string, number> =
       await this.countByUnidade(
         2,
-        await this.getIdByUnidade("RESID"),
         periodFilter,
+        await this.getIdByUnidade("RESID"),
       );
     const deferidoGeralResid: Record<string, number> =
       await this.countByUnidade(
         3,
+        periodFilter,
         await this.getIdByUnidade("RESID"),
-        periodFilter);
+      );
     const indeferidosGeralResid: Record<string, number> =
       await this.countByUnidade(
         4,
+        periodFilter,
         await this.getIdByUnidade("RESID"),
-        periodFilter);
+      );
 
     const analiseGeralServin: Record<string, number> =
       await this.countByUnidade(
         2,
+        periodFilter,
         await this.getIdByUnidade("SERVIN"),
-        periodFilter);
+      );
     const deferidoGeralServin: Record<string, number> =
       await this.countByUnidade(
         3,
+        periodFilter,
         await this.getIdByUnidade("SERVIN"),
-        periodFilter);
+      );
     const indeferidosGeralServin: Record<string, number> =
       await this.countByUnidade(
         4,
+        periodFilter,
         await this.getIdByUnidade("SERVIN"),
-        periodFilter);
+      );
 
     const analiseGeralComin: Record<string, number> =
       await this.countByUnidade(
         2,
+        periodFilter,
         await this.getIdByUnidade("COMIN"),
-        periodFilter);
+      );
     const deferidoGeralComin: Record<string, number> =
       await this.countByUnidade(
         3,
+        periodFilter,
         await this.getIdByUnidade("COMIN"),
-        periodFilter);
+      );
     const indeferidosGeralComin: Record<string, number> =
       await this.countByUnidade(
         4,
+        periodFilter,
         await this.getIdByUnidade("COMIN"),
-        periodFilter);
+      );
 
     const analiseGeralCaepp: Record<string, number> =
       await this.countByUnidade(
         2,
+        periodFilter,
         await this.getIdByUnidade("CAEPP"),
-        periodFilter);
+      );
     const deferidoGeralCaepp: Record<string, number> =
       await this.countByUnidade(
         3,
+        periodFilter,
         await this.getIdByUnidade("CAEPP"),
-        periodFilter);
+      );
     const indeferidosGeralCaepp: Record<string, number> =
       await this.countByUnidade(
         4,
+        periodFilter,
         await this.getIdByUnidade("CAEPP"),
-        periodFilter);
+      );
 
     const data_gerado: string = new Date()
       .toISOString()
