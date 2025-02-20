@@ -34,7 +34,6 @@ export class RelatorioService {
         select: { unidade: { select: { nome: true, id: true } } },
       });
 
-    // Agrupa os resultados por nome de unidade e conta quantos processos
     return resultados.reduce(
       (acc, item): Record<string, number> => {
         const nome: string = item.unidade.nome;
@@ -100,7 +99,6 @@ export class RelatorioService {
       },
     });
   }
-
 
   async getRelatorio(mes: string, ano: string) {
     const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
@@ -234,10 +232,6 @@ export class RelatorioService {
         4,
         await this.getIdByUnidade("CAEPP"),
         periodFilter);
-
-
-
-
 
     const data_gerado: string = new Date()
       .toISOString()
