@@ -450,6 +450,13 @@ model Unidade {
   @@map("unidades")
 }
 
+model Licenciamento_unidade {
+  id     String @id @default(uuid())
+  nome   String @unique
+  sigla  String @unique
+  status Boolean
+}
+
 model Avisos {
   id            String   @id @default(uuid())
   titulo        String
