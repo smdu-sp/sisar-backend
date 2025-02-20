@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { InicialService } from '../inicial.service';
-import { Inicial_Sqls } from '@prisma/client';
+import { Inicial, Inicial_Sqls } from '@prisma/client';
 import { ForbiddenException } from '@nestjs/common';
 
 describe('InicialService tests', () => {
@@ -207,20 +207,6 @@ describe('InicialService tests', () => {
     expect(result_two.getDay()).toBe(3);
   });
 
-  // async removeSql(inicial_id: number, sql: string) {
-  //   const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
-  //     where: {
-  //       sql,
-  //       inicial_id
-  //     }
-  //   });
-  //   if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
-  //   await this.prisma.inicial_Sqls.delete({
-  //     where: { id: sqlBusca.id }
-  //   });
-  //   return true;
-  // }
-
   /**
    * 
    * Testando chamada do serviço de "removeSql"
@@ -261,6 +247,45 @@ describe('InicialService tests', () => {
       // Verifica se o retorno está correto.
       expect(result_one).not.toThrow;
       expect(result_one).toEqual(true);
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "todosProcessos"
+   * 
+   */
+  it('Deve envocar prisma.inicial.findMany quando executar função todosProcessos.', 
+    async () => {
+      // Configurando objetos de mock.
+      const mockReturnValue: {
+        id: number;
+        sei: string;
+        aprova_digital: string;
+      }[] = [{ id: 2, sei: 'string', aprova_digital: 'string' }];
+      // Configura o retorno do método mockado
+      (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockReturnValue);
+
+      // Chama o método do serviço, fornecendo id.
+      const result_one: {
+        id: number;
+        sei: string;
+        aprova_digital: string;
+      }[] = await service.todosProcessos();
+      
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método findMany mockado foi chamado corretamente.
+      expect(prisma.inicial.findMany).toHaveBeenCalledWith({ 
+        select: {
+          sei: true,
+          aprova_digital: true,
+          id: true
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toEqual(mockReturnValue);
     }
   );
 

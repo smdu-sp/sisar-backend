@@ -70,7 +70,7 @@ export class InicialService {
   }
 
   async removeSql(inicial_id: number, sql: string): Promise<boolean> {
-    const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
+    const sqlBusca: Inicial_Sqls = await this.prisma.inicial_Sqls.findFirst({
       where: {
         sql,
         inicial_id
@@ -78,7 +78,9 @@ export class InicialService {
     });
     if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
     await this.prisma.inicial_Sqls.delete({
-      where: { id: sqlBusca.id }
+      where: { 
+        id: sqlBusca.id 
+      }
     });
     return true;
   }
