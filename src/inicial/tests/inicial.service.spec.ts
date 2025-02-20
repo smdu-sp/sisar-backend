@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { InicialService } from '../inicial.service';
+import { Inicial_Sqls } from '@prisma/client';
+import { ForbiddenException } from '@nestjs/common';
 
 describe('InicialService tests', () => {
   let service: InicialService;
@@ -114,6 +116,98 @@ describe('InicialService tests', () => {
     }
   );
 
+  /**
+   * 
+   * Testando chamada do serviço de "adicionaSql"
+   * 
+   */
+  it('Deve envocar prisma.inicial_Sqls.findFirst e prisma.inicial_Sqls.create quando executar função adicionaSql.', 
+    async () => {
+      // Configurando objetos de mock.
+      const mockReturnValue: Inicial_Sqls = {
+        id: "",
+        inicial_id: 123,
+        sql: "7897293",
+        criado_em: new Date(),
+        alterado_em: new Date()
+      };
+      // Configura o retorno do método mockado
+      (prisma.inicial_Sqls.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.inicial_Sqls.create as jest.Mock).mockResolvedValue(mockReturnValue);
+
+      // Chama o método do serviço, fornecendo id.
+      const result_one: Inicial_Sqls | ForbiddenException = await service.adicionaSql(123, "7897293");
+      
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método findFirst mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.findFirst).toHaveBeenCalledWith({ 
+        where: {
+          sql: "7897293",
+          inicial_id: 123
+        }
+      });
+      // Verifica se o método create mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.create).toHaveBeenCalledWith({ 
+        data: {
+          sql: "7897293",
+          inicial_id: 123
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toEqual(mockReturnValue);
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "adicionaDiasData"
+   * 
+   */
+  it('Deve adicionar dias na data inicial quando executar função adicionaDiasData.', async () => {
+      // Chama o método do serviço.
+      const result_one: Date = service.adicionaDiasData(new Date(2025, 0, 1), 2);
+      const result_two: Date = service.adicionaDiasData(new Date(2025, 1, 27), 2);
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      expect(result_two).not.toBeNull();
+      // Verifica se o retorno está correto, se a soma de dias foi correta, e se não lançou exceção.
+      expect(result_one).not.toThrow;
+      expect(result_one).toEqual(new Date(2025, 0, 3));
+      expect(result_one.getDate()).toBe(3);
+      // Verifica result_two.
+      expect(result_two).toEqual(new Date(2025, 2, 1));
+      expect(result_two.getDate()).toBe(1);
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "pegaQuarta"
+   * 
+   */
+  it('Deve encontrar a quarta-feira quando executar função pegaQuarta.', async () => {
+    // Chama o método do serviço.
+    const result_one: Date = service.pegaQuarta(new Date(2025, 0, 1)); // Deve retornar o mesmo dia 1, visto que cai na quarta.
+    const result_two: Date = service.pegaQuarta(new Date(2025, 1, 28)); // Deve retornar dia 26.
+
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    expect(result_two).not.toBeNull();
+    
+    // Verifica se o retorno está correto, se a soma de dias foi correta, e se não lançou exceção.
+    expect(result_one).not.toThrow;
+    expect(result_one.getDate()).toBe(1);
+    expect(result_one.getDay()).toBe(3);
+    
+    // Verifica result_two.
+    expect(result_two).not.toThrow;
+    expect(result_two.getDate()).toEqual(26);
+    expect(result_two.getDay()).toBe(3);
+  });
+
+  
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"
