@@ -4,6 +4,7 @@ import { AppService } from 'src/app.service';
 import { InicialService } from '../inicial.service';
 import { Inicial, Inicial_Sqls } from '@prisma/client';
 import { ForbiddenException } from '@nestjs/common';
+import { IniciaisPaginado } from '../dto/inicial-response.dto';
 
 describe('InicialService tests', () => {
   let service: InicialService;
@@ -326,6 +327,50 @@ describe('InicialService tests', () => {
     expect(result_one).not.toThrow;
     expect(result_one).toEqual(mockReturnValue);
   });
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarTudo"
+   * 
+   */
+  it(
+    'Deve envocar prisma.alvara_Tipo.findMany e prisma.alvara_Tipo.count quando buscarTudo é executada.', 
+    async () => {
+      // Configura o retorno dos métodos mockados
+      (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
+      (prisma.inicial.count as jest.Mock).mockResolvedValue(10);
+      (app.verificaLimite as jest.Mock).mockReturnValue([0, 10]);
+      (prisma.inicial.findMany as jest.Mock).mockResolvedValue([]);
+
+      // Chama o método do serviço, fornecendo pagina e limite.
+      const result: IniciaisPaginado = await service.buscarTudo(0, 10, 'search');
+
+      // Testa se o resultado não é nulo.
+      expect(result).not.toBeNull();
+      // Verifica se o método count mockado de alvará tipo foi chamado corretamente.
+      expect(prisma.inicial.count).toHaveBeenCalled();
+      // Verifica se o método findMany mockado de alvará tipo foi chamado corretamente.
+      expect(prisma.inicial.findMany).toHaveBeenCalledWith({ 
+        where: {
+          OR: [
+            { sei: { contains: 'search' } },
+            { requerimento: { contains: 'search' } },
+            { aprova_digital: { contains: 'search' } },
+            { processo_fisico: { contains: 'search' } }
+          ],
+          status: expect.any(Number)
+        },
+        include: {
+          alvara_tipo: true,
+        },
+        skip: expect.any(Number),
+        take: expect.any(Number)
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
+      expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
+    }
+  );
 
   // /**
   //  * 
