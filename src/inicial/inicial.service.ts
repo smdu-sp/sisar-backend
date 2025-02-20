@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateInicialDto, CreateInterfacesDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Inicial } from '@prisma/client';
+import { Inicial, Inicial_Sqls } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
 
@@ -31,15 +31,15 @@ export class InicialService {
     return processo > 0;
   }
 
-  async adicionaSql(inicial_id: number, sql: string) {
-    const existe = await this.prisma.inicial_Sqls.findFirst({
+  async adicionaSql(inicial_id: number, sql: string): Promise<Inicial_Sqls> {
+    const existe: Inicial_Sqls = await this.prisma.inicial_Sqls.findFirst({
       where: {
         sql,
         inicial_id
       }
     });
-    if (existe) return new ForbiddenException('Sql já vinculado.');
-    const novo_sql = await this.prisma.inicial_Sqls.create({
+    if (existe) throw new ForbiddenException('Sql já vinculado.');
+    const novo_sql: Inicial_Sqls = await this.prisma.inicial_Sqls.create({
       data: { sql, inicial_id }
     });
     if (!novo_sql) throw new ForbiddenException('Erro ao vincular sql.');

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { InicialService } from '../inicial.service';
+import { Inicial_Sqls } from '@prisma/client';
 
 describe('InicialService tests', () => {
   let service: InicialService;
@@ -111,6 +112,50 @@ describe('InicialService tests', () => {
       // Verifica se o retorno está correto.
       expect(result_one).not.toThrow;
       expect(result_one).toBe(true);
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "adicionaSql"
+   * 
+   */
+  it(
+    'Deve envocar prisma.inicial_Sqls.findFirst e prisma.inicial_Sqls.create quando executar função adicionaSql.', 
+    async () => {
+      // Configura o retorno do método mockado
+      const mockFindFirstResult: Inicial_Sqls = {
+        id: '123',
+        inicial_id: 1,
+        sql: '892189271',
+        criado_em: new Date(),
+        alterado_em: new Date()
+      };
+      (prisma.inicial_Sqls.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.inicial_Sqls.create as jest.Mock).mockResolvedValue(mockFindFirstResult);
+      
+      // Chama o método do serviço, fornecendo id.
+      const result_one: Inicial_Sqls = await service.adicionaSql(1, "7897293");
+      
+      // Testa se o resultado não é nulo.
+      expect(result_one).not.toBeNull();
+      // Verifica se o método count mockado foi chamado corretamente.
+      expect(prisma.inicial_Sqls.findFirst).toHaveBeenCalledWith({ 
+        where: {
+          sql: expect.any(String),
+          inicial_id: expect.any(Number)
+        }
+      });
+      expect(prisma.inicial_Sqls.create).toHaveBeenCalledWith({ 
+        data: {
+          sql: expect.any(String),
+          inicial_id: expect.any(Number)
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result_one).not.toThrow;
+      expect(result_one).toBe(mockFindFirstResult);
+      expect(result_one.inicial_id).toBe(mockFindFirstResult.inicial_id);
     }
   );
 
