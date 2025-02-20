@@ -35,6 +35,15 @@ describe('InicialService tests', () => {
     interface: {
       upsert: jest.fn()
     },
+    reuniao_Processo: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn()
+    },
   };
   // Configurando mock para o serviço do app.
   const mockAppService = {
@@ -484,29 +493,6 @@ describe('InicialService tests', () => {
     expect(result_one).toEqual({});
   });
 
-  // async atualizar(
-  //   id: number,
-  //   updateInicialDto: UpdateInicialDto,
-  // ): Promise<Inicial> {
-  //   const inicial = await this.prisma.inicial.findUnique({ 
-  //     where: { id } 
-  //   });
-  //   if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
-  //   const { interfaces } = updateInicialDto;
-  //   delete updateInicialDto.interfaces;
-  //   const inicial_atualizado = await this.prisma.inicial.update({
-  //     where: { id },
-  //     data: { ...updateInicialDto },
-  //   });
-  //   if (inicial_atualizado.tipo_processo === 2) {
-  //     await this.geraReuniaoData(inicial_atualizado);
-  //     await this.criaInterfaces(interfaces as CreateInterfacesDto, inicial_atualizado.id);
-  //   }
-  //   if (!inicial_atualizado)
-  //     throw new ForbiddenException('Erro ao atualizar processo');
-  //   return inicial_atualizado;
-  // }
-
   /**
    * 
    * Testando chamada do serviço de "atualizar"
@@ -556,5 +542,36 @@ describe('InicialService tests', () => {
     expect(result_one).toEqual(mockReturnValue);
     expect(result_one.id).toEqual(mockReturnValue.id);
   });
-  
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarPorDataProcesso"
+   * 
+   */
+  it('Deve envocar prisma.reuniao_Processo.findMany quando executar função buscarPorDataProcesso.', async () => {
+    // Configura o retorno do método mockado
+    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue([1]);
+    const mockDate = new Date();
+    mockDate.setDate(123);
+
+    // Chama o método do serviço, fornecendo data.
+    const result_one = await service.buscarPorDataProcesso(mockDate);
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({ 
+      include: {
+        inicial: true
+      },
+      where: {
+        data_processo: { 
+          equals: expect.anything()
+        }
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual([1]);
+  });
 });
