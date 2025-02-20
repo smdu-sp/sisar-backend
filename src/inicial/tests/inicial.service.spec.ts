@@ -5,6 +5,7 @@ import { InicialService } from '../inicial.service';
 import { Inicial, Inicial_Sqls } from '@prisma/client';
 import { ForbiddenException } from '@nestjs/common';
 import { IniciaisPaginado } from '../dto/inicial-response.dto';
+import { UpdateInicialDto } from '../dto/update-inicial.dto';
 
 describe('InicialService tests', () => {
   let service: InicialService;
@@ -32,13 +33,6 @@ describe('InicialService tests', () => {
       count: jest.fn()
     },
     interface: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findFirst: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
       upsert: jest.fn()
     },
   };
@@ -410,28 +404,6 @@ describe('InicialService tests', () => {
     expect(result_one).toEqual(mockReturnValue);
   });
 
-  // async buscarPorId(id: number): Promise<Inicial> {
-  //   if (!id || id < 1) throw new ForbiddenException('Id inválido');
-  //   const inicial = await this.prisma.inicial.findUnique({
-  //     where: { id },
-  //     include: {
-  //       iniciais_sqls: {
-  //         orderBy: { sql: 'asc' }
-  //       },
-  //       interfaces: true,
-  //       admissibilidade: true,
-  //       distribuicao: {
-  //         include: {
-  //           administrativo_responsavel: true,
-  //           tecnico_responsavel: true
-  //         }
-  //       }
-  //     }
-  //   });
-  //   if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
-  //   return inicial;
-  // }
-
   /**
    * 
    * Testando chamada do serviço de "buscarPorId"
@@ -471,256 +443,118 @@ describe('InicialService tests', () => {
     expect(result_one).not.toThrow;
     expect(result_one).toEqual({});
   });
+
+  /**
+   * 
+   * Testando chamada do serviço de "verificaSei"
+   * 
+   */
+  it('Deve envocar prisma.inicial.findUnique quando executar função verificaSei.', async () => {
+    // Configura o retorno do método mockado
+    (prisma.inicial.findUnique as jest.Mock).mockResolvedValue({});
+
+    // Chama o método do serviço, fornecendo id.
+    const result_one: Inicial = await service.buscarPorId(1);
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.inicial.findUnique).toHaveBeenCalledWith({ 
+      where: { 
+        id: 1 
+      },
+      include: {
+        iniciais_sqls: {
+          orderBy: { 
+            sql: 'asc' 
+          }
+        },
+        interfaces: true,
+        admissibilidade: true,
+        distribuicao: {
+          include: {
+            administrativo_responsavel: true,
+            tecnico_responsavel: true
+          }
+        }
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual({});
+  });
+
+  // async atualizar(
+  //   id: number,
+  //   updateInicialDto: UpdateInicialDto,
+  // ): Promise<Inicial> {
+  //   const inicial = await this.prisma.inicial.findUnique({ 
+  //     where: { id } 
+  //   });
+  //   if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
+  //   const { interfaces } = updateInicialDto;
+  //   delete updateInicialDto.interfaces;
+  //   const inicial_atualizado = await this.prisma.inicial.update({
+  //     where: { id },
+  //     data: { ...updateInicialDto },
+  //   });
+  //   if (inicial_atualizado.tipo_processo === 2) {
+  //     await this.geraReuniaoData(inicial_atualizado);
+  //     await this.criaInterfaces(interfaces as CreateInterfacesDto, inicial_atualizado.id);
+  //   }
+  //   if (!inicial_atualizado)
+  //     throw new ForbiddenException('Erro ao atualizar processo');
+  //   return inicial_atualizado;
+  // }
+
+  /**
+   * 
+   * Testando chamada do serviço de "atualizar"
+   * 
+   */
+  it('Deve envocar prisma.inicial.findUnique e prisma.inicial.update quando executar função atualizar.', async () => {
+    // Configura o retorno do método mockado
+    const mockReturnValue: UpdateInicialDto = {
+      id: 2,
+      decreto: false,
+      sei: '312312313',
+      tipo_requerimento: 321,
+      requerimento: 'string',
+      aprova_digital: 'string',
+      processo_fisico: 'string',
+      data_protocolo: new Date(),
+      envio_admissibilidade: new Date(),
+      alvara_tipo_id: 'string',
+      tipo_processo: 454,
+      requalifica_rapido: false,
+      associado_reforma: false
+    };
+    (prisma.inicial.findUnique as jest.Mock).mockResolvedValue(mockReturnValue);
+    (prisma.inicial.update as jest.Mock).mockResolvedValue(mockReturnValue);
+
+    // Chama o método do serviço, fornecendo id.
+    const result_one: Inicial = await service.atualizar(1, mockReturnValue);
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.inicial.findUnique).toHaveBeenCalledWith({ 
+      where: { 
+        id: 1 
+      }
+    });
+    expect(prisma.inicial.update).toHaveBeenCalledWith({ 
+      where: { 
+        id: 1 
+      },
+      data: {
+        ...mockReturnValue
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual(mockReturnValue);
+    expect(result_one.id).toEqual(mockReturnValue.id);
+  });
   
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "criar"
-  //  * 
-  //  */
-  // it(
-  //   'Deve envocar prisma.alvara_Tipo.findFirst e prisma.alvara_Tipo.create quando executar função criar.', 
-  //   async () => {
-  //     // Criando o objeto mockado de retorno da chamada "criar".
-  //     const mockFindResult: CreateAlvaraTipoDto = {
-  //       nome: "",
-  //       prazo_admissibilidade_smul: 7,
-  //       reconsideracao_smul: 6,
-  //       reconsideracao_smul_tipo: 5,
-  //       analise_reconsideracao_smul: 4,
-  //       prazo_analise_smul1: 4,
-  //       prazo_analise_smul2: 3,
-  //       prazo_emissao_alvara_smul: 2,
-  //       prazo_admissibilidade_multi: 2,
-  //       reconsideracao_multi: 2,
-  //       reconsideracao_multi_tipo: 1,
-  //       analise_reconsideracao_multi: 1,
-  //       prazo_analise_multi1: 1,
-  //       prazo_analise_multi2: 1,
-  //       prazo_comunique_se: 1,
-  //       prazo_encaminhar_coord: 1,
-  //       status: 1
-  //     };
-  //     // Configura o retorno do método mockado
-  //     (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(null);
-  //     (prisma.alvara_Tipo.create as jest.Mock).mockResolvedValue(mockFindResult);
-
-  //     // Chama o método do serviço, fornecendo o CreateAlvaraTipoDto.
-  //     const result: Alvara_Tipo = await service.criar(mockFindResult);
-
-  //     // Testa se o resultado não é nulo.
-  //     expect(result).not.toBeNull();
-  //     // Verifica se o método findFirst mockado foi chamado corretamente.
-  //     expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
-  //       where: { 
-  //         nome: expect.any(String) 
-  //       }
-  //     });
-  //     // Verifica se o método create mockado foi chamado corretamente.
-  //     expect(prisma.alvara_Tipo.create).toHaveBeenCalledWith({ 
-  //       data: { ...mockFindResult } 
-  //     });
-  //     // Verifica se o retorno está correto.
-  //     expect(result).toEqual(mockFindResult);
-  //   }
-  // );
-
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "buscarTudo"
-  //  * 
-  //  */
-  // it(
-  //   'Deve envocar prisma.alvara_Tipo.findMany e prisma.alvara_Tipo.count quando buscarTudo é executada.', 
-  //   async () => {
-  //     // Configura o retorno dos métodos mockados
-  //     (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
-  //     (prisma.alvara_Tipo.count as jest.Mock).mockResolvedValue(10);
-  //     (app.verificaLimite as jest.Mock).mockReturnValue([0, 10]);
-  //     (prisma.alvara_Tipo.findMany as jest.Mock).mockResolvedValue([]);
-
-  //     // Chama o método do serviço, fornecendo pagina e limite.
-  //     const result: AlvaraTipoPaginadoDTO = await service.buscarTudo(0, 10, 'search');
-
-  //     // Testa se o resultado não é nulo.
-  //     expect(result).not.toBeNull();
-  //     // Verifica se o método count mockado de alvará tipo foi chamado corretamente.
-  //     expect(prisma.alvara_Tipo.count).toHaveBeenCalled();
-  //     // Verifica se o método findMany mockado de alvará tipo foi chamado corretamente.
-  //     expect(prisma.alvara_Tipo.findMany).toHaveBeenCalledWith({ 
-  //       where: {
-  //         OR: [
-  //           { 
-  //             nome: { 
-  //               contains: 'search'
-  //             } 
-  //           },
-  //         ]
-  //       },
-  //       orderBy: { 
-  //         criado_em: 'desc'
-  //       },
-  //       skip: expect.any(Number),
-  //       take: expect.any(Number)
-  //     });
-  //     // Verifica se o retorno está correto.
-  //     expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
-  //     expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
-  //   }
-  // );
-
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "buscaId"
-  //  * 
-  //  */
-  // it('Deve envocar prisma.alvara_Tipo.findUnique quando função buscarUm é executada.', async () => {
-  //   const mockFindUniqueResult: AlvaraTipoResponseDTO = { 
-  //     id: "",
-  //     nome: "",
-  //     prazo_admissibilidade_smul: 1,
-  //     reconsideracao_smul: 1,
-  //     reconsideracao_smul_tipo: 1,
-  //     analise_reconsideracao_smul: 2,
-  //     prazo_analise_smul1: 3,
-  //     prazo_analise_smul2: 4,
-  //     prazo_emissao_alvara_smul: 5,
-  //     prazo_admissibilidade_multi: 6,
-  //     reconsideracao_multi: 7,
-  //     reconsideracao_multi_tipo: 8,
-  //     analise_reconsideracao_multi: 9,
-  //     prazo_analise_multi1: 10,
-  //     prazo_analise_multi2: 3,
-  //     prazo_emissao_alvara_multi: 4,
-  //     prazo_comunique_se: 5,
-  //     prazo_encaminhar_coord: 6,
-  //     status: 1
-  //   };
-  //   // Configura o retorno dos métodos mockados
-  //   (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(mockFindUniqueResult);
-
-  //   // Chama o método do serviço, fornecendo pagina e limite.
-  //   const result: Alvara_Tipo = await service.buscarPorId('3');
-
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se o método findFirst mockado de alvará-tipo foi chamado corretamente.
-  //   expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     }
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual(mockFindUniqueResult);
-  //   expect(result.id).toEqual(mockFindUniqueResult.id);
-  // });
-
-  // /**
-  //  * 
-  //  * Testando chamada do serviço de "atualizar"
-  //  * 
-  //  */
-  // it('Deve chamar prisma.alvara_Tipo.update e prisma.alvara_Tipo.findFirst quando função atualizar é executada.', async () => {
-  //   const mockFindFirstResult: AlvaraTipoResponseDTO = { 
-  //     id: "",
-  //     nome: "",
-  //     prazo_admissibilidade_smul: 1,
-  //     reconsideracao_smul: 1,
-  //     reconsideracao_smul_tipo: 1,
-  //     analise_reconsideracao_smul: 2,
-  //     prazo_analise_smul1: 3,
-  //     prazo_analise_smul2: 4,
-  //     prazo_emissao_alvara_smul: 5,
-  //     prazo_admissibilidade_multi: 6,
-  //     reconsideracao_multi: 7,
-  //     reconsideracao_multi_tipo: 8,
-  //     analise_reconsideracao_multi: 9,
-  //     prazo_analise_multi1: 10,
-  //     prazo_analise_multi2: 3,
-  //     prazo_emissao_alvara_multi: 4,
-  //     prazo_comunique_se: 5,
-  //     prazo_encaminhar_coord: 6,
-  //     status: 1
-  //   };
-  //   // Configura o retorno dos métodos mockados
-  //   (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(mockFindFirstResult);
-  //   (prisma.alvara_Tipo.update as jest.Mock).mockResolvedValue(mockFindFirstResult);
-
-  //   // Chama o método do serviço, id e objeto.
-  //   const result: AlvaraTipoResponseDTO = await service.atualizar('3', mockFindFirstResult);
-
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se findFirst foi chamado corretamente.
-  //   expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     },
-  //   });
-  //   // Verifica se o método update mockado de alvará-tipo foi chamado corretamente.
-  //   expect(prisma.alvara_Tipo.update).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     },
-  //     data: mockFindFirstResult
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual(mockFindFirstResult);
-  //   expect(result.status).toEqual(mockFindFirstResult.status);
-  // });
-
-  //   /**
-  //  * 
-  //  * Testando chamada do serviço de "alterarStatus"
-  //  * 
-  //  */
-  // it('Deve chamar prisma.alvara_Tipo.update e prisma.alvara_Tipo.findFirst quando função alterarStatus é executada.', async () => {
-  //   const mockFindFirstResult: AlvaraTipoResponseDTO = { 
-  //     id: "",
-  //     nome: "",
-  //     prazo_admissibilidade_smul: 1,
-  //     reconsideracao_smul: 1,
-  //     reconsideracao_smul_tipo: 1,
-  //     analise_reconsideracao_smul: 2,
-  //     prazo_analise_smul1: 3,
-  //     prazo_analise_smul2: 4,
-  //     prazo_emissao_alvara_smul: 5,
-  //     prazo_admissibilidade_multi: 6,
-  //     reconsideracao_multi: 7,
-  //     reconsideracao_multi_tipo: 8,
-  //     analise_reconsideracao_multi: 9,
-  //     prazo_analise_multi1: 10,
-  //     prazo_analise_multi2: 3,
-  //     prazo_emissao_alvara_multi: 4,
-  //     prazo_comunique_se: 5,
-  //     prazo_encaminhar_coord: 6,
-  //     status: 1
-  //   };
-  //   // Configura o retorno dos métodos mockados
-  //   (prisma.alvara_Tipo.findFirst as jest.Mock).mockResolvedValue(mockFindFirstResult);
-  //   (prisma.alvara_Tipo.update as jest.Mock).mockResolvedValue(mockFindFirstResult);
-
-  //   // Chama o método do serviço, id e status.
-  //   const result: AlvaraTipoResponseDTO = await service.alterarStatus('3', 1);
-
-  //   // Testa se o resultado não é nulo.
-  //   expect(result).not.toBeNull();
-  //   // Verifica se findFirst foi chamado corretamente.
-  //   expect(prisma.alvara_Tipo.findFirst).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     },
-  //   });
-  //   // Verifica se o método update mockado de alvará-tipo foi chamado corretamente.
-  //   expect(prisma.alvara_Tipo.update).toHaveBeenCalledWith({ 
-  //     where: {
-  //       id: expect.any(String)
-  //     },
-  //     data: {
-  //       status: 1
-  //     }
-  //   });
-  //   // Verifica se o retorno está correto.
-  //   expect(result).toEqual(mockFindFirstResult);
-  //   expect(result.status).toEqual(mockFindFirstResult.status);
-  // });
 });

@@ -434,19 +434,22 @@ export class InicialService {
     return inicial;
   }
 
-  async atualizar(
-    id: number,
-    updateInicialDto: UpdateInicialDto,
-  ): Promise<Inicial> {
+  async atualizar(id: number, updateInicialDto: UpdateInicialDto): Promise<Inicial> {
     const inicial = await this.prisma.inicial.findUnique({ 
-      where: { id } 
+      where: { 
+        id 
+      } 
     });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;
     const inicial_atualizado = await this.prisma.inicial.update({
-      where: { id },
-      data: { ...updateInicialDto },
+      where: { 
+        id 
+      },
+      data: { 
+        ...updateInicialDto
+      },
     });
     if (inicial_atualizado.tipo_processo === 2) {
       await this.geraReuniaoData(inicial_atualizado);
