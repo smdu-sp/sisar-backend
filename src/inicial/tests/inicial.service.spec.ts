@@ -29,7 +29,17 @@ describe('InicialService tests', () => {
       update: jest.fn(),
       delete: jest.fn(),
       count: jest.fn()
-    }
+    },
+    interface: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      upsert: jest.fn()
+    },
   };
   // Configurando mock para o serviço do app.
   const mockAppService = {
@@ -252,42 +262,70 @@ describe('InicialService tests', () => {
 
   /**
    * 
+   * Testando chamada do serviço de "criaInterfaces"
+   * 
+   */
+  it('Deve envocar prisma.interface.upsert quando executar função criaInterfaces.', async () => {
+    // Configura o retorno do método mockado
+    (prisma.interface.upsert as jest.Mock).mockResolvedValue({});
+
+    // Chama o método do serviço, fornecendo id.
+    const result_one = await service.criaInterfaces({}, 2);
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método upsert mockado foi chamado corretamente.
+    expect(prisma.interface.upsert).toHaveBeenCalledWith({ 
+      where: { 
+        inicial_id: expect.any(Number) 
+      },
+      create: {
+        inicial_id: expect.any(Number)
+      },
+      update: {}
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+  });
+
+  /**
+   * 
    * Testando chamada do serviço de "todosProcessos"
    * 
    */
-  it('Deve envocar prisma.inicial.findMany quando executar função todosProcessos.', 
-    async () => {
-      // Configurando objetos de mock.
-      const mockReturnValue: {
-        id: number;
-        sei: string;
-        aprova_digital: string;
-      }[] = [{ id: 2, sei: 'string', aprova_digital: 'string' }];
-      // Configura o retorno do método mockado
-      (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockReturnValue);
+  it('Deve envocar prisma.inicial.findMany quando executar função todosProcessos.', async () => {
+    // Configurando objetos de mock.
+    const mockReturnValue: { id: number; sei: string; aprova_digital: string; }[] = [
+      { 
+        id: 2, 
+        sei: 'string', 
+        aprova_digital: 'string' 
+      }
+    ];
+    // Configura o retorno do método mockado
+    (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockReturnValue);
 
-      // Chama o método do serviço, fornecendo id.
-      const result_one: {
-        id: number;
-        sei: string;
-        aprova_digital: string;
-      }[] = await service.todosProcessos();
-      
-      // Testa se o resultado não é nulo.
-      expect(result_one).not.toBeNull();
-      // Verifica se o método findMany mockado foi chamado corretamente.
-      expect(prisma.inicial.findMany).toHaveBeenCalledWith({ 
-        select: {
-          sei: true,
-          aprova_digital: true,
-          id: true
-        }
-      });
-      // Verifica se o retorno está correto.
-      expect(result_one).not.toThrow;
-      expect(result_one).toEqual(mockReturnValue);
-    }
-  );
+    // Chama o método do serviço, fornecendo id.
+    const result_one: {
+      id: number;
+      sei: string;
+      aprova_digital: string;
+    }[] = await service.todosProcessos();
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.inicial.findMany).toHaveBeenCalledWith({ 
+      select: {
+        sei: true,
+        aprova_digital: true,
+        id: true
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual(mockReturnValue);
+  });
 
   // /**
   //  * 

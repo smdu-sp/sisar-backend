@@ -85,7 +85,7 @@ export class InicialService {
     return true;
   }
 
-  async criaInterfaces(interfaces: CreateInterfacesDto, inicial_id: number) {
+  async criaInterfaces(interfaces: CreateInterfacesDto, inicial_id: number): Promise<void> {
     const interfaceUpsert = await this.prisma.interface.upsert({
       where: { inicial_id },
       create: {
