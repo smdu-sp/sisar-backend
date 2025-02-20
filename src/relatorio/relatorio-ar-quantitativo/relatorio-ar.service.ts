@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Admissibilidade, Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PeriodFilterDto } from './dto/response-relatorio.dto';
-import { UnidadesController } from 'src/unidades/unidades.controller';
 
 @Injectable()
 export class RelatorioService {
