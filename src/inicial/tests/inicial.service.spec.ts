@@ -291,45 +291,6 @@ describe('InicialService tests', () => {
 
   /**
    * 
-   * Testando chamada do serviço de "todosProcessos"
-   * 
-   */
-  it('Deve envocar prisma.inicial.findMany quando executar função todosProcessos.', async () => {
-    // Configurando objetos de mock.
-    const mockReturnValue: { id: number; sei: string; aprova_digital: string; }[] = [
-      { 
-        id: 2, 
-        sei: 'string', 
-        aprova_digital: 'string' 
-      }
-    ];
-    // Configura o retorno do método mockado
-    (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockReturnValue);
-
-    // Chama o método do serviço, fornecendo id.
-    const result_one: {
-      id: number;
-      sei: string;
-      aprova_digital: string;
-    }[] = await service.todosProcessos();
-    
-    // Testa se o resultado não é nulo.
-    expect(result_one).not.toBeNull();
-    // Verifica se o método findMany mockado foi chamado corretamente.
-    expect(prisma.inicial.findMany).toHaveBeenCalledWith({ 
-      select: {
-        sei: true,
-        aprova_digital: true,
-        id: true
-      }
-    });
-    // Verifica se o retorno está correto.
-    expect(result_one).not.toThrow;
-    expect(result_one).toEqual(mockReturnValue);
-  });
-
-  /**
-   * 
    * Testando chamada do serviço de "buscarTudo"
    * 
    */
@@ -410,6 +371,107 @@ describe('InicialService tests', () => {
     }
   );
 
+  /**
+   * 
+   * Testando chamada do serviço de "todosProcessos"
+   * 
+   */
+  it('Deve envocar prisma.inicial.findMany quando executar função todosProcessos.', async () => {
+    // Configurando objetos de mock.
+    const mockReturnValue: { id: number; sei: string; aprova_digital: string; }[] = [
+      { 
+        id: 2, 
+        sei: 'string', 
+        aprova_digital: 'string' 
+      }
+    ];
+    // Configura o retorno do método mockado
+    (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockReturnValue);
+
+    // Chama o método do serviço, fornecendo id.
+    const result_one: {
+      id: number;
+      sei: string;
+      aprova_digital: string;
+    }[] = await service.todosProcessos();
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.inicial.findMany).toHaveBeenCalledWith({ 
+      select: {
+        sei: true,
+        aprova_digital: true,
+        id: true
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual(mockReturnValue);
+  });
+
+  // async buscarPorId(id: number): Promise<Inicial> {
+  //   if (!id || id < 1) throw new ForbiddenException('Id inválido');
+  //   const inicial = await this.prisma.inicial.findUnique({
+  //     where: { id },
+  //     include: {
+  //       iniciais_sqls: {
+  //         orderBy: { sql: 'asc' }
+  //       },
+  //       interfaces: true,
+  //       admissibilidade: true,
+  //       distribuicao: {
+  //         include: {
+  //           administrativo_responsavel: true,
+  //           tecnico_responsavel: true
+  //         }
+  //       }
+  //     }
+  //   });
+  //   if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
+  //   return inicial;
+  // }
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarPorId"
+   * 
+   */
+  it('Deve envocar prisma.inicial.findUnique quando executar função buscarPorId.', async () => {
+    // Configura o retorno do método mockado
+    (prisma.inicial.findUnique as jest.Mock).mockResolvedValue({});
+
+    // Chama o método do serviço, fornecendo id.
+    const result_one: Inicial = await service.buscarPorId(1);
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.inicial.findUnique).toHaveBeenCalledWith({ 
+      where: { 
+        id: 1 
+      },
+      include: {
+        iniciais_sqls: {
+          orderBy: { 
+            sql: 'asc' 
+          }
+        },
+        interfaces: true,
+        admissibilidade: true,
+        distribuicao: {
+          include: {
+            administrativo_responsavel: true,
+            tecnico_responsavel: true
+          }
+        }
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual({});
+  });
+  
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"
