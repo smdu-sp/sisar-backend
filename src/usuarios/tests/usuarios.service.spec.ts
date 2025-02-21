@@ -22,6 +22,15 @@ describe('UsuarioService tests', () => {
       delete: jest.fn(),
       count: jest.fn()
     },
+    unidade: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn()
+    },
     ferias: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -39,13 +48,15 @@ describe('UsuarioService tests', () => {
   };
   // Configurando mock para o serviço do sgu.
   const mockSguService = {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findFirst: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn()
+    tblUsuarios: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn()
+    }
   };
 
   beforeEach(async () => {
@@ -276,12 +287,12 @@ describe('UsuarioService tests', () => {
     expect(result).toEqual({ id: 1, nome: 'Test', status: 1 });
   });
 
-   /**
+  /**
    * 
    * Testando chamada do serviço de "adicionaFerias"
    * 
    */
-   it('Deve envocar prisma.usuario.update e prisma.ferias.create quando executar função adicionaFerias.', async () => {
+  it('Deve envocar prisma.usuario.update e prisma.ferias.create quando executar função adicionaFerias.', async () => {
     // Configura o retorno do método mockado
     const mockReturn = { id: 1, nome: 'Test', status: 1 };
     (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
@@ -310,4 +321,51 @@ describe('UsuarioService tests', () => {
     // Verifica se o retorno está correto.
     expect(result).toEqual({});
   });
+
+   /**
+   * 
+   * Testando chamada do serviço de "buscaUnidade"
+   * 
+   */
+   it('Deve envocar prisma.usuario.update e sgu.tblUsuarios.findFirst quando executar função buscaUnidade.', 
+    async () => {
+      // Configura o retorno do método mockado
+      const mockReturn = {
+        cpID: 12312312,
+        cpRF: '235343423',
+        cpNome: 'string',
+        cpVinculo: 'string',
+        cpnomecargo2: 'string',
+        cpRef: 'string',
+        cpUnid: 'string',
+        cpnomesetor2: 'string',
+        cpPermissao: 'string',
+        cpImprimir: 'string',
+        cpUltimaCarga: 'string',
+        cpOBS: 'string'
+      };
+      (sgu.tblUsuarios.findFirst as jest.Mock).mockResolvedValue(mockReturn);
+      (prisma.unidade.findUnique as jest.Mock).mockResolvedValue({ id: '4134213' });
+
+      // Chama o método do serviço.
+      const result: string = await service.buscaUnidade('nd92n29d3n');
+
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(sgu.tblUsuarios.findFirst).toHaveBeenCalledWith({ 
+        where: {
+          cpRF: { 
+            startsWith: expect.any(String) 
+          },
+        },
+      });
+      expect(prisma.unidade.findUnique).toHaveBeenCalledWith({ 
+        where: { 
+          codigo: 'string'
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual('4134213');
+    }
+  );
 });

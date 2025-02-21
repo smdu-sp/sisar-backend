@@ -221,14 +221,14 @@ export class UsuariosService {
     return ferias;
   }
 
-  async buscaUnidade(login: string) {
+  async buscaUnidade(login: string): Promise<string> {
     let unidade_id: string = '';
     const usuario_sgu = await this.sgu.tblUsuarios.findFirst({
       where: {
         cpRF: { startsWith: login.substring(1) },
       },
     });
-    if (usuario_sgu){
+    if (usuario_sgu) {
       const codigo: string = usuario_sgu.cpUnid;
       const unidade: Unidade = await this.prisma.unidade.findUnique({ 
         where: { codigo } 
