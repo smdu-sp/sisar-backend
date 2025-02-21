@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Parecer_Admissibilidade } from '@prisma/client';
 import { UsuariosService } from '../usuarios.service';
 import { SGUService } from 'src/sgu/sgu.service';
+import { Permissao } from '@prisma/client';
 
 describe('UsuarioService tests', () => {
   let service: UsuariosService;
@@ -62,12 +62,34 @@ describe('UsuarioService tests', () => {
     expect(sgu).toBeDefined();
   });
 
-  // async retornaPermissao(id: string): Promise<Permissao> {
-  //   const usuario: Usuario = await this.prisma.usuario.findUnique({ 
-  //     where: { id } 
-  //   });
-  //   return usuario.permissao;
-  // }
+  /**
+   * 
+   * Testando chamada do serviço de "retornaPermissao"
+   * 
+   */
+  it(
+    'Deve envocar prisma.usuario.findUnique quando executar função retornaPermissao.', 
+    async () => {
+      // Criando o objeto mockado de retorno da chamada.
+      const mockReturn = { permissao: 'DEV' };
+      // Configura o retorno do método mockado
+      (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
+
+      // Chama o método do serviço.
+      const result: Permissao = await service.retornaPermissao('9238892');
+
+      // Testa se o resultado não é nulo.
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(prisma.usuario.findUnique).toHaveBeenCalledWith({ 
+        where: { 
+          id: '9238892'
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual('DEV');
+    }
+  );
 
   // /**
   //  * 
