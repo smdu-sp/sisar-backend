@@ -418,4 +418,42 @@ describe('UsuarioService tests', () => {
       expect(result).toEqual(mockReturn);
     }
   );
+
+  /**
+   * 
+   * Testando chamada do serviço de "removerSubstituto"
+   * 
+   */
+  it('Deve envocar prisma.substituto.findUnique e prisma.substituto.delete quando executar função removerSubstituto.', 
+    async () => {
+      // Configura o retorno do método mockado
+      const mockReturn: Substituto =  {
+        id: '32ri3m2o32',
+        usuario_id: '23434f2rf3f32',
+        substituto_id: '3423o4n23io4n',
+        criado_em: new Date(),
+        alterado_em: new Date()
+      };
+      (prisma.substituto.findUnique as jest.Mock).mockResolvedValue(mockReturn);
+      (prisma.substituto.delete as jest.Mock).mockResolvedValue(mockReturn);
+
+      // Chama o método do serviço.
+      const result: boolean = await service.removerSubstituto('nd92n29d3n');
+
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(prisma.substituto.findUnique).toHaveBeenCalledWith({ 
+        where: { 
+          id: 'nd92n29d3n'
+        },
+      });
+      expect(prisma.substituto.delete).toHaveBeenCalledWith({ 
+        where: {
+          id: 'nd92n29d3n'
+        },
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual(true);
+    }
+  );
 });
