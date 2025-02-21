@@ -173,6 +173,48 @@ describe('UsuarioService tests', () => {
 
   /**
    * 
+   * Testando chamada do serviço de "criar"
+   * 
+   */
+  it(
+    'Deve envocar prisma.usuarios.findUnique e prisma.usuarios.count quando criar é executada.', 
+    async () => {
+      const mockDto: Usuario ={ 
+        id: 'string',
+        nome: 'string',
+        login: 'string',
+        email: 'string',
+        cargo: Cargo.TEC,
+        permissao: Permissao.DEV,
+        status: 1,
+        criado_em: new Date(),
+        alterado_em: new Date(),
+        unidade_id: 'string'
+      };
+
+      (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.usuario.create as jest.Mock).mockResolvedValue(mockDto);
+
+      // Chama o método do serviço, fornecendo pagina e limite.
+      const result: Usuario = await service.criar(mockDto);
+
+      // Testa se o resultado não é nulo.
+      expect(result).not.toBeNull();
+      // Verifica se o método count mockado de alvará tipo foi chamado corretamente.
+      expect(prisma.usuario.findUnique).toHaveBeenCalled();
+      // Verifica se o método findMany mockado de alvará tipo foi chamado corretamente.
+      expect(prisma.usuario.create).toHaveBeenCalledWith({ 
+        data: {
+          ...mockDto
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual(mockDto);
+    }
+  );
+
+  /**
+   * 
    * Testando chamada do serviço de "buscarTudo"
    * 
    */
