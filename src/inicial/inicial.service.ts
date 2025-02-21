@@ -371,9 +371,9 @@ export class InicialService {
     }
     let data_reuniao = pegaQuarta(new Date(data));
     const data_formatada = data_reuniao.toISOString().split('T')[0]
-    const validaFeriado = await this.verificaFeriado(data_formatada);
+    // const validaFeriado = await this.verificaFeriado(data_formatada);
     data_reuniao.setUTCHours(0, 0, 0, 0);
-    if (validaFeriado) data_reuniao.setDate(data_reuniao.getDate() - 7);
+    // if (validaFeriado) data_reuniao.setDate(data_reuniao.getDate() - 7);
     let dataProcesso = new Date(inicial.envio_admissibilidade);
     dataProcesso.setDate(
       dataProcesso.getDate() +

@@ -15,7 +15,7 @@ interface DiasUteis {
 
 @Injectable()
 export class AdmissibilidadeService {
-  constructor(private prisma: PrismaService, private app: AppService) {}
+  constructor(private prisma: PrismaService, private app: AppService) { }
 
   async create(
     createAdmissibilidadeDto: CreateAdmissibilidadeDto
@@ -129,13 +129,13 @@ export class AdmissibilidadeService {
 
   async admissibilidadeFinalizada(): Promise<number> {
     const count: number = await this.prisma.admissibilidade.count({
-      where: {        
-          data_decisao_interlocutoria: {
-            not: null,
-          },
-        },            
-    });    
-    return count;    
+      where: {
+        data_decisao_interlocutoria: {
+          not: null,
+        },
+      },
+    });
+    return count;
   }
 
   async buscarTudo(
@@ -163,13 +163,13 @@ export class AdmissibilidadeService {
         inicial: true
       },
       where: {
-        status: filtro === -1 ? undefined : filtro,
+        status: filtro !== -1 ? filtro : undefined,
         inicial: { ...searchParams }
       },
       skip: (pagina - 1) * limite,
       take: limite,
     });
-    if (!admissibilidades)
+    if (admissibilidades.length === 0)
       throw new ForbiddenException('Nenhum processo encontrado');
     return {
       data: admissibilidades,
@@ -260,7 +260,7 @@ export class AdmissibilidadeService {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_6AM)
-  async verificaReconsideracao() { 
+  async verificaReconsideracao() {
     const reconsiderados = await this.prisma.admissibilidade.findMany({
       where: {
         AND: [
@@ -290,20 +290,20 @@ export class AdmissibilidadeService {
     for (let i = 0; i < reconsiderados.length; i++) {
       let dataFinal: Date;
       if (
-        reconsiderados[i].inicial.tipo_processo === 1 
+        reconsiderados[i].inicial.tipo_processo === 1
         && reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul_tipo === 0
       ) {
         const diasUteisSmul: DiasUteis = await this.verificaDiasUteis(
-          reconsiderados[i].data_decisao_interlocutoria.toString(), 
+          reconsiderados[i].data_decisao_interlocutoria.toString(),
           reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
         );
         dataFinal = new Date(diasUteisSmul.dataExpiracao.valueOf());
-      } else  {
+      } else {
         dataFinal = this.dataExperacaoNaoUtil(
-          reconsiderados[i].data_decisao_interlocutoria.toString(), 
+          reconsiderados[i].data_decisao_interlocutoria.toString(),
           reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
         );
-      }  
+      }
       if (new Date() >= dataFinal) {
         await this.prisma.admissibilidade.update({
           where: { inicial_id: reconsiderados[i].inicial_id },
@@ -344,14 +344,14 @@ export class AdmissibilidadeService {
         const envioAdmissibilidade: Date = registro.envio_admissibilidade;
         if (dataDecisao && envioAdmissibilidade) {
           const diffTime: number = new Date(dataDecisao).getTime() - new Date(envioAdmissibilidade).getTime();
-          return diffTime / (1000 * 3600 * 24); 
+          return diffTime / (1000 * 3600 * 24);
         }
         return null;
-      }).filter((diff) => diff !== null) as number[]; 
-    if (diffsInDays.length === 0) return null; 
+      }).filter((diff) => diff !== null) as number[];
+    if (diffsInDays.length === 0) return null;
     diffsInDays.sort((a, b) => a - b);
     const middle: number = Math.floor(diffsInDays.length / 2);
-    if (diffsInDays.length % 2 === 0) 
+    if (diffsInDays.length % 2 === 0)
       return (diffsInDays[middle - 1] + diffsInDays[middle]) / 2;
     return diffsInDays[middle];
   }

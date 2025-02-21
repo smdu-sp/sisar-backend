@@ -451,10 +451,12 @@ model Unidade {
 }
 
 model Licenciamento_unidade {
-  id     String @id @default(uuid())
-  nome   String @unique
-  sigla  String @unique
+  id     String  @id @default(uuid())
+  nome   String  @unique 
+  sigla  String  @unique 
   status Boolean
+
+  @@map("licenciamento")
 }
 
 model Avisos {
