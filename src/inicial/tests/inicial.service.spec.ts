@@ -455,10 +455,10 @@ describe('InicialService tests', () => {
 
   /**
    * 
-   * Testando chamada do serviço de "verificaSei"
+   * Testando chamada do serviço de "buscarPorId"
    * 
    */
-  it('Deve envocar prisma.inicial.findUnique quando executar função verificaSei.', async () => {
+  it('Deve envocar prisma.inicial.findUnique quando executar função buscarPorId.', async () => {
     // Configura o retorno do método mockado
     (prisma.inicial.findUnique as jest.Mock).mockResolvedValue({});
 
