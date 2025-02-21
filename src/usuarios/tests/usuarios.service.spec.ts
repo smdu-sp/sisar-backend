@@ -3,7 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { UsuariosService } from '../usuarios.service';
 import { SGUService } from 'src/sgu/sgu.service';
-import { Ferias, Permissao, Usuario } from '@prisma/client';
+import { Ferias, Permissao, Substituto, Usuario } from '@prisma/client';
+import { AddSubstitutoDTO } from '../dto/usuario-response.dto';
 
 describe('UsuarioService tests', () => {
   let service: UsuariosService;
@@ -23,6 +24,15 @@ describe('UsuarioService tests', () => {
       count: jest.fn()
     },
     unidade: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn()
+    },
+    substituto: {
       create: jest.fn(),
       findUnique: jest.fn(),
       findFirst: jest.fn(),
@@ -322,12 +332,12 @@ describe('UsuarioService tests', () => {
     expect(result).toEqual({});
   });
 
-   /**
+  /**
    * 
    * Testando chamada do serviço de "buscaUnidade"
    * 
    */
-   it('Deve envocar prisma.usuario.update e sgu.tblUsuarios.findFirst quando executar função buscaUnidade.', 
+  it('Deve envocar prisma.usuario.update e sgu.tblUsuarios.findFirst quando executar função buscaUnidade.', 
     async () => {
       // Configura o retorno do método mockado
       const mockReturn = {
@@ -366,6 +376,46 @@ describe('UsuarioService tests', () => {
       });
       // Verifica se o retorno está correto.
       expect(result).toEqual('4134213');
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "adicionarSubstituto"
+   * 
+   */
+  it('Deve envocar prisma.substituto.findFirst e prisma.substituto.create quando executar função adicionarSubstituto.', 
+    async () => {
+      // Configura o retorno do método mockado
+      const mockReturn: Substituto =  {
+        id: '32ri3m2o32',
+        usuario_id: '23434f2rf3f32',
+        substituto_id: '3423o4n23io4n',
+        criado_em: new Date(),
+        alterado_em: new Date()
+      };
+      (prisma.substituto.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.substituto.create as jest.Mock).mockResolvedValue(mockReturn);
+
+      // Chama o método do serviço.
+      const result: AddSubstitutoDTO = await service.adicionarSubstituto('nd92n29d3n', '1i2o4n23io');
+
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(prisma.substituto.findFirst).toHaveBeenCalledWith({ 
+        where: {
+          substituto_id: '1i2o4n23io', 
+          usuario_id: 'nd92n29d3n'
+        },
+      });
+      expect(prisma.substituto.create).toHaveBeenCalledWith({ 
+        data: {
+          substituto_id: '1i2o4n23io', 
+          usuario_id: 'nd92n29d3n'
+        },
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual(mockReturn);
     }
   );
 });

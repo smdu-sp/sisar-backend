@@ -304,10 +304,7 @@ export class UsuariosService {
     };
   }
 
-  async adicionarSubstituto(
-    usuario_id: string, 
-    substituto_id: string
-  ): Promise<AddSubstitutoDTO> {
+  async adicionarSubstituto(usuario_id: string, substituto_id: string): Promise<AddSubstitutoDTO> {
     if (usuario_id === substituto_id) 
       throw new ForbiddenException('Substituto não pode ser o usuário.');
     const substituto: Substituto = await this.prisma.substituto.findFirst({
