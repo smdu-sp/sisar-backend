@@ -456,4 +456,57 @@ describe('UsuarioService tests', () => {
       expect(result).toEqual(true);
     }
   );
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarAdministrativos"
+   * 
+   */
+  it('Deve envocar prisma.usuario.findMany quando executar função buscarAdministrativos.', 
+    async () => {
+      // Configura o retorno do método mockado
+      const mockReturn = [{ id: 1, nome: 'Test' }];
+      (prisma.usuario.findMany as jest.Mock).mockResolvedValue(mockReturn);
+
+      // Chama o método do serviço.
+      const result: Usuario[] = await service.buscarAdministrativos();
+
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(prisma.usuario.findMany).toHaveBeenCalledWith({ 
+        where: { 
+          cargo: 'ADM'
+        },
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual(mockReturn);
+    }
+  );
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarFuncionarios"
+   * 
+   */
+  it('Deve envocar prisma.usuario.findMany quando executar função buscarFuncionarios.', 
+    async () => {
+      // Configura o retorno do método mockado
+      const mockReturn = [{ id: 1, nome: 'Test' }];
+      (prisma.usuario.findMany as jest.Mock).mockResolvedValue(mockReturn);
+
+      // Chama o método do serviço.
+      const result: Usuario[] = await service.buscarAdministrativos();
+
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(prisma.usuario.findMany).toHaveBeenCalledWith({ 
+        where: { 
+          cargo: 'ADM'
+        },
+      });
+
+      // Verifica se o retorno está correto.
+      expect(result).toEqual(mockReturn);
+    }
+  );
 });
