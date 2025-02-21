@@ -4,6 +4,7 @@ import { AppService } from 'src/app.service';
 import { UsuariosService } from '../usuarios.service';
 import { SGUService } from 'src/sgu/sgu.service';
 import { Permissao, Usuario } from '@prisma/client';
+import { UsuarioResponseDTO } from '../dto/usuario-response.dto';
 
 describe('UsuarioService tests', () => {
   let service: UsuariosService;
@@ -139,6 +140,54 @@ describe('UsuarioService tests', () => {
     expect(result2).not.toBeNull();
     // Verifica se o retorno 2 está correto.
     expect(result2).toEqual('ADM');
+  });
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarPorEmail"
+   * 
+   */
+  it('Deve verificar permissão quando executar função buscarPorEmail.', async () => {
+    const mockReturn = [{ id: 1, nome: 'Test' }];
+
+    (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
+
+    // Chama o método do serviço.
+    const result: Usuario = await service.buscarPorEmail('email@mail.com');
+
+    expect(result).not.toBeNull();
+    // Verifica se o método mockado foi chamado corretamente.
+    expect(prisma.usuario.findUnique).toHaveBeenCalledWith({ 
+      where: {
+        email: 'email@mail.com'
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual([{ id: 1, nome: 'Test' }]);
+  });
+  
+  /**
+   * 
+   * Testando chamada do serviço de "buscarPorLogin"
+   * 
+   */
+  it('Deve verificar permissão quando executar função buscarPorLogin.', async () => {
+    const mockReturn = [{ id: 1, nome: 'Test' }];
+
+    (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
+
+    // Chama o método do serviço.
+    const result: Usuario = await service.buscarPorLogin('email@mail.com');
+
+    expect(result).not.toBeNull();
+    // Verifica se o método mockado foi chamado corretamente.
+    expect(prisma.usuario.findUnique).toHaveBeenCalledWith({ 
+      where: {
+        login: 'email@mail.com'
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual([{ id: 1, nome: 'Test' }]);
   });
 
   // /**
