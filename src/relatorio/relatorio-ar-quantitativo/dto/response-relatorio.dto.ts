@@ -42,7 +42,7 @@ export class RelatorioResopnseDto {
   indeferidos?: RelatorioData;
 }
 
-export class PeriodFilterDto { 
-  gte: Date; 
-  lte: Date 
+export class PeriodFilterDto {
+  gte: Date;
+  lte: Date
 }

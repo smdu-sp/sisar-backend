@@ -23,6 +23,14 @@ export class RelatorioService {
   ): Promise<Record<string, number>> {
     let resultados: { unidade: { nome: string; id: string } }[];
 
+    if (!periodFilter) {
+
+      periodFilter = {
+        gte: new Date("1970-01-01T00:00:00.000Z"),
+        lte: new Date(),
+      };
+    }
+
     if (tipo_processo === 1 || tipo_processo === 2) {
       const unidadeNome = tipo_processo === 1 ? "SMUL" : "GRAPROEM";
 
@@ -69,7 +77,6 @@ export class RelatorioService {
         sigla
       }
     })
-    // console.log("ids das unidades pegas aqui", unidade.id)
     return unidade.id
   }
 
@@ -117,12 +124,22 @@ export class RelatorioService {
     });
   }
 
-  async getRelatorio(mes: string, ano: string) {
+  verificarData(mes: string, ano: string): PeriodFilterDto {
+    if (!mes && !ano) {
+      return {
+        gte: new Date(0),
+        lte: new Date(),
+      };
+    }
     const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
     const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
-    const unidades: Partial<Unidade>[] = await this.getUnidades();
     const periodFilter: PeriodFilterDto = { gte: primeiroDia, lte: ultimoDia };
-    const unidadeIds: string[] = unidades.map((u) => u.id);
+    return periodFilter
+
+  }
+
+  async getRelatorio(mes: string, ano: string) {
+    const periodFilter: PeriodFilterDto = this.verificarData(mes, ano)
 
     // Contagens
     const analise: number = (await this.getInicialData(0, periodFilter)).length;
