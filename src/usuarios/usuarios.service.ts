@@ -210,10 +210,7 @@ export class UsuariosService {
     return usuario;
   }
 
-  async adicionaFerias(
-    id: string, 
-    addFeriasDto: AddFeriasDto
-  ): Promise<Ferias> {
+  async adicionaFerias(id: string, addFeriasDto: AddFeriasDto): Promise<Ferias> {
     const usuario: Usuario = await this.prisma.usuario.findUnique({ where: { id } });
     if (!usuario) throw new ForbiddenException('Usuário não encontrado.');
     if (usuario.status !== 1) throw new ForbiddenException('Usuário inativo.');

@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { UsuariosService } from '../usuarios.service';
 import { SGUService } from 'src/sgu/sgu.service';
-import { Permissao, Usuario } from '@prisma/client';
+import { Ferias, Permissao, Usuario } from '@prisma/client';
 
 describe('UsuarioService tests', () => {
   let service: UsuariosService;
@@ -14,6 +14,15 @@ describe('UsuarioService tests', () => {
   // Configurando mock para o serviço do prisma.
   const mockPrismaService = {
     usuario: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn()
+    },
+    ferias: {
       create: jest.fn(),
       findUnique: jest.fn(),
       findFirst: jest.fn(),
@@ -248,7 +257,7 @@ describe('UsuarioService tests', () => {
    * Testando chamada do serviço de "validaUsuario"
    * 
    */
-  it('Deve envocar prisma.usuario.update quando executar função validaUsuario.', async () => {
+  it('Deve envocar prisma.usuario.findUnique quando executar função validaUsuario.', async () => {
     // Configura o retorno do método mockado
     const mockReturn = { id: 1, nome: 'Test', status: 1 };
     (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
@@ -265,5 +274,40 @@ describe('UsuarioService tests', () => {
     });
     // Verifica se o retorno está correto.
     expect(result).toEqual({ id: 1, nome: 'Test', status: 1 });
+  });
+
+   /**
+   * 
+   * Testando chamada do serviço de "adicionaFerias"
+   * 
+   */
+   it('Deve envocar prisma.usuario.update e prisma.ferias.create quando executar função adicionaFerias.', async () => {
+    // Configura o retorno do método mockado
+    const mockReturn = { id: 1, nome: 'Test', status: 1 };
+    (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
+    (prisma.ferias.create as jest.Mock).mockResolvedValue({});
+
+    // Chama o método do serviço.
+    const result: Ferias = await service.adicionaFerias(
+      'nd92n29d3n', 
+      { inicio: new Date(), final: new Date() }
+    );
+
+    expect(result).not.toBeNull();
+    // Verifica se o método mockado foi chamado corretamente.
+    expect(prisma.usuario.findUnique).toHaveBeenCalledWith({ 
+      where: { 
+        id: 'nd92n29d3n'
+      }
+    });
+    expect(prisma.ferias.create).toHaveBeenCalledWith({ 
+      data: { 
+        inicio: expect.any(Date), 
+        final: expect.any(Date), 
+        usuario_id: 'nd92n29d3n' 
+      },
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual({});
   });
 });
