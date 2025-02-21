@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { UsuariosService } from '../usuarios.service';
 import { SGUService } from 'src/sgu/sgu.service';
-import { Permissao } from '@prisma/client';
+import { Permissao, Usuario } from '@prisma/client';
 
 describe('UsuarioService tests', () => {
   let service: UsuariosService;
@@ -88,6 +88,44 @@ describe('UsuarioService tests', () => {
       });
       // Verifica se o retorno está correto.
       expect(result).toEqual('DEV');
+    }
+  );
+
+  // async listaCompleta(): Promise<UsuarioResponseDTO[]> {
+  //   const lista: Usuario[] = await this.prisma.usuario.findMany({
+  //     orderBy: { nome: 'asc' },
+  //   });
+  //   if (!lista || lista.length == 0) 
+  //     throw new ForbiddenException('Nenhum usuário encontrado.');
+  //   return lista;
+  // }
+
+  /**
+   * 
+   * Testando chamada do serviço de "listaCompleta"
+   * 
+   */
+  it(
+    'Deve envocar prisma.usuario.findMany quando executar função listaCompleta.', 
+    async () => {
+      // Criando o objeto mockado de retorno da chamada.
+      const mockReturn = [{ id: 1, nome: 'Test' }];
+      // Configura o retorno do método mockado
+      (prisma.usuario.findMany as jest.Mock).mockResolvedValue(mockReturn);
+
+      // Chama o método do serviço.
+      const result: Usuario[] = await service.listaCompleta();
+
+      // Testa se o resultado não é nulo.
+      expect(result).not.toBeNull();
+      // Verifica se o método mockado foi chamado corretamente.
+      expect(prisma.usuario.findMany).toHaveBeenCalledWith({ 
+        orderBy: {
+          nome: 'asc'
+        }
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual([{ id: 1, nome: 'Test' }]);
     }
   );
 
