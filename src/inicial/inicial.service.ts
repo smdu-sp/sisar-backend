@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateInicialDto, CreateInterfacesDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Inicial, Inicial_Sqls } from '@prisma/client';
+import { Inicial, Inicial_Sqls, Reuniao_Processo } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
 
@@ -302,10 +302,10 @@ export class InicialService {
     return iniciais;
   }
 
-  async buscarPorMesAnoProcesso(mes: any, ano: any) {
-    const primeiroDiaMes = new Date(ano, mes - 1, 1);
-    const ultimoDiaMes = new Date(ano, mes, 0);
-    const processos = await this.prisma.reuniao_Processo.findMany({
+  async buscarPorMesAnoProcesso(mes: number, ano: number): Promise<Reuniao_Processo[]> {
+    const primeiroDiaMes: Date = new Date(ano, mes - 1, 1);
+    const ultimoDiaMes: Date = new Date(ano, mes, 0);
+    const processos: Reuniao_Processo[] = await this.prisma.reuniao_Processo.findMany({
       where: {
         AND: [
           { data_processo: { gte: primeiroDiaMes } },

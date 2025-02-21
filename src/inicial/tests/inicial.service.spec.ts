@@ -574,4 +574,37 @@ describe('InicialService tests', () => {
     expect(result_one).not.toThrow;
     expect(result_one).toEqual([1]);
   });
+
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarPorMesAnoProcesso"
+   * 
+   */
+  it('Deve envocar prisma.reuniao_Processo.findMany quando executar função buscarPorMesAnoProcesso.', async () => {
+    // Configura o retorno do método mockado
+    (prisma.reuniao_Processo.findMany as jest.Mock).mockResolvedValue([1]);
+
+    // Chama o método do serviço, fornecendo data.
+    const result_one = await service.buscarPorMesAnoProcesso(10, 2025);
+    
+    // Testa se o resultado não é nulo.
+    expect(result_one).not.toBeNull();
+    // Verifica se o método findMany mockado foi chamado corretamente.
+    expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({ 
+      where: {
+        AND: [
+          { data_processo: { 
+            gte: expect.any(Date)
+          } },
+          { data_processo: { 
+            lte: expect.any(Date)
+          } }
+        ]
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result_one).not.toThrow;
+    expect(result_one).toEqual([1]);
+  });
 });
