@@ -53,10 +53,7 @@ export class UsuariosService {
     return permissao;
   }
 
-  async criar(
-    createUsuarioDto: CreateUsuarioDto, 
-    criador?: Usuario
-  ): Promise<UsuarioResponseDTO> {
+  async criar(createUsuarioDto: CreateUsuarioDto, criador?: Usuario): Promise<UsuarioResponseDTO> {
     const loguser: UsuarioResponseDTO = await this.buscarPorLogin(createUsuarioDto.login);
     if (loguser) throw new ForbiddenException('Login já cadastrado.');
     const emailuser: UsuarioResponseDTO = await this.buscarPorEmail(createUsuarioDto.email);

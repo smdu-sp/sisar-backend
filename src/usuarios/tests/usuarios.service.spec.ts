@@ -3,8 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { UsuariosService } from '../usuarios.service';
 import { SGUService } from 'src/sgu/sgu.service';
-import { Ferias, Permissao, Substituto, Usuario } from '@prisma/client';
-import { AddSubstitutoDTO } from '../dto/usuario-response.dto';
+import { Cargo, Ferias, Permissao, Substituto, Usuario } from '@prisma/client';
+import { AddSubstitutoDTO, UsuarioPaginadoResponseDTO } from '../dto/usuario-response.dto';
 
 describe('UsuarioService tests', () => {
   let service: UsuariosService;
@@ -170,6 +170,77 @@ describe('UsuarioService tests', () => {
     // Verifica se o retorno 2 está correto.
     expect(result2).toEqual('ADM');
   });
+
+  /**
+   * 
+   * Testando chamada do serviço de "buscarTudo"
+   * 
+   */
+  it(
+    'Deve envocar prisma.usuarios.findMany e prisma.usuarios.count quando buscarTudo é executada.', 
+    async () => {
+      const mockDto: Usuario ={ 
+        id: 'string',
+        nome: 'string',
+        login: 'string',
+        email: 'string',
+        cargo: Cargo.TEC,
+        permissao: Permissao.DEV,
+        status: 1,
+        criado_em: new Date(),
+        alterado_em: new Date(),
+        unidade_id: 'string'
+      };
+
+      // Configura o retorno dos métodos mockados
+      (app.verificaPagina as jest.Mock).mockReturnValue([0, 10]);
+      (prisma.usuario.count as jest.Mock).mockResolvedValue(10);
+      (app.verificaLimite as jest.Mock).mockReturnValue([0, 10]);
+      (prisma.usuario.findMany as jest.Mock).mockResolvedValue([]);
+
+      // Chama o método do serviço, fornecendo pagina e limite.
+      const result: UsuarioPaginadoResponseDTO = await service.buscarTudo(mockDto, 0, 10, 1, 'search');
+
+      // Testa se o resultado não é nulo.
+      expect(result).not.toBeNull();
+      // Verifica se o método count mockado de alvará tipo foi chamado corretamente.
+      expect(prisma.usuario.count).toHaveBeenCalled();
+      // Verifica se o método findMany mockado de alvará tipo foi chamado corretamente.
+      expect(prisma.usuario.findMany).toHaveBeenCalledWith({ 
+        where: {
+          OR: [
+            { 
+              nome: { 
+                contains: 'search'
+              }
+            },
+            { 
+              login: { 
+                contains: 'search' 
+              } 
+            },
+            { 
+              email: { 
+                contains: 'search'
+              } 
+            },
+          ],
+          status: 1
+        },
+        orderBy: { 
+          nome: 'asc'
+        },
+        include: {
+          unidade: true
+        },
+        skip: -10,
+        take: 10
+      });
+      // Verifica se o retorno está correto.
+      expect(result).toEqual({ data: [], total: 10, pagina: 0, limite: 10 });
+      expect(result.limite).toEqual({ data: [], total: 10, pagina: 0, limite: 10 }.limite);
+    }
+  );
 
   /**
    * 
