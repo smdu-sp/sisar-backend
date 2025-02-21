@@ -147,7 +147,7 @@ describe('UsuarioService tests', () => {
    * Testando chamada do serviço de "buscarPorEmail"
    * 
    */
-  it('Deve verificar permissão quando executar função buscarPorEmail.', async () => {
+  it('Deve envocar prisma.usuario.findUnique quando executar função buscarPorEmail.', async () => {
     const mockReturn = [{ id: 1, nome: 'Test' }];
 
     (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
@@ -165,13 +165,13 @@ describe('UsuarioService tests', () => {
     // Verifica se o retorno está correto.
     expect(result).toEqual([{ id: 1, nome: 'Test' }]);
   });
-  
+
   /**
    * 
    * Testando chamada do serviço de "buscarPorLogin"
    * 
    */
-  it('Deve verificar permissão quando executar função buscarPorLogin.', async () => {
+  it('Deve envocar prisma.usuario.findUnique quando executar função buscarPorLogin.', async () => {
     const mockReturn = [{ id: 1, nome: 'Test' }];
 
     (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
@@ -190,6 +190,44 @@ describe('UsuarioService tests', () => {
     expect(result).toEqual([{ id: 1, nome: 'Test' }]);
   });
 
+  // async excluir(id: string): Promise<{ desativado: boolean }> {
+  //   await this.prisma.usuario.update({
+  //     data: { status: 2 },
+  //     where: { id },
+  //   });
+  //   return {
+  //     desativado: true,
+  //   };
+  // }
+
+  /**
+   * 
+   * Testando chamada do serviço de "excluir"
+   * 
+   */
+  it('Deve envocar prisma.usuario.update quando executar função excluir.', async () => {
+    // Criando o objeto mockado de retorno da chamada.
+    const mockReturn = { desativado: true };
+    // Configura o retorno do método mockado
+    (prisma.usuario.update as jest.Mock).mockResolvedValue(mockReturn);
+
+    // Chama o método do serviço.
+    const result: { desativado: boolean } = await service.excluir('nd92n29d3n');
+
+    expect(result).not.toBeNull();
+    // Verifica se o método mockado foi chamado corretamente.
+    expect(prisma.usuario.update).toHaveBeenCalledWith({ 
+      data: { 
+        status: 2 
+      },
+      where: { 
+        id: 'nd92n29d3n'
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual({ desativado: true });
+  });
+  
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"
