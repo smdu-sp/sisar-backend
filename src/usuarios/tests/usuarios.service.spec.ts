@@ -190,16 +190,6 @@ describe('UsuarioService tests', () => {
     expect(result).toEqual([{ id: 1, nome: 'Test' }]);
   });
 
-  // async excluir(id: string): Promise<{ desativado: boolean }> {
-  //   await this.prisma.usuario.update({
-  //     data: { status: 2 },
-  //     where: { id },
-  //   });
-  //   return {
-  //     desativado: true,
-  //   };
-  // }
-
   /**
    * 
    * Testando chamada do serviço de "excluir"
@@ -227,7 +217,33 @@ describe('UsuarioService tests', () => {
     // Verifica se o retorno está correto.
     expect(result).toEqual({ desativado: true });
   });
-  
+
+  /**
+   * 
+   * Testando chamada do serviço de "autorizaUsuario"
+   * 
+   */
+  it('Deve envocar prisma.usuario.update quando executar função autorizaUsuario.', async () => {
+    // Configura o retorno do método mockado
+    (prisma.usuario.update as jest.Mock).mockResolvedValue({ status: 1 });
+
+    // Chama o método do serviço.
+    const result: { autorizado: boolean } = await service.autorizaUsuario('nd92n29d3n');
+
+    expect(result).not.toBeNull();
+    // Verifica se o método mockado foi chamado corretamente.
+    expect(prisma.usuario.update).toHaveBeenCalledWith({ 
+      data: { 
+        status: 1
+      },
+      where: { 
+        id: 'nd92n29d3n'
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual({ autorizado: true });
+  });
+
   // /**
   //  * 
   //  * Testando chamada do serviço de "criar"
