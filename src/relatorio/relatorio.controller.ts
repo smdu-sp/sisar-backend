@@ -10,13 +10,13 @@ import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal
 @ApiTags('Relatórios')
 export class RelatorioController {
   constructor(
-    private readonly relatorioService: RelatorioService, 
+    private readonly relatorioService: RelatorioService,
     private readonly relatorioRRService: RelatorioRRService,
     private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService
-  ) {}
-  
+  ) { }
+
   @IsPublic()
-  @Get("ar/quantitativo/:mes/:ano")
+  @Get("ar/quantitativo/:mes?/:ano?")
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório Aprova Rápido com sucesso.', type: RelatorioResopnseDto })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })

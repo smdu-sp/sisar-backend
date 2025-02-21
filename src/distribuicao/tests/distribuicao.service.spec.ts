@@ -42,7 +42,7 @@ describe('DistribuicaoService tests', () => {
    * Testando chamada do serviço de "criar"
    * 
    */
-  it('should call prisma.distribuicao.create when create is called', async () => {
+  it('Deve envocar prisma.distribuicao.create quando função criar é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "criar".
     const mockCreateResult: CreateDistribuicaoDto = { inicial_id: 123, tecnico_responsavel_id: 'tecnico_responsavel_id', administrativo_responsavel_id: 'administrativo_responsavel_id', processo_relacionado_incomum: "processo_relacionado_incomum", assunto_processo_relacionado_incomum: 'assunto_processo_relacionado_incomum', baixa_pagamento: 1, obs: null };
     // Configura o retorno do método mockado
@@ -72,7 +72,7 @@ describe('DistribuicaoService tests', () => {
    * Testando chamada do serviço de "atualizar"
    * 
    */
-  it('should call prisma.distribuicao.update', async () => {
+  it('Deve envocar prisma.distribuicao.update quando função atualizar é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "atualizar".
     const mockUpdateResult: UpdateDistribuicaoDto = { inicial_id: 123, tecnico_responsavel_id: 'tecnico_responsavel_id', administrativo_responsavel_id: 'administrativo_responsavel_id', processo_relacionado_incomum: "processo_relacionado_incomum", assunto_processo_relacionado_incomum: 'assunto_processo_relacionado_incomum', baixa_pagamento: 1, obs: null };
     // Configura o retorno do método mockado.
@@ -105,10 +105,11 @@ describe('DistribuicaoService tests', () => {
   });
 
   /**
+   * 
    * Testando chamada do serviço de "mudarAdministrativoResponsavel"
    * 
    */
-  it('should call prisma.distribuicao.update', async () => {
+  it('Deve envocar prisma.distribuicao.update quando mudarAdministrativoResponsavel é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "mudarAdministrativoResponsavel".
     const mockUpdateResult: UpdateDistribuicaoDto = { inicial_id: 123, tecnico_responsavel_id: 'tecnico_responsavel_id', administrativo_responsavel_id: 'administrativo_responsavel_id', processo_relacionado_incomum: "processo_relacionado_incomum", assunto_processo_relacionado_incomum: 'assunto_processo_relacionado_incomum', baixa_pagamento: 1, obs: null };
     // Configura o retorno do método mockado.
@@ -136,10 +137,11 @@ describe('DistribuicaoService tests', () => {
   });
 
   /**
+   * 
    * Testando chamada do serviço de "mudarTecnicoResponsavel"
    * 
    */
-  it('should call prisma.distribuicao.update', async () => {
+  it('Deve envocar prisma.distribuicao.update quando função mudarTecnicoResponsavel é executada.', async () => {
     // Criando o objeto mockado de retorno da chamada "mudarTecnicoResponsavel".
     const mockUpdateResult: UpdateDistribuicaoDto = { inicial_id: 123, tecnico_responsavel_id: 'tecnico_responsavel_id', administrativo_responsavel_id: 'administrativo_responsavel_id', processo_relacionado_incomum: "processo_relacionado_incomum", assunto_processo_relacionado_incomum: 'assunto_processo_relacionado_incomum', baixa_pagamento: 1, obs: null };
     // Configura o retorno do método mockado.

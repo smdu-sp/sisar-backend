@@ -2,23 +2,21 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateInicialDto, CreateInterfacesDto } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Inicial } from '@prisma/client';
+import { Inicial, Inicial_Sqls, Reuniao_Processo } from '@prisma/client';
 import { AppService } from 'src/app.service';
-import { HttpService } from '@nestjs/axios';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
 
 @Injectable()
 export class InicialService {
   constructor(
     private prisma: PrismaService,
-    private app: AppService,
-    private readonly httpService: HttpService
+    private app: AppService
   ) {}
 
-  async validaSql(sql: string) {
-    const dataBusca = new Date();
+  async validaSql(sql: string): Promise<boolean> {
+    const dataBusca: Date = new Date();
     dataBusca.setDate(dataBusca.getDate() - 90);
-    const sqlBusca = await this.prisma.inicial_Sqls.count({
+    const sqlBusca: number = await this.prisma.inicial_Sqls.count({
       where: {
         sql, criado_em: { gte: dataBusca }
       }
@@ -27,51 +25,52 @@ export class InicialService {
     return sqlBusca > 0;
   }
 
-  async validaSei(sei: string) {
-    const processo = await this.prisma.inicial.count({ where: { sei } });
+  async validaSei(sei: string): Promise<boolean> {
+    const processo: number = await this.prisma.inicial.count({ where: { sei } });
     if (!processo) throw new ForbiddenException('Erro ao buscar processos.');
     return processo > 0;
   }
 
-  async adicionaSql(inicial_id: number, sql: string) {
-    const existe = await this.prisma.inicial_Sqls.findFirst({
+  async adicionaSql(inicial_id: number, sql: string): Promise<Inicial_Sqls> {
+    const existe: Inicial_Sqls = await this.prisma.inicial_Sqls.findFirst({
       where: {
         sql,
         inicial_id
       }
     });
-    if (existe) return new ForbiddenException('Sql já vinculado.');
-    const novo_sql = await this.prisma.inicial_Sqls.create({
+    if (existe) throw new ForbiddenException('Sql já vinculado.');
+    const novo_sql: Inicial_Sqls = await this.prisma.inicial_Sqls.create({
       data: { sql, inicial_id }
     });
     if (!novo_sql) throw new ForbiddenException('Erro ao vincular sql.');
     return novo_sql;
   }
 
-  adicionaDiasData(dataInicial: Date, dias: number) {
+  adicionaDiasData(dataInicial: Date, dias: number): Date {
     return new Date(dataInicial.valueOf() + (dias * 24 * 60 * 60 * 1000));
   }
 
-  pegaQuarta(data: Date) {
+  pegaQuarta(data: Date): Date {
     switch (data.getDay()) {
-      case 2: return data;
-      case 3:
-        return this.adicionaDiasData(data, -1);
-      case 4:
-        return this.adicionaDiasData(data, -2);
-      case 5:
-        return this.adicionaDiasData(data, -3);
-      case 6:
-        return this.adicionaDiasData(data, -4);
-      case 0:
-        return this.adicionaDiasData(data, -5);
       case 1:
+        return this.adicionaDiasData(data, -5);
+      case 2: 
         return this.adicionaDiasData(data, -6);
+      case 3:
+        return data;
+      case 4:
+        return this.adicionaDiasData(data, -1);
+      case 5:
+        return this.adicionaDiasData(data, -2);
+      case 6:
+        return this.adicionaDiasData(data, -3);
+      case 0:
+        return this.adicionaDiasData(data, -4);
     }
   }
 
-  async removeSql(inicial_id: number, sql: string) {
-    const sqlBusca = await this.prisma.inicial_Sqls.findFirst({
+  async removeSql(inicial_id: number, sql: string): Promise<boolean> {
+    const sqlBusca: Inicial_Sqls = await this.prisma.inicial_Sqls.findFirst({
       where: {
         sql,
         inicial_id
@@ -79,12 +78,14 @@ export class InicialService {
     });
     if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
     await this.prisma.inicial_Sqls.delete({
-      where: { id: sqlBusca.id }
+      where: { 
+        id: sqlBusca.id 
+      }
     });
     return true;
   }
 
-  async criaInterfaces(interfaces: CreateInterfacesDto, inicial_id: number) {
+  async criaInterfaces(interfaces: CreateInterfacesDto, inicial_id: number): Promise<void> {
     const interfaceUpsert = await this.prisma.interface.upsert({
       where: { inicial_id },
       create: {
@@ -301,10 +302,10 @@ export class InicialService {
     return iniciais;
   }
 
-  async buscarPorMesAnoProcesso(mes: any, ano: any) {
-    const primeiroDiaMes = new Date(ano, mes - 1, 1);
-    const ultimoDiaMes = new Date(ano, mes, 0);
-    const processos = await this.prisma.reuniao_Processo.findMany({
+  async buscarPorMesAnoProcesso(mes: number, ano: number): Promise<Reuniao_Processo[]> {
+    const primeiroDiaMes: Date = new Date(ano, mes - 1, 1);
+    const ultimoDiaMes: Date = new Date(ano, mes, 0);
+    const processos: Reuniao_Processo[] = await this.prisma.reuniao_Processo.findMany({
       where: {
         AND: [
           { data_processo: { gte: primeiroDiaMes } },
@@ -371,9 +372,9 @@ export class InicialService {
     }
     let data_reuniao = pegaQuarta(new Date(data));
     const data_formatada = data_reuniao.toISOString().split('T')[0]
-    const validaFeriado = await this.verificaFeriado(data_formatada);
+    // const validaFeriado = await this.verificaFeriado(data_formatada);
     data_reuniao.setUTCHours(0, 0, 0, 0);
-    if (validaFeriado) data_reuniao.setDate(data_reuniao.getDate() - 7);
+    // if (validaFeriado) data_reuniao.setDate(data_reuniao.getDate() - 7);
     let dataProcesso = new Date(inicial.envio_admissibilidade);
     dataProcesso.setDate(
       dataProcesso.getDate() +
@@ -433,19 +434,22 @@ export class InicialService {
     return inicial;
   }
 
-  async atualizar(
-    id: number,
-    updateInicialDto: UpdateInicialDto,
-  ): Promise<Inicial> {
+  async atualizar(id: number, updateInicialDto: UpdateInicialDto): Promise<Inicial> {
     const inicial = await this.prisma.inicial.findUnique({ 
-      where: { id } 
+      where: { 
+        id 
+      } 
     });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;
     const inicial_atualizado = await this.prisma.inicial.update({
-      where: { id },
-      data: { ...updateInicialDto },
+      where: { 
+        id 
+      },
+      data: { 
+        ...updateInicialDto
+      },
     });
     if (inicial_atualizado.tipo_processo === 2) {
       await this.geraReuniaoData(inicial_atualizado);

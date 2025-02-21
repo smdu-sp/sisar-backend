@@ -41,11 +41,11 @@ export class ReunioesService {
     return reunioes;
   }
 
-  async buscarPorId(idInt: string): Promise<Inicial> {
-    let id: number = parseInt(idInt.toString());
-    const inicial: Inicial = await this.prisma.inicial.findUnique({ where: { id } });
-    if (!inicial) throw new ForbiddenException('Inicial não encontrada.');
-    return inicial;
+  async buscarPorId(idInt: string): Promise<Reuniao_Processo> {
+    let id = idInt.toString();
+    const reuniao_Processo: Reuniao_Processo = await this.prisma.reuniao_Processo.findUnique({ where: { id } });
+    if (!reuniao_Processo) throw new ForbiddenException('reuniao não encontrada.');
+    return reuniao_Processo;
   }
 
   async atualizarData(id: string, updateReunioesDto: UpdateReunioesDto): Promise<Reuniao_Processo> {
