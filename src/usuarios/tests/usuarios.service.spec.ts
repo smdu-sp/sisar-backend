@@ -91,15 +91,6 @@ describe('UsuarioService tests', () => {
     }
   );
 
-  // async listaCompleta(): Promise<UsuarioResponseDTO[]> {
-  //   const lista: Usuario[] = await this.prisma.usuario.findMany({
-  //     orderBy: { nome: 'asc' },
-  //   });
-  //   if (!lista || lista.length == 0) 
-  //     throw new ForbiddenException('Nenhum usuário encontrado.');
-  //   return lista;
-  // }
-
   /**
    * 
    * Testando chamada do serviço de "listaCompleta"
@@ -128,6 +119,27 @@ describe('UsuarioService tests', () => {
       expect(result).toEqual([{ id: 1, nome: 'Test' }]);
     }
   );
+
+  /**
+   * 
+   * Testando chamada do serviço de "validaPermissaoCriador"
+   * 
+   */
+  it('Deve verificar permissão quando executar função validaPermissaoCriador.', async () => {
+    // Chama o método do serviço.
+    const result: Permissao = service.validaPermissaoCriador('DEV', 'SUP');
+    const result2: Permissao = service.validaPermissaoCriador('SUP', 'ADM');
+
+    // Testa se o resultado 1 não é nulo.
+    expect(result).not.toBeNull();
+    // Verifica se o retorno 1 está correto.
+    expect(result).toEqual('SUP');
+
+    // Testa se o resultado 2 não é nulo.
+    expect(result2).not.toBeNull();
+    // Verifica se o retorno 2 está correto.
+    expect(result2).toEqual('ADM');
+  });
 
   // /**
   //  * 

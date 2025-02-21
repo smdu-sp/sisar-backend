@@ -39,21 +39,17 @@ export class UsuariosService {
     return lista;
   }
 
-  validaPermissaoCriador(
-    permissao: $Enums.Permissao,
-    permissaoCriador: $Enums.Permissao,
-  ): Permissao {
-    if (
-      permissao === $Enums.Permissao.DEV &&
-      permissaoCriador === $Enums.Permissao.SUP
-    )
+  validaPermissaoCriador(permissao: $Enums.Permissao, permissaoCriador: $Enums.Permissao): Permissao {
+    if (permissao === $Enums.Permissao.DEV && permissaoCriador === $Enums.Permissao.SUP) {
       permissao = $Enums.Permissao.SUP;
+    }
     if (
-      (permissao === $Enums.Permissao.DEV ||
-        permissao === $Enums.Permissao.SUP) &&
-      permissaoCriador === $Enums.Permissao.ADM
-    )
+      (permissao === $Enums.Permissao.DEV 
+      || permissao === $Enums.Permissao.SUP) 
+      && permissaoCriador === $Enums.Permissao.ADM
+    ) {
       permissao = $Enums.Permissao.ADM;
+    }
     return permissao;
   }
 
