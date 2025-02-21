@@ -243,4 +243,27 @@ describe('UsuarioService tests', () => {
     expect(result).toEqual({ autorizado: true });
   });
 
+  /**
+   * 
+   * Testando chamada do serviço de "validaUsuario"
+   * 
+   */
+  it('Deve envocar prisma.usuario.update quando executar função validaUsuario.', async () => {
+    // Configura o retorno do método mockado
+    const mockReturn = { id: 1, nome: 'Test', status: 1 };
+    (prisma.usuario.findUnique as jest.Mock).mockResolvedValue(mockReturn);
+
+    // Chama o método do serviço.
+    const result: Usuario = await service.validaUsuario('nd92n29d3n');
+
+    expect(result).not.toBeNull();
+    // Verifica se o método mockado foi chamado corretamente.
+    expect(prisma.usuario.findUnique).toHaveBeenCalledWith({ 
+      where: { 
+        id: 'nd92n29d3n'
+      }
+    });
+    // Verifica se o retorno está correto.
+    expect(result).toEqual({ id: 1, nome: 'Test', status: 1 });
+  });
 });
