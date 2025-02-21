@@ -9,7 +9,6 @@ import { Inicial } from '@prisma/client';
 describe('Reunioes.service test', () => {
   let service: ReunioesService;
   let prisma: PrismaService;
-  // let reuniao: Reuniao_Processo;
 
   const MockPrismaService = {
     reuniao_Processo: {
@@ -22,6 +21,7 @@ describe('Reunioes.service test', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks(); 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReunioesService,
@@ -192,7 +192,7 @@ describe('Reunioes.service test', () => {
   });
 
   it('deverá atualizar uma reuniao', async () => {
-    const mockReuniaoUpdate = {
+    const mockReuniaoUpdate: Reuniao_Processo = {
       id: 'M7Hi3w',
       inicial_id: 112,
       data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
@@ -203,7 +203,7 @@ describe('Reunioes.service test', () => {
       alterado_em: new Date('2025-01-05T14:34:21.651Z'),
     };
 
-    const mockParams = {
+    const mockParams: UpdateReunioesDto = {
       nova_data_reuniao: new Date('2025-03-05T14:34:21.651Z'),
       justificativa_remarcacao: 'atestado médico',
     };
@@ -212,7 +212,7 @@ describe('Reunioes.service test', () => {
       mockReuniaoUpdate,
     );
 
-    const result = await service.atualizarData('M7Hi3w', mockParams);
+    const result: UpdateReunioesDto = await service.atualizarData('M7Hi3w', mockParams);
 
     expect(result).not.toBeNull();
     expect(result).toEqual(mockReuniaoUpdate);
@@ -223,16 +223,17 @@ describe('Reunioes.service test', () => {
   });
 
   it('deverá buscar reuniões por uma data especifica', async () => {
+    const dataFixa = new Date('2025-01-05T14:34:21.651Z');
     const mockFindReuniao: Reuniao_Processo[] = [
       {
         id: 'M7Hi3w',
         inicial_id: 112,
-        data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
-        data_processo: new Date('2025-01-05T14:34:21.651Z'),
-        nova_data_reuniao: new Date('2025-01-05T14:34:21.651Z'),
+        data_reuniao: dataFixa,
+        data_processo: dataFixa,
+        nova_data_reuniao: dataFixa,
         justificativa_remarcacao: 'queda de energia na data e horário marcado',
-        criado_em: new Date('2025-01-05T14:34:21.651Z'),
-        alterado_em: new Date('2025-01-05T14:34:21.651Z'),
+        criado_em: dataFixa,
+        alterado_em: dataFixa,
       },
     ];
 
@@ -240,17 +241,18 @@ describe('Reunioes.service test', () => {
       mockFindReuniao,
     );
 
-    const result: Reuniao_Processo[] = await service.buscarPorData(new Date());
+    const result: Reuniao_Processo[] = await service.buscarPorData(dataFixa);
 
     expect(result).not.toBeNull();
     expect(result).toEqual(mockFindReuniao);
+    expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledTimes(1)
     expect(prisma.reuniao_Processo.findMany).toHaveBeenCalledWith({
       where: {
         OR: [
-          { nova_data_reuniao: { equals: new Date().toISOString() } },
+          { nova_data_reuniao: { equals: dataFixa.toISOString() } },
           {
             nova_data_reuniao: null,
-            data_reuniao: { equals: new Date().toISOString() },
+            data_reuniao: { equals: dataFixa.toISOString() },
           },
         ],
       },
