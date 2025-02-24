@@ -36,8 +36,9 @@ export class RelatorioController {
   }
 
   @IsPublic()
-  @Get('ar/progressao-mensal/:ano')
-  async relatorioArGraficoProgressaoMensal(@Param('ano') ano: number) {
-    return await this.arGraficoProgressaoMensal.getAllByYear(ano);
+  @Get('ar/progressao-mensal/:ano_inicio?/:ano_fim?')
+  async relatorioArGraficoProgressaoMensal(@Param('ano_inicio') ano_inicio: string, @Param('ano_fim') ano_fim: string) {
+    console.log("Endpoint ar/progressao-mensal chamado com:", ano_inicio, ano_fim);
+    return await this.arGraficoProgressaoMensal.getReatorio(ano_inicio, ano_fim);
   }
 }
