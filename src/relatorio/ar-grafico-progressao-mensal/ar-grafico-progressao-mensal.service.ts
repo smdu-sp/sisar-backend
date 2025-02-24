@@ -6,7 +6,8 @@ import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relat
 export class ArGraficoProgressaoMensalService {
   constructor(private prisma: PrismaService) { }
 
-  async getAllByYear(periodFilter: PeriodFilterDto) {
+  async getDataPorAno(periodFilter: PeriodFilterDto) {
+
     const result = await this.prisma.$queryRaw`
     SELECT 
       YEAR(criado_em) AS ano,
@@ -57,8 +58,8 @@ export class ArGraficoProgressaoMensalService {
     return periodFilter
   }
 
-  async getReatorio(anoInit: string, anoFinal: string) {
+  async getRelatorio(anoInit: string, anoFinal: string) {
     const periodFilter: PeriodFilterDto = this.verificarData(anoInit, anoFinal)
-    return await this.getAllByYear(periodFilter)
+    return await this.getDataPorAno(periodFilter)
   }
 }
