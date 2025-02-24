@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { Admissibilidade } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
 
@@ -8,11 +7,10 @@ export class ArGraficoProgressaoMensalService {
   constructor(private prisma: PrismaService) { }
 
   async getAllByYear(periodFilter: PeriodFilterDto) {
-    // A consulta retorna total de processos por ano e mês
     const result = await this.prisma.$queryRaw`
     SELECT 
-      YEAR(criado_em) AS year,
-      MONTH(criado_em) - 1 AS month,  -- Ajusta para 0-11
+      YEAR(criado_em) AS ano,
+      MONTH(criado_em) - 1 AS mes,
       COUNT(*) AS total
     FROM admissibilidades
     WHERE criado_em >= ${periodFilter.gte}
@@ -21,38 +19,32 @@ export class ArGraficoProgressaoMensalService {
     ORDER BY YEAR(criado_em), MONTH(criado_em);
   `;
 
-    // Inicializa um objeto para armazenar os dados por ano
-    const yearlyData: { [key: number]: { year: number; month: number[]; total: number } } = {};
+    const anoData: { [key: number]: { ano: number; mes: number[]; total: number } } = {};
 
-    // Processa os resultados da consulta
     if (Array.isArray(result)) {
 
       result.forEach(row => {
-        const year = Number(row.year);
-        const month = Number(row.month);
+        const ano = Number(row.ano);
+        const mes = Number(row.mes);
         const total = Number(row.total);
 
-        // Se o ano ainda não foi adicionado, inicializa o array de meses e o total
-        if (!yearlyData[year]) {
-          yearlyData[year] = {
-            year: year,
-            month: Array(12).fill(0),  // Inicializa o array com 12 meses
+        if (!anoData[ano]) {
+          anoData[ano] = {
+            ano: ano,
+            mes: Array(12).fill(0),
             total: 0,
           };
         }
 
-        // Preenche o número de processos para o mês correspondente
-        yearlyData[year].month[month] = total;
-        yearlyData[year].total += total;  // Atualiza o total para o ano
+        anoData[ano].mes[mes] = total;
+        anoData[ano].total += total;
       });
     }
 
-    // Retorna os dados no formato desejado
-    return Object.values(yearlyData);
+    return Object.values(anoData);
   }
 
   verificarData(anoInit: string, anoFinal: string): PeriodFilterDto {
-    console.log("2:", anoInit, anoFinal)
     if (!anoInit && !anoFinal) {
       return {
         gte: new Date(0),
