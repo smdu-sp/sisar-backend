@@ -20,7 +20,7 @@ export class ArGraficoProgressaoMensalService {
     ORDER BY YEAR(criado_em), MONTH(criado_em);
   `;
 
-    const anoData: { [key: number]: { ano: number; mes: number[]; acc: number[]; total: number } } = {};
+    const anoData: { [key: number]: { ano: number; mes: number[]; acc: number[] } } = {};
 
     const anoInicio = new Date(periodFilter.gte).getFullYear();
     const anoFim = new Date(periodFilter.lte).getFullYear();
@@ -30,7 +30,6 @@ export class ArGraficoProgressaoMensalService {
         ano: ano,
         mes: Array(12).fill(0),
         acc: Array(12).fill(0),
-        total: 0,
       };
     }
 
@@ -42,7 +41,6 @@ export class ArGraficoProgressaoMensalService {
         const total = Number(row.total);
 
         anoData[ano].mes[mes] = total;
-        anoData[ano].total += total;
         acc += total;
         anoData[ano].acc[mes] = acc;
       });
@@ -68,7 +66,7 @@ export class ArGraficoProgressaoMensalService {
   verificarData(anoInit: string, anoFinal: string): PeriodFilterDto {
     if (!anoInit && !anoFinal) {
       return {
-        gte: new Date(0),
+        gte: new Date("2018-12-31"),
         lte: new Date(),
       };
     }
