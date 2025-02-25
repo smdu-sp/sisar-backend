@@ -25,7 +25,6 @@ export class ArGraficoProgressaoMensalService {
     const anoInicio = new Date(periodFilter.gte).getFullYear();
     const anoFim = new Date(periodFilter.lte).getFullYear();
 
-
     for (let ano = anoInicio; ano <= anoFim; ano++) {
       anoData[ano] = {
         ano: ano,
