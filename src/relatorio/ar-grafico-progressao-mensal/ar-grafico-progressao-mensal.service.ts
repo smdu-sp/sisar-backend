@@ -20,7 +20,7 @@ export class ArGraficoProgressaoMensalService {
     ORDER BY YEAR(criado_em), MONTH(criado_em);
   `;
 
-    const anoData: { [key: number]: { ano: number; mes: number[]; total: number } } = {};
+    const anoData: { [key: number]: { ano: number; mes: number[]; acc: number[]; total: number } } = {};
 
     const anoInicio = new Date(periodFilter.gte).getFullYear();
     const anoFim = new Date(periodFilter.lte).getFullYear();
@@ -29,30 +29,39 @@ export class ArGraficoProgressaoMensalService {
       anoData[ano] = {
         ano: ano,
         mes: Array(12).fill(0),
+        acc: Array(12).fill(0),
         total: 0,
       };
     }
 
     if (Array.isArray(result)) {
+      let acc = 0
 
-      result.forEach(row => {
+      result.forEach((row) => {
         const ano = Number(row.ano);
         const mes = Number(row.mes);
         const total = Number(row.total);
 
-        // if (!anoData[ano]) {
-        //   anoData[ano] = {
-        //     ano: ano,
-        //     mes: Array(12).fill(0),
-        //     total: 0,
-        //   };
-        // }
-
         anoData[ano].mes[mes] = total;
         anoData[ano].total += total;
+        acc += total; // Acumula o valor para o mês
+        anoData[ano].acc[mes] = acc; // Atribui o acumulado ao mês correspondente
       });
     }
 
+    for (let ano = anoInicio; ano <= anoFim; ano++) {
+      let acumulado = 0;
+      for (let mes = 0; mes < 12; mes++) {
+        if (anoData[ano].mes[mes] === 0) {
+          // Se não houver valor para o mês, mantém o valor acumulado anterior
+          anoData[ano].acc[mes] = acumulado;
+        } else {
+          // Se houver valor, soma ao acumulado
+          acumulado += anoData[ano].mes[mes];
+          anoData[ano].acc[mes] = acumulado;
+        }
+      }
+    }
     return Object.values(anoData);
   }
 
