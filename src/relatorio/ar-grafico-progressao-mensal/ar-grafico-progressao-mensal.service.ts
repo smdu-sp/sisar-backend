@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
 
@@ -21,6 +21,17 @@ export class ArGraficoProgressaoMensalService {
   `;
 
     const anoData: { [key: number]: { ano: number; mes: number[]; total: number } } = {};
+
+    const anoInicio = new Date(periodFilter.gte).getFullYear();
+    const anoFim = new Date(periodFilter.lte).getFullYear();
+
+    for (let ano = anoInicio; ano <= anoFim; ano++) {
+      anoData[ano] = {
+        ano: ano,
+        mes: Array(12).fill(0),
+        total: 0,
+      };
+    }
 
     if (Array.isArray(result)) {
 
@@ -52,6 +63,21 @@ export class ArGraficoProgressaoMensalService {
         lte: new Date(),
       };
     }
+
+    if (new Date(anoInit).getFullYear() < new Date("2018").getFullYear()) {
+      throw new HttpException(
+        "A pesquisa de processos está limitada a registros iniciados a partir de 2018. Não é possível consultar processos anteriores a esta data.",
+        HttpStatus.NOT_FOUND
+      )
+    }
+
+    if (new Date(anoFinal).getFullYear() > new Date().getFullYear()) {
+      throw new HttpException(
+        `A pesquisa de processos está limitada aos registros de processos iniciados até o ano de ${new Date().getFullYear()}. Por favor, consulte os processos até essa data. `,
+        HttpStatus.NOT_FOUND
+      )
+    }
+
     const primeiroDia: Date = new Date(Number(anoInit), Number(0), Number(1));
     const ultimoDia: Date = new Date(Number(anoFinal), Number(11), Number(31));
     const periodFilter: PeriodFilterDto = { gte: primeiroDia, lte: ultimoDia };
