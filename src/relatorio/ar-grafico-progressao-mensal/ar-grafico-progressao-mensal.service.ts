@@ -40,13 +40,13 @@ export class ArGraficoProgressaoMensalService {
         const mes = Number(row.mes);
         const total = Number(row.total);
 
-        if (!anoData[ano]) {
-          anoData[ano] = {
-            ano: ano,
-            mes: Array(12).fill(0),
-            total: 0,
-          };
-        }
+        // if (!anoData[ano]) {
+        //   anoData[ano] = {
+        //     ano: ano,
+        //     mes: Array(12).fill(0),
+        //     total: 0,
+        //   };
+        // }
 
         anoData[ano].mes[mes] = total;
         anoData[ano].total += total;
