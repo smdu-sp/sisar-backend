@@ -23,14 +23,6 @@ export class RelatorioService {
   ): Promise<Record<string, number>> {
     let resultados: { unidade: { nome: string; id: string } }[];
 
-    if (!periodFilter) {
-
-      periodFilter = {
-        gte: new Date("1970-01-01T00:00:00.000Z"),
-        lte: new Date(),
-      };
-    }
-
     if (tipo_processo === 1 || tipo_processo === 2) {
       const unidadeNome = tipo_processo === 1 ? "SMUL" : "GRAPROEM";
 
