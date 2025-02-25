@@ -25,6 +25,8 @@ export class ArGraficoProgressaoMensalService {
     const anoInicio = new Date(periodFilter.gte).getFullYear();
     const anoFim = new Date(periodFilter.lte).getFullYear();
 
+    let acc = 0
+
     for (let ano = anoInicio; ano <= anoFim; ano++) {
       anoData[ano] = {
         ano: ano,
@@ -35,7 +37,6 @@ export class ArGraficoProgressaoMensalService {
     }
 
     if (Array.isArray(result)) {
-      let acc = 0
 
       result.forEach((row) => {
         const ano = Number(row.ano);
@@ -44,8 +45,8 @@ export class ArGraficoProgressaoMensalService {
 
         anoData[ano].mes[mes] = total;
         anoData[ano].total += total;
-        acc += total; // Acumula o valor para o mês
-        anoData[ano].acc[mes] = acc; // Atribui o acumulado ao mês correspondente
+        acc += total;
+        anoData[ano].acc[mes] = acc;
       });
     }
 
@@ -53,15 +54,14 @@ export class ArGraficoProgressaoMensalService {
       let acumulado = 0;
       for (let mes = 0; mes < 12; mes++) {
         if (anoData[ano].mes[mes] === 0) {
-          // Se não houver valor para o mês, mantém o valor acumulado anterior
           anoData[ano].acc[mes] = acumulado;
         } else {
-          // Se houver valor, soma ao acumulado
           acumulado += anoData[ano].mes[mes];
           anoData[ano].acc[mes] = acumulado;
         }
       }
     }
+
     return Object.values(anoData);
   }
 
