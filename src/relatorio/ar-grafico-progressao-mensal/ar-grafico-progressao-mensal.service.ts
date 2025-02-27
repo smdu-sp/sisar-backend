@@ -66,7 +66,7 @@ export class ArGraficoProgressaoMensalService {
   verificarData(anoInit: string, anoFinal: string): PeriodFilterDto {
     if (!anoInit && !anoFinal) {
       return {
-        gte: new Date("2018-12-31"),
+        gte: new Date("2018-01-01"),
         lte: new Date(),
       };
     }
