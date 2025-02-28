@@ -101,7 +101,6 @@ describe('teste de relatórios AR de progressão mensal', () => {
             (prisma.$queryRaw as jest.Mock).mockRejectedValue(mockRelatorioResult)
             MockPrismaService.$queryRaw.mockResolvedValue(dbData);
             const result = await service.getRelatorio('2018', '2024');
-            // Verifique a transformação dos dados
             expect(result).toEqual(mockRelatorioResult);
         });
     });
