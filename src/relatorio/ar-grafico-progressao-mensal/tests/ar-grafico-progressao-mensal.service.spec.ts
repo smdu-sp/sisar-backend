@@ -51,8 +51,12 @@ describe('teste de relatórios AR de progressão mensal', () => {
         it('deve processar dados do Prisma corretamente', async () => {
             // Configure dados reais que o banco retornaria
             const dbData = [
-                { ano: 2024, mes: 6, total: 6 }, // Julho (mes 6 = julho -1)
-                { ano: 2024, mes: 7, total: 2 },  // Agosto
+                { ano: 2024, mes: 6, total: 6 },
+                { ano: 2024, mes: 7, total: 2 },
+                { ano: 2024, mes: 9, total: 2 },
+                { ano: 2024, mes: 10, total: 1 },
+                { ano: 2024, mes: 11, total: 3 },
+
             ];
 
             const mockRelatorioResult = [
@@ -91,16 +95,12 @@ describe('teste de relatórios AR de progressão mensal', () => {
                     mes: [0, 0, 0, 0, 0, 0, 6, 2, 0, 2, 1, 3],
                     acc: [0, 0, 0, 0, 0, 0, 6, 8, 8, 10, 11, 14],
                 },
-                {
-                    ano: 2025,
-                    mes: Array(12).fill(0),
-                    acc: Array(12).fill(14),
-                },
             ];
 
-            (prisma.$queryRaw as jest.Mock).mockRejectedValue(mockRelatorioResult)
+            (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockRelatorioResult)
             MockPrismaService.$queryRaw.mockResolvedValue(dbData);
             const result = await service.getRelatorio('2018', '2024');
+            console.log("1", result)
             expect(result).toEqual(mockRelatorioResult);
         });
     });
