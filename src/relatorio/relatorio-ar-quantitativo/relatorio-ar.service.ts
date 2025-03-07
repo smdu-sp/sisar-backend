@@ -72,21 +72,6 @@ export class RelatorioService {
     return unidade.id
   }
 
-  // Função auxiliar para contagem total
-  async countTotal(
-    status: number,
-    decisaoNull = false,
-    periodFilter: PeriodFilterDto,
-  ): Promise<number> {
-    return await this.prisma.admissibilidade.count({
-      where: {
-        status,
-        criado_em: periodFilter,
-        data_decisao_interlocutoria: decisaoNull ? null : periodFilter,
-      },
-    });
-  }
-
   // Função para obter dados completos
   async getData(
     status: number,
@@ -108,15 +93,18 @@ export class RelatorioService {
     status: number,
     periodFilter: { gte: Date; lte: Date },
   ): Promise<Inicial[]> {
-    return await this.prisma.inicial.findMany({
+
+    const result = await this.prisma.inicial.findMany({
       where: {
         status,
         criado_em: periodFilter,
       },
     });
+
+    return result
   }
 
-  verificarData(mes: string, ano: string): PeriodFilterDto {
+  verificarData(mes?: string, ano?: string): PeriodFilterDto {
     if (!mes && !ano) {
       return {
         gte: new Date(0),
