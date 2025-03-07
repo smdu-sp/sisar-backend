@@ -290,21 +290,193 @@ describe('Relatorio AR quantitativo test', () => {
         expect(result).toEqual(mockDateResult)
     })
 
-    it('deverá contar todos os processos por unidade com tipo de processo 1 e status em análise(1)', async () => {
-
+    it('deverá contar processos por unidade corretamente', async () => {
         const mockPeriodFilter = {
             gte: new Date("2019-07-01T00:00:00.000Z"),
             lte: new Date("2019-12-31T23:59:59.999Z"),
         };
 
-        const mockResult = { SMUL: 6 };
+        (prisma.admissibilidade.count as jest.Mock).mockResolvedValue(6);
 
-        jest.spyOn(service, "countByUnidade").mockResolvedValue(mockResult);
-        (prisma.admissibilidade.count as jest.Mock).mockResolvedValue(6)
         const result = await service.countByUnidade(1, mockPeriodFilter, null, 1);
 
-        expect(result).toEqual(mockResult);
-        expect(service.countByUnidade).toHaveBeenCalledWith(1, mockPeriodFilter, null, 1)
+        expect(result).toEqual({ SMUL: 6 });
+
+        expect(prisma.admissibilidade.count).toHaveBeenCalledWith({
+            where: {
+                inicial: {
+                    status: 1,
+                    tipo_processo: 1,
+                },
+                data_decisao_interlocutoria: mockPeriodFilter,
+            }
+        });
+    });
+
+    it('deverá contar todos os processos de status 2 de uma unidade especifica pelo ID', async () => {
+        const mockPeriodFilter = {
+            gte: new Date("2019-07-01T00:00:00.000Z"),
+            lte: new Date("2019-12-31T23:59:59.999Z"),
+        };
+
+        //params status: 2, mockPeriodFilter, "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7, null 
+
+        const unidadeFind = {
+            id: "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7",
+            nome: "COORDENADORIA DE EDIFICACAO DE USO COMERCIAL E INDUSTRIAL",
+            sigla: "COMIN",
+            codigo: "290300000000000",
+            status: 1,
+        };
+
+        const mockFindMany = [
+            {
+                id: 11,
+                decreto: true,
+                sei: "11",
+                tipo_requerimento: 1,
+                requerimento: "2",
+                aprova_digital: "",
+                processo_fisico: "",
+                data_protocolo: "2024-10-01T00:00:00.000Z",
+                envio_admissibilidade: "2024-10-01T00:00:00.000Z",
+                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
+                tipo_processo: 1,
+                obs: "a",
+                status: 2,
+                pagamento: 1,
+                requalifica_rapido: false,
+                associado_reforma: false,
+                data_limiteSmul: "2024-10-16T00:00:00.000Z",
+                data_limiteMulti: null,
+                criado_em: "2019-07-01T00:00:00.000Z",
+                alterado_em: "2024-11-13T21:31:39.173Z",
+                unidade_id: unidadeFind.id,
+                unidade: {
+                    nome: unidadeFind.nome,
+                    id: unidadeFind.id
+                }
+            },
+            {
+                id: 12,
+                decreto: true,
+                sei: "11",
+                tipo_requerimento: 1,
+                requerimento: "2",
+                aprova_digital: "",
+                processo_fisico: "",
+                data_protocolo: "2024-10-01T00:00:00.000Z",
+                envio_admissibilidade: "2024-10-01T00:00:00.000Z",
+                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
+                tipo_processo: 1,
+                obs: "a",
+                status: 2,
+                pagamento: 2,
+                requalifica_rapido: false,
+                associado_reforma: false,
+                data_limiteSmul: "2024-10-16T00:00:00.000Z",
+                data_limiteMulti: null,
+                criado_em: "2019-07-01T00:00:00.000Z",
+                alterado_em: "2024-11-13T21:31:39.173Z",
+                unidade: {
+                    nome: unidadeFind.nome,
+                    id: unidadeFind.id
+                }
+            },
+            {
+                id: 13,
+                decreto: true,
+                sei: "11",
+                tipo_requerimento: 1,
+                requerimento: "2",
+                aprova_digital: "",
+                processo_fisico: "",
+                data_protocolo: "2024-10-01T00:00:00.000Z",
+                envio_admissibilidade: "2024-10-01T00:00:00.000Z",
+                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
+                tipo_processo: 1,
+                obs: "a",
+                status: 2,
+                pagamento: 1,
+                requalifica_rapido: false,
+                associado_reforma: false,
+                data_limiteSmul: "2024-10-16T00:00:00.000Z",
+                data_limiteMulti: null,
+                criado_em: "2019-07-01T00:00:00.000Z",
+                alterado_em: "2024-11-13T21:31:39.173Z",
+                unidade: {
+                    nome: unidadeFind.nome,
+                    id: unidadeFind.id
+                }
+            },
+        ];
+
+        (prisma.admissibilidade.findMany as jest.Mock).mockResolvedValue(mockFindMany)
+
+        const result = await service.countByUnidade(2, mockPeriodFilter, "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7")
+        const mockResult = { "COORDENADORIA DE EDIFICACAO DE USO COMERCIAL E INDUSTRIAL": 3 }
+
+        expect(mockResult).toEqual(result)
+        expect(prisma.admissibilidade.findMany).toHaveBeenCalledWith({
+            where: {
+                inicial: {
+                    status: 2,
+                    tipo_processo: { in: [1, 2] },
+                },
+                data_decisao_interlocutoria: mockPeriodFilter,
+                unidade_id: "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7",
+            },
+            select: { unidade: { select: { nome: true, id: true } } }
+        })
     })
+
+
+    it('deverá gerar um relatório de todos os processos de todas as unidades dentro de um intervalo de tempo periodFilterDto', async () => {
+
+        const mockPeriodFilter = {
+            gte: new Date("2019-07-01T00:00:00.000Z"),
+            lte: new Date("2019-12-31T23:59:59.999Z"),
+        };
+        // Mock básico para verificarData
+        jest.spyOn(service, 'verificarData').mockReturnValue(mockPeriodFilter);
+
+
+        // Mock para getIdByUnidade
+        jest.spyOn(service, 'getIdByUnidade').mockImplementation(async (sigla) => {
+            const units: Record<string, string> = {
+                'PARHIS': '4d7987e9-4b59-46cf-ac90-1c2cb5f144a8',
+                'RESID': 'eafff5eb-e8f0-459c-9267-ca6f91e91f06',
+                'SERVIN': '7d20188e-c7a0-4f0b-87bf-5e70248d38a3',
+                'COMIN': '0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7',
+                'CAEPP': '71ef22d1-a92d-4b8e-a576-ff158f9eb1ab'
+            };
+            return units[sigla] || null;
+        });
+
+        jest.spyOn(service, 'countByUnidade').mockImplementation(async (status, period, unidadeId, tipo) => {
+            // Retorna contagem fictícia baseada no status
+            return { [`${unidadeId || 'tipo'}-${status}`]: status * 10 };
+        });
+
+        // Mock para getInicialData
+        jest.spyOn(service, 'getInicialData').mockImplementation(async (status, period) => {
+            // Retorna array com tamanho igual ao status + 1
+            return new Array(status + 1).fill({});
+        });
+
+        jest.spyOn(service, 'countByUnidade').mockImplementation(async (status, period, unidadeId, tipo) => {
+            // Retorna contagem fictícia baseada no status
+            return { [`${unidadeId || 'tipo'}-${status}`]: status * 10 };
+        });
+
+        // Mock para getInicialData
+        jest.spyOn(service, 'getInicialData').mockImplementation(async (status, period) => {
+            // Retorna array com tamanho igual ao status + 1
+            return new Array(status + 1).fill({});
+        });
+    });
+
+
+
 
 })
