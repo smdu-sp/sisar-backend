@@ -1,0 +1,88 @@
+import { PrismaService } from "src/prisma/prisma.service";
+import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
+
+/**
+  pseudocódigo
+
+
+ relação de processos protocolados ano/mês
+ uma lista de objetos
+ cada objeto tem uma chave com o valor de um ano
+ cada objeto referente ao ano possui 12 objetos, sendo cada um os meses do ano
+ cada mÊs do ano terão os seguintes campos: 
+    processos_protocolados_aprov_rapido,
+    processos_aprovados
+o primeiro campo será um number
+o segundo campo será um objeto com os seguintes campos
+    numero_de_processos,
+    lista_de_processos
+o primeiro campo será um number
+o segundo campo será uma lista de objetos, onde eles terão os seguintes campos
+    numero_do_processo,
+    tempo_de_analise_pedido_inicial,
+    tempo_de_analise_recurso,
+    categoria_de_uso,
+    responsavel_pelo_projeto,
+    empresa,
+    caracteristica_projeto,
+    regiao_da_cidade
+exemplo de objeto:
+
+
+    {
+        ano: 2019,
+        meses: [
+            {
+                mes: "janeiro",
+                ...
+            },
+            ...
+            {
+                mes: "dezembro",
+                processos_protocolados_aprova_rapido: number,
+                processos_aprovados: {
+                    numero_de_processos: number(lista_de_processos.length),
+                    lista_de_processos: [
+                        {
+                            numero_do_processo: 018-0.048.779-3,
+                            tempo_de_analise_pedido_inicial: number,
+                            tempo_de_analise_recurso: number,
+                            categoria_de_uso: string (possível enum),
+                            responsavel_pelo_projeto: string,
+                            empresa: string,
+                            caracteristica_projeto: string,
+                            regiao_da_cidade: string,
+                        },
+                        {
+                            numero_do_processo: 018-0.036.309-1,
+                            tempo_de_analise_pedido_inicial: number,
+                            tempo_de_analise_recurso: number,
+                            categoria_de_uso: string (possível enum),
+                            responsavel_pelo_projeto: string,
+                            empresa: string,
+                            caracteristica_projeto: string,
+                            regiao_da_cidade: string,
+                        },
+                        {
+                            numero_do_processo: 018-0.048.697-5 ,
+                            tempo_de_analise_pedido_inicial: number,
+                            tempo_de_analise_recurso: number,
+                            categoria_de_uso: string (possível enum),
+                            responsavel_pelo_projeto: string,
+                            empresa: string,
+                            caracteristica_projeto: string,
+                            regiao_da_cidade: string,
+                        },
+                    ]
+            }
+
+            }
+        ]
+    }
+
+ */
+
+/**
+ * plano piloto: 
+ *  filtrar admissibilidades por 
+ */
