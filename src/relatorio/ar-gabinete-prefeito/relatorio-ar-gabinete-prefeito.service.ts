@@ -83,6 +83,13 @@ exemplo de objeto:
  */
 
 /**
+ *REFERENTE AO CAMPO NUMERO DO PROCESSO (PODE SER 3 NUMEROS)
+ Prioritariamente, é o campo SEI
+ SE (if) não tivr SEI, será o APROVA RAPIDO
+ SENÃO (else if) será o campo de processo_fisico
+ */
+
+/**
  * plano piloto: 
  *  filtrar admissibilidades por 
  */
