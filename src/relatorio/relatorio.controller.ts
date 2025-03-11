@@ -5,6 +5,7 @@ import { RelatorioResopnseDto } from './relatorio-ar-quantitativo/dto/response-r
 import { RelatorioService } from './relatorio-ar-quantitativo/relatorio-ar.service';
 import { RelatorioRRService } from './relatorio-rr-quantitativo/relatorio-rr.service';
 import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal/ar-grafico-progressao-mensal.service';
+import { ArGabineteDoPrefeito } from './ar-gabinete-prefeito/relatorio-ar-gabinete-prefeito.service';
 
 @Controller('relatorio')
 @ApiTags('Relatórios')
@@ -12,7 +13,8 @@ export class RelatorioController {
   constructor(
     private readonly relatorioService: RelatorioService,
     private readonly relatorioRRService: RelatorioRRService,
-    private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService
+    private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService,
+    private readonly ArGabineteDoPrefeito: ArGabineteDoPrefeito
   ) { }
 
   @IsPublic()
@@ -40,5 +42,12 @@ export class RelatorioController {
   async relatorioArGraficoProgressaoMensal(@Param('ano_inicio') ano_inicio: string, @Param('ano_fim') ano_fim: string) {
     console.log("Endpoint ar/progressao-mensal chamado com:", ano_inicio, ano_fim);
     return await this.arGraficoProgressaoMensal.getRelatorio(ano_inicio, ano_fim);
+  }
+
+  @IsPublic()
+  @Get('ar/gabinete-do-prefeito')
+  async RelatorioArGabineteDoPrefeito() {
+    console.log('endpoint ar/ganinete-do-prefeito é chamado sem parâmetro')
+    return await this.ArGabineteDoPrefeito.getRelatorioGabineteDoPrefeito()
   }
 }

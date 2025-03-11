@@ -1,5 +1,6 @@
 import { PrismaService } from "src/prisma/prisma.service";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
+import { Injectable } from "@nestjs/common";
 
 /**
   pseudocódigo
@@ -91,5 +92,23 @@ exemplo de objeto:
 
 /**
  * plano piloto: 
- *  filtrar admissibilidades por 
+ *  filtrar todas as iniciais e dividilas por ANO 
+ * 
  */
+
+
+@Injectable()
+export class ArGabineteDoPrefeito {
+    constructor(private prisma: PrismaService) { }
+
+    async getIniciaisOrdenadasPorAno() {
+
+        const iniciais = await this.prisma.inicial.findMany()
+        return iniciais
+    }
+
+    async getRelatorioGabineteDoPrefeito() {
+        return await this.getIniciaisOrdenadasPorAno()
+    }
+
+}
