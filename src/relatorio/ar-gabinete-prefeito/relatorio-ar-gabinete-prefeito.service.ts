@@ -1,6 +1,7 @@
 import { PrismaService } from "src/prisma/prisma.service";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
 import { Injectable } from "@nestjs/common";
+import { Inicial } from "@prisma/client";
 
 /**
   pseudocódigo
@@ -102,13 +103,31 @@ export class ArGabineteDoPrefeito {
     constructor(private prisma: PrismaService) { }
 
     async getIniciaisOrdenadasPorAno() {
+        const todasIniciais: Inicial[] = await this.prisma.inicial.findMany({
+            orderBy: { data_protocolo: 'desc' },
+        });
 
-        const iniciais = await this.prisma.inicial.findMany()
-        return iniciais
+        const agrupamento: { [ano: number]: Inicial[] } = todasIniciais.reduce(
+            (acc, inicial) => {
+                const ano = inicial.data_protocolo.getFullYear();
+                if (!acc[ano]) {
+                    acc[ano] = [];
+                }
+                acc[ano].push(inicial);
+                return acc;
+            },
+            {},
+        );
+
+        const resultado = Object.entries(agrupamento).map(([ano, dados]) => ({
+            ano: Number(ano),
+            dados: dados,
+        }));
+
+        return resultado;
     }
 
     async getRelatorioGabineteDoPrefeito() {
-        return await this.getIniciaisOrdenadasPorAno()
+        return await this.getIniciaisOrdenadasPorAno();
     }
-
 }
