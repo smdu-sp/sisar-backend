@@ -103,8 +103,14 @@ export class ArGabineteDoPrefeito {
     constructor(private prisma: PrismaService) { }
 
     async getIniciaisOrdenadasPorAno() {
+        const periodoFiltro: PeriodFilterDto = {
+            gte: new Date('2018-01-01'),
+            lte: new Date()
+        }
         const todasIniciais: Inicial[] = await this.prisma.inicial.findMany({
+            where: { data_protocolo: periodoFiltro },
             orderBy: { data_protocolo: 'desc' },
+
         });
 
         const agrupamento: { [ano: number]: Inicial[] } = todasIniciais.reduce(
@@ -118,6 +124,8 @@ export class ArGabineteDoPrefeito {
             },
             {},
         );
+
+        console.log(agrupamento)
 
         const resultado = Object.entries(agrupamento).map(([ano, dados]) => ({
             ano: Number(ano),
