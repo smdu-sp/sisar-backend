@@ -5,13 +5,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial, Inicial_Sqls, Reuniao_Processo } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
+import { Controle_Prazo } from '@prisma/client';
 
 @Injectable()
 export class InicialService {
   constructor(
     private prisma: PrismaService,
     private app: AppService
-  ) {}
+  ) { }
 
   async validaSql(sql: string): Promise<boolean> {
     const dataBusca: Date = new Date();
@@ -54,7 +55,7 @@ export class InicialService {
     switch (data.getDay()) {
       case 1:
         return this.adicionaDiasData(data, -5);
-      case 2: 
+      case 2:
         return this.adicionaDiasData(data, -6);
       case 3:
         return data;
@@ -78,8 +79,8 @@ export class InicialService {
     });
     if (!sqlBusca) throw new ForbiddenException('Erro ao buscar sql.');
     await this.prisma.inicial_Sqls.delete({
-      where: { 
-        id: sqlBusca.id 
+      where: {
+        id: sqlBusca.id
       }
     });
     return true;
@@ -218,7 +219,7 @@ export class InicialService {
     }
     if (novo_inicial) await this.criaDistribuicao(novo_inicial);
     if (nums_sql && nums_sql.length > 0) {
-      await this.prisma.inicial_Sqls.createMany({ 
+      await this.prisma.inicial_Sqls.createMany({
         data: nums_sql.map(sql => ({ sql, inicial_id: novo_inicial.id })),
       });
     }
@@ -229,24 +230,26 @@ export class InicialService {
   }
 
   async buscarTudo(
-    pagina: number = 1, 
+    pagina: number = 1,
     limite: number = 10,
     busca?: string,
     status: number = 0
   ): Promise<IniciaisPaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
-      ...(busca ? 
-        { OR: [
+      ...(busca ?
+        {
+          OR: [
             { sei: { contains: busca } },
             { requerimento: { contains: busca } },
             { aprova_digital: { contains: busca } },
             { processo_fisico: { contains: busca } }
-        ] } : 
+          ]
+        } :
         {}),
-        status: status === -1 ? undefined : status
+      status: status === -1 ? undefined : status
     };
-    const total = await this.prisma.inicial.count({where: searchParams });
+    const total = await this.prisma.inicial.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const iniciais = await this.prisma.inicial.findMany({
@@ -313,7 +316,7 @@ export class InicialService {
         ]
       }
     });
-    if (!processos || processos.length === 0) 
+    if (!processos || processos.length === 0)
       throw new ForbiddenException('Nenhum processo encontrado para esse dia.');
     return processos;
   }
@@ -330,12 +333,12 @@ export class InicialService {
   }
 
   async geraReuniaoData(inicial: Inicial): Promise<void> {
-    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ 
-      where: { 
-        id: inicial.alvara_tipo_id 
-      } 
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({
+      where: {
+        id: inicial.alvara_tipo_id
+      }
     });
-    if (!tipoAlvara) 
+    if (!tipoAlvara)
       throw new ForbiddenException('Erro ao buscar tipo de alvará.');
     const { prazo_analise_multi1 } = tipoAlvara;
     const data = new Date(inicial.envio_admissibilidade);
@@ -435,19 +438,19 @@ export class InicialService {
   }
 
   async atualizar(id: number, updateInicialDto: UpdateInicialDto): Promise<Inicial> {
-    const inicial = await this.prisma.inicial.findUnique({ 
-      where: { 
-        id 
-      } 
+    const inicial = await this.prisma.inicial.findUnique({
+      where: {
+        id
+      }
     });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;
     const inicial_atualizado = await this.prisma.inicial.update({
-      where: { 
-        id 
+      where: {
+        id
       },
-      data: { 
+      data: {
         ...updateInicialDto
       },
     });
