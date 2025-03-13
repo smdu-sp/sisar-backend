@@ -102,11 +102,19 @@ exemplo de objeto:
 export class ArGabineteDoPrefeito {
     constructor(private prisma: PrismaService) { }
 
-    async getIniciaisOrdenadasPorAno() {
+    async getIniciaisOrdenadasPorAno(): Promise<{ ano: number; dados: Inicial[] }[]> {
+
         const periodoFiltro: PeriodFilterDto = {
             gte: new Date('2018-01-01'),
             lte: new Date()
         }
+
+        const relatorio = {}
+
+        for (let i = 2018; i <= Number(periodoFiltro.lte.getFullYear()); i++) {
+            relatorio[i] = []
+        }
+
         const todasIniciais: Inicial[] = await this.prisma.inicial.findMany({
             where: { data_protocolo: periodoFiltro },
             orderBy: { data_protocolo: 'desc' },
@@ -122,10 +130,8 @@ export class ArGabineteDoPrefeito {
                 acc[ano].push(inicial);
                 return acc;
             },
-            {},
+            relatorio,
         );
-
-        console.log(agrupamento)
 
         const resultado = Object.entries(agrupamento).map(([ano, dados]) => ({
             ano: Number(ano),
@@ -135,7 +141,35 @@ export class ArGabineteDoPrefeito {
         return resultado;
     }
 
+    async segregarIniciaisPorMes(lista: { ano: number, dados: Inicial[] }[]) {
+
+        lista.forEach((obj) => {
+
+            for (let i = 1; i <= 12; i++) {
+                const mes = String(i).padStart(2, '0');
+                obj[new Date(`2020-${mes}`).toLocaleString('pt-BR', { month: 'short' })] = []
+            }
+
+        })
+
+        lista.forEach((obj) => {
+            obj.dados.forEach((inicial) => {
+                const mes = inicial.data_protocolo.toLocaleString('pt-BR', { month: 'short' });
+                obj[mes].push(inicial);
+            });
+        })
+
+        lista.forEach((obj) => {
+            delete obj.dados
+        })
+
+        return lista
+    }
+
     async getRelatorioGabineteDoPrefeito() {
-        return await this.getIniciaisOrdenadasPorAno();
+        const agrupamentoAnual = await this.getIniciaisOrdenadasPorAno();
+        const agrupamentoMensal = await this.segregarIniciaisPorMes(agrupamentoAnual)
+
+        return agrupamentoMensal
     }
 }
