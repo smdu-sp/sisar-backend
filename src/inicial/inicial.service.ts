@@ -199,6 +199,12 @@ export class InicialService {
     if (inicial.envio_admissibilidade && distribuicao) await this.alocaResponsavelTecnico(inicial);
   }
 
+  async adicionarEntradaEmControleDePrazo() {
+    const res = await this.prisma.controle_Prazo.findMany()
+
+    return res
+  }
+
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
     const { nums_sql, interfaces } = createInicialDto;
     delete createInicialDto.nums_sql;
