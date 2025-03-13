@@ -2,6 +2,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
 import { Injectable } from "@nestjs/common";
 import { Inicial } from "@prisma/client";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 /**
   pseudocódigo
@@ -102,7 +103,7 @@ exemplo de objeto:
 export class ArGabineteDoPrefeito {
     constructor(private prisma: PrismaService) { }
 
-    async getIniciaisOrdenadasPorAno(): Promise<{ ano: number; dados: Inicial[] }[]> {
+    async segregarIniaisPorAno(): Promise<{ ano: number; dados: Inicial[] }[]> {
 
         const periodoFiltro: PeriodFilterDto = {
             gte: new Date('2018-01-01'),
@@ -141,6 +142,22 @@ export class ArGabineteDoPrefeito {
         return resultado;
     }
 
+    getNumeroDoProcesso(inicial: any) {
+        if (inicial.sei) {
+            inicial.numero_do_processo = inicial.sei
+        } else if (inicial.aprova_digital) {
+            inicial.numero_do_processo = inicial.aprova_digital
+        } else if (inicial.processo_fisico) {
+            inicial.numero_do_processo = inicial.processo_fisico
+        } else {
+            throw new HttpException(
+                `a inicial de id ${inicial.id} não possui um numero SEI, aprova digital ou processo físico`,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+        return inicial
+    }
+
     async segregarIniciaisPorMes(lista: { ano: number, dados: Inicial[] }[]) {
 
         lista.forEach((obj) => {
@@ -155,6 +172,7 @@ export class ArGabineteDoPrefeito {
         lista.forEach((obj) => {
             obj.dados.forEach((inicial) => {
                 const mes = inicial.data_protocolo.toLocaleString('pt-BR', { month: 'short' });
+                inicial = this.getNumeroDoProcesso(inicial)
                 obj[mes].push(inicial);
             });
         })
@@ -166,8 +184,9 @@ export class ArGabineteDoPrefeito {
         return lista
     }
 
+
     async getRelatorioGabineteDoPrefeito() {
-        const agrupamentoAnual = await this.getIniciaisOrdenadasPorAno();
+        const agrupamentoAnual = await this.segregarIniaisPorAno();
         const agrupamentoMensal = await this.segregarIniciaisPorMes(agrupamentoAnual)
 
         return agrupamentoMensal
