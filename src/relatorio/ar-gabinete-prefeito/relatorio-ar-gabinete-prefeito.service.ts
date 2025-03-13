@@ -184,10 +184,16 @@ export class ArGabineteDoPrefeito {
         return lista
     }
 
+    async getControlesDePrazo(id?: string) {
+
+        const res = await this.prisma.controle_Prazo.findMany()
+        return res
+    }
 
     async getRelatorioGabineteDoPrefeito() {
         const agrupamentoAnual = await this.segregarIniaisPorAno();
         const agrupamentoMensal = await this.segregarIniciaisPorMes(agrupamentoAnual)
+        console.log(await this.getControlesDePrazo())
 
         return agrupamentoMensal
     }
