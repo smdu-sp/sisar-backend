@@ -59,18 +59,33 @@ export class AdmissibilidadeService {
 
   async adicionarEntradaEmControleDePrazo(inicial: Inicial) {
 
-    // status 0 => admissibilidade analise de dados
-    // status 1 => inadmissível 
+    // status 0 => admissibilidade analise de dados - JÁ EXCLUSO
+    // status 1 => inadmissível - JÁ EXCLUSO
     // status 2 => em analise 
-    // status 3 => deferido 
-    // status 4 => indeferido
+    // status 3 => deferido - terminou (sem mais prazos)
+    // status 4 => indeferido - 
     //status 5 => via ordinária 
+
+    //a depende do tipo_alvara => ID a depender do campo => INT
+    // SMUL =>X GRAPROEM / MULTI =>V GRAPROEM 
+    // tipo_processo 1 === SMUL 
+    // tipo_processo 2 === GRAPROEM
+    // tipo_processo === 1 => TUDO QUE INCLUDE(MULTI) => ELIMINADADO
+    // tipo_processo === 2 => TUDO QUE INCLUDE(SMUL) => ELIMINADO
+    // status 2 === em_analise (fase inicial) => tipo_processo 1 = prazo_analise_smul1
+    // status 2 === em_analise (fae inicial) => tipo_processo 2 = prazo_analise_multi1 
 
     const prazo = this.prisma.alvara_Tipo.findUnique({
       where: {
         id: inicial.alvara_tipo_id
       }
     })
+
+    // tipo_processo ??? 
+    // DURACAO_PLANEJADA(tipo_alvara, tipo_processo[1 || 2])
+    // ?? tipo_alvara => ID 
+    // ?? alvara-Id => tipo_processo
+    // 
 
     const controle_de_prazo: Controle_Prazo = await this.prisma.controle_Prazo.create({
       data: {
@@ -441,3 +456,6 @@ export class AdmissibilidadeService {
     return resultado;
   }
 }
+
+
+
