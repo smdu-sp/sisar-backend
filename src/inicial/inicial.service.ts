@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreateInicialDto, CreateInterfacesDto } from './dto/create-inicial.dto';
+import { CreateInicialDto, CreateInterfacesDto, CreateControlePrazoDTO } from './dto/create-inicial.dto';
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial, Inicial_Sqls, Reuniao_Processo } from '@prisma/client';
@@ -199,10 +199,22 @@ export class InicialService {
     if (inicial.envio_admissibilidade && distribuicao) await this.alocaResponsavelTecnico(inicial);
   }
 
-  async adicionarEntradaEmControleDePrazo() {
-    const res = await this.prisma.controle_Prazo.findMany()
+  async adicionarEntradaEmControleDePrazo(inicial: Inicial) {
 
-    return res
+    const controle_de_prazo: Controle_Prazo = await this.prisma.controle_Prazo.create({
+      data: {
+        inicial: { connect: { id: inicial.id } },
+        data_inicio: inicial.criado_em,
+        final_planejado: inicial.data_limiteSmul,
+        graproem: inicial.tipo_processo,
+        etapa: inicial.status,
+        criado_em: inicial.criado_em,
+        alterado_em: inicial.alterado_em,
+        duracao_planejada: 10,
+        status: inicial.status
+      }
+    })
+    return controle_de_prazo;
   }
 
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
@@ -232,6 +244,9 @@ export class InicialService {
     await this.prisma.admissibilidade.create({
       data: { inicial_id: novo_inicial.id }
     });
+
+    this.adicionarEntradaEmControleDePrazo(novo_inicial)
+
     return novo_inicial;
   }
 

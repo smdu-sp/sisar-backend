@@ -1,42 +1,42 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateInicialDto {
-    @ApiProperty()
-    id?: number;
-    @ApiProperty()
-    decreto: boolean = false;
-    @ApiProperty()
-    sei: string;
-    @ApiProperty()
-    tipo_requerimento: number;
-    @ApiProperty()
-    requerimento: string;
-    @ApiProperty()
-    aprova_digital: string;
-    @ApiProperty()
-    processo_fisico: string;
-    @ApiProperty()
-    data_protocolo: Date;
-    @ApiProperty()
-    envio_admissibilidade: Date;
-    @ApiProperty()
-    alvara_tipo_id: string;
-    @ApiProperty()
-    tipo_processo: number;
-    @ApiProperty()
-    obs?: string;
-    @ApiProperty()
-    status?: number;
-    @ApiProperty()
-    requalifica_rapido: boolean = false;
-    @ApiProperty()
-    associado_reforma: boolean = false;
-    @ApiProperty()
-    nums_sql?: string[];
-    @ApiProperty()
-    interfaces?: any;
-    @ApiProperty()
-    data_limiteSmul?: Date;
+  @ApiProperty()
+  id?: number;
+  @ApiProperty()
+  decreto: boolean = false;
+  @ApiProperty()
+  sei: string;
+  @ApiProperty()
+  tipo_requerimento: number;
+  @ApiProperty()
+  requerimento: string;
+  @ApiProperty()
+  aprova_digital: string;
+  @ApiProperty()
+  processo_fisico: string;
+  @ApiProperty()
+  data_protocolo: Date;
+  @ApiProperty()
+  envio_admissibilidade: Date;
+  @ApiProperty()
+  alvara_tipo_id: string;
+  @ApiProperty()
+  tipo_processo: number;
+  @ApiProperty()
+  obs?: string;
+  @ApiProperty()
+  status?: number;
+  @ApiProperty()
+  requalifica_rapido: boolean = false;
+  @ApiProperty()
+  associado_reforma: boolean = false;
+  @ApiProperty()
+  nums_sql?: string[];
+  @ApiProperty()
+  interfaces?: any;
+  @ApiProperty()
+  data_limiteSmul?: Date;
 }
 
 export class CreateInterfacesDto {
@@ -62,4 +62,25 @@ export class CreateInterfacesDto {
   num_smt?: string;
   @ApiProperty()
   num_svma?: string;
+}
+
+export class CreateControlePrazoDTO {
+  @ApiProperty()
+  inicial_id?: number;
+  @ApiProperty()
+  data_inicio: Date;
+  @ApiProperty()
+  final_planejado?: Date;
+  @ApiProperty()
+  final_executado?: Date;
+  @ApiProperty()
+  duracao_planejada?: number;
+  @ApiProperty()
+  duracao_executada?: number;
+  @ApiProperty()
+  etapa?: number;
+  @ApiProperty()
+  grapoem: number;
+  @ApiProperty()
+  status: number;
 }
