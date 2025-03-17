@@ -199,24 +199,6 @@ export class InicialService {
     if (inicial.envio_admissibilidade && distribuicao) await this.alocaResponsavelTecnico(inicial);
   }
 
-  async adicionarEntradaEmControleDePrazo(inicial: Inicial) {
-
-    const controle_de_prazo: Controle_Prazo = await this.prisma.controle_Prazo.create({
-      data: {
-        inicial: { connect: { id: inicial.id } },
-        data_inicio: inicial.criado_em,
-        final_planejado: inicial.data_limiteSmul,
-        graproem: inicial.tipo_processo,
-        etapa: inicial.status,
-        criado_em: inicial.criado_em,
-        alterado_em: inicial.alterado_em,
-        duracao_planejada: 10,
-        status: inicial.status
-      }
-    })
-    return controle_de_prazo;
-  }
-
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
     const { nums_sql, interfaces } = createInicialDto;
     delete createInicialDto.nums_sql;
@@ -244,8 +226,6 @@ export class InicialService {
     await this.prisma.admissibilidade.create({
       data: { inicial_id: novo_inicial.id }
     });
-
-    this.adicionarEntradaEmControleDePrazo(novo_inicial)
 
     return novo_inicial;
   }

@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Inicial } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AppService {
@@ -21,4 +23,9 @@ export class AppService {
     if ((pagina - 1) * limite >= total) pagina = Math.ceil(total / limite);
     return [pagina, limite];
   }
+
+  verificaControleDePrazos(inicial: Inicial) {
+    return "oi gente"
+  }
 }
+

@@ -4,7 +4,7 @@ import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Admissibilidade, Inicial } from '@prisma/client';
+import { Admissibilidade, Inicial, Controle_Prazo } from '@prisma/client';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -21,6 +21,7 @@ export class AdmissibilidadeService {
     createAdmissibilidadeDto: CreateAdmissibilidadeDto
   ): Promise<CreateResponseAdmissibilidadeDTO> {
     const { interfaces, tipo_processo, inicial_id } = createAdmissibilidadeDto;
+    delete createAdmissibilidadeDto.tipo_processo;
     const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.create({
       data: createAdmissibilidadeDto,
       include: { inicial: true }
@@ -45,7 +46,46 @@ export class AdmissibilidadeService {
     }
     if (!admissibilidade)
       throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
+
+    const inicial = await this.prisma.inicial.findUnique({
+      where: {
+        id: admissibilidade.inicial_id
+      }
+    })
+
+    this.adicionarEntradaEmControleDePrazo(inicial)
     return admissibilidade;
+  }
+
+  async adicionarEntradaEmControleDePrazo(inicial: Inicial) {
+
+    // status 0 => admissibilidade analise de dados
+    // status 1 => inadmissível 
+    // status 2 => em analise 
+    // status 3 => deferido 
+    // status 4 => indeferido
+    //status 5 => via ordinária 
+
+    const prazo = this.prisma.alvara_Tipo.findUnique({
+      where: {
+        id: inicial.alvara_tipo_id
+      }
+    })
+
+    const controle_de_prazo: Controle_Prazo = await this.prisma.controle_Prazo.create({
+      data: {
+        inicial: { connect: { id: inicial.id } },
+        data_inicio: inicial.criado_em,
+        final_planejado: inicial.data_limiteSmul,
+        graproem: inicial.tipo_processo,
+        etapa: inicial.status,
+        criado_em: inicial.criado_em,
+        alterado_em: inicial.alterado_em,
+        duracao_planejada: (await prazo).prazo_admissibilidade_smul,
+        status: inicial.status
+      }
+    })
+    return controle_de_prazo;
   }
 
   async listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
