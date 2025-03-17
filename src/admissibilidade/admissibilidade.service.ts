@@ -63,7 +63,7 @@ export class AdmissibilidadeService {
     // status 1 => inadmissível - JÁ EXCLUSO
     // status 2 => em analise 
     // status 3 => deferido - terminou (sem mais prazos)
-    // status 4 => indeferido - 
+    // status 4 => indeferido - terminou (sem mais prazos)
     //status 5 => via ordinária 
 
     //a depende do tipo_alvara => ID a depender do campo => INT
@@ -73,7 +73,8 @@ export class AdmissibilidadeService {
     // tipo_processo === 1 => TUDO QUE INCLUDE(MULTI) => ELIMINADADO
     // tipo_processo === 2 => TUDO QUE INCLUDE(SMUL) => ELIMINADO
     // status 2 === em_analise (fase inicial) => tipo_processo 1 = prazo_analise_smul1
-    // status 2 === em_analise (fae inicial) => tipo_processo 2 = prazo_analise_multi1 
+    // status 2 === em_analise (fase inicial) => tipo_processo 2 = prazo_analise_multi1
+
 
     const prazo = this.prisma.alvara_Tipo.findUnique({
       where: {
