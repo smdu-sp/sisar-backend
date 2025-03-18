@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Admissibilidade, Inicial, Controle_Prazo } from '@prisma/client';
+import { Admissibilidade, Inicial, Controle_Prazo, Alvara_Tipo } from '@prisma/client';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -53,40 +53,44 @@ export class AdmissibilidadeService {
       }
     })
 
-    this.adicionarEntradaEmControleDePrazo(inicial)
+    this.adicionarEntradaEmControleDePrazo(inicial, admissibilidade)
     return admissibilidade;
   }
 
-  async adicionarEntradaEmControleDePrazo(inicial: Inicial) {
+  async adicionarEntradaEmControleDePrazo(inicial: Inicial, admissibilidade: Admissibilidade) {
 
     // status 0 => admissibilidade analise de dados - JÁ EXCLUSO
     // status 1 => inadmissível - JÁ EXCLUSO
-    // status 2 => em analise 
+    // status 2 => em analise
     // status 3 => deferido - terminou (sem mais prazos)
     // status 4 => indeferido - terminou (sem mais prazos)
-    //status 5 => via ordinária 
-
-    //a depende do tipo_alvara => ID a depender do campo => INT
-    // SMUL =>X GRAPROEM / MULTI =>V GRAPROEM 
-    // tipo_processo 1 === SMUL 
+    //status 5 => via ordinária
+    //a depender do tipo_alvara => ID a depender do campo => INT
+    // SMUL =>X GRAPROEM / MULTI =>V GRAPROEM
+    // tipo_processo 1 === SMUL
     // tipo_processo 2 === GRAPROEM
     // tipo_processo === 1 => TUDO QUE INCLUDE(MULTI) => ELIMINADADO
     // tipo_processo === 2 => TUDO QUE INCLUDE(SMUL) => ELIMINADO
     // status 2 === em_analise (fase inicial) => tipo_processo 1 = prazo_analise_smul1
     // status 2 === em_analise (fase inicial) => tipo_processo 2 = prazo_analise_multi1
+    //SE NÃO PASSAR NA ANALISE:
+    // => reconsderacao_smul: 3 - usuario enviar reconsideracao
+    // => anaise_reconsideracao_smul: 15 - prazo pra secretaria analisar a reconsideração
+    // SE FOR RECONSIDERADO
+    // prazo_analise_smul2 PARA tipo_processo 1
+    // praso_analise_multii2 PARA tipo_processo 2
+    // DEPOIS QUE PASSA NA ANALISE
+    //prazo_emissao_alvara_smul PARA tipo_processo 1
+    //prazo_emissao_alvara_multi PARA tipo_processo 2
 
-
-    const prazo = this.prisma.alvara_Tipo.findUnique({
+    const alvara: Alvara_Tipo = await this.prisma.alvara_Tipo.findUnique({
       where: {
         id: inicial.alvara_tipo_id
       }
     })
 
-    // tipo_processo ??? 
-    // DURACAO_PLANEJADA(tipo_alvara, tipo_processo[1 || 2])
-    // ?? tipo_alvara => ID 
-    // ?? alvara-Id => tipo_processo
-    // 
+    const prazo = await this.verificarPrazoDaAdmissibilidade(alvara, admissibilidade, inicial)
+    console.log(prazo)
 
     const controle_de_prazo: Controle_Prazo = await this.prisma.controle_Prazo.create({
       data: {
@@ -97,11 +101,33 @@ export class AdmissibilidadeService {
         etapa: inicial.status,
         criado_em: inicial.criado_em,
         alterado_em: inicial.alterado_em,
-        duracao_planejada: (await prazo).prazo_admissibilidade_smul,
+        duracao_planejada: prazo,
         status: inicial.status
       }
     })
     return controle_de_prazo;
+  }
+
+  async verificarPrazoDaAdmissibilidade(alvara: Alvara_Tipo, admissibilidade: Admissibilidade, inicial: Inicial) {
+    try {
+      if (admissibilidade.status === 2 && !admissibilidade.reconsiderado && inicial.tipo_processo === 1) {
+        return alvara.prazo_analise_smul1
+      }
+
+      if (admissibilidade.status === 2 && admissibilidade.reconsiderado && inicial.tipo_processo === 1) {
+        return alvara.prazo_analise_smul2
+      }
+
+      if (admissibilidade.status === 2 && !admissibilidade.reconsiderado && inicial.tipo_processo === 2) {
+        return alvara.prazo_analise_multi1
+      }
+
+      if (admissibilidade.status === 2 && admissibilidade.reconsiderado && inicial.tipo_processo === 2) {
+        return alvara.prazo_analise_multi2
+      }
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
   }
 
   async listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
