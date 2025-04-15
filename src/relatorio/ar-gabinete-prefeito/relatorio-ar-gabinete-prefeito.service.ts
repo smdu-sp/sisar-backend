@@ -2,6 +2,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
 import { Injectable } from "@nestjs/common";
 import { Inicial } from "@prisma/client";
+import { Admissibilidade } from "@prisma/client";
 import { HttpException, HttpStatus } from "@nestjs/common";
 
 /**
@@ -117,7 +118,10 @@ export class ArGabineteDoPrefeito {
         }
 
         const todasIniciais: Inicial[] = await this.prisma.inicial.findMany({
-            where: { data_protocolo: periodoFiltro },
+            where: {
+                data_protocolo: periodoFiltro,
+                status: 3
+            },
             orderBy: { data_protocolo: 'desc' },
 
         });
@@ -177,6 +181,12 @@ export class ArGabineteDoPrefeito {
             });
         })
 
+        for (const processo of lista) {
+            for (let inicial of processo.dados) {
+                inicial = await this.atribuirTempoDeAnalize(inicial)
+            }
+        }
+
         lista.forEach((obj) => {
             delete obj.dados
         })
@@ -190,10 +200,27 @@ export class ArGabineteDoPrefeito {
         return res
     }
 
+    async atribuirTempoDeAnalize(inicial: any) {
+
+        const admissibilidade = this.prisma.admissibilidade.findUnique({
+            where: {
+                inicial_id: inicial.id
+            }
+        })
+
+        const data_enviado = new Date((await admissibilidade).data_envio)
+        const data_decidido = new Date((await admissibilidade).data_decisao_interlocutoria)
+        const diferenca = data_decidido.getTime() - data_enviado.getTime()
+        const diferencaEmDias = diferenca / (1000 * 60 * 60 * 24)
+
+        inicial.tempo_de_analise_pedido_inicial = diferencaEmDias
+        return inicial
+    }
+
+
     async getRelatorioGabineteDoPrefeito() {
         const agrupamentoAnual = await this.segregarIniaisPorAno();
         const agrupamentoMensal = await this.segregarIniciaisPorMes(agrupamentoAnual)
-        console.log(await this.getControlesDePrazo())
 
         return agrupamentoMensal
     }
