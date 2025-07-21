@@ -217,6 +217,10 @@ export class ArGabineteDoPrefeito {
         return inicial
     }
 
+    async atribuirCategoriaDeUso(inicial: any) {
+
+    }
+
 
     async getRelatorioGabineteDoPrefeito() {
         const agrupamentoAnual = await this.segregarIniaisPorAno();
