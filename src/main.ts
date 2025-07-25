@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000;
-  app.enableCors({ origin: 'http://localhost:3001' });
+  app.enableCors({ origin: ['http://localhost:3001', 'http://localhost:3030'] });
   const options = new DocumentBuilder()
     .addBearerAuth()
     .setTitle('SISAR')
