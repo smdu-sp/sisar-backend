@@ -9,16 +9,22 @@ export class ArGraficoProgressaoMensalService {
   async getDataPorAno(periodFilter: PeriodFilterDto) {
 
     const result = await this.prisma.$queryRaw`
-SELECT
-    EXTRACT(YEAR FROM admissibilidades.criado_em) AS ano,
-    EXTRACT(MONTH FROM admissibilidades.criado_em) AS mes,
-    MIN(admissibilidades.criado_em) AS primeira_data_criacao_do_mes,
-    COUNT(admissibilidades.inicial_id) AS total_registros
-FROM
-  admissibilidades
-GROUP BY
+  SELECT 
+    ano,
+    mes,
+    COUNT(*) AS total_registros
+  FROM (
+    SELECT 
+      YEAR(criado_em) AS ano,
+      MONTH(criado_em) AS mes
+    FROM 
+      admissibilidades
+  ) AS subquery
+  GROUP BY 
+    ano, mes
+  ORDER BY 
     ano, mes;
-  `;
+    `;
 
     const anoData: { [key: number]: { ano: number; mes: number[]; acc: number[] } } = {};
 
@@ -38,7 +44,9 @@ GROUP BY
       result.forEach((row) => {
         const ano = Number(row.ano);
         const mes = Number(row.mes);
-        const total = Number(row.total);
+        const total = Number(row.total_registros);
+
+        console.log("row.total aqui", row.total_registros)
 
         anoData[ano].mes[mes] = total;
         acc += total;
