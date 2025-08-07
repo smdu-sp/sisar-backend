@@ -11,7 +11,7 @@ import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 @ApiBearerAuth()
 @Controller('admissibilidade')
 export class AdmissibilidadeController {
-  constructor(private readonly admissibilidadeService: AdmissibilidadeService) {}
+  constructor(private readonly admissibilidadeService: AdmissibilidadeService) { }
 
   @Post('criar')
   @HttpCode(HttpStatus.CREATED)
@@ -44,9 +44,9 @@ export class AdmissibilidadeController {
   @ApiResponse({ status: 200, description: 'Retorna 200 se buscar todas as admissibilidades com sucesso.', type: AdmissibilidadePaginado })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   buscarTudo(
-    @Query('pagina') pagina: number = 1, 
-    @Query('limite') limite: number = 10, 
-    @Query('filtro') filtro: number, 
+    @Query('pagina') pagina: number = 1,
+    @Query('limite') limite: number = 10,
+    @Query('filtro') filtro: number,
     @Query('busca') busca: string
   ): Promise<AdmissibilidadePaginado> {
     return this.admissibilidadeService.buscarTudo(+pagina, +limite, +filtro, busca);
@@ -80,7 +80,7 @@ export class AdmissibilidadeController {
   @ApiResponse({ status: 200, description: 'Retorna 200 se atualizar a admissibilidade com sucesso.', type: AdmissibilidadeResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   atulaizarStatus(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
   ): Promise<AdmissibilidadeResponseDTO> {
     return this.admissibilidadeService.atualizarStatus(+id, updateAdmissibilidadeDto);
@@ -92,7 +92,7 @@ export class AdmissibilidadeController {
   @ApiOperation({ description: "Deletar a admissibilidade.", summary: 'Delete admissibilidade.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se deletar a admissibilidade com sucesso.', type: String })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  remove(@Param('id') id: string): string {
+  remove(@Param('id') id: string): Promise<string> {
     return this.admissibilidadeService.remove(+id);
   }
 
@@ -101,33 +101,44 @@ export class AdmissibilidadeController {
   verificaReconsideracao() {
     return this.admissibilidadeService.verificaReconsideracao();
   }
-  
+
   @IsPublic()
   @Get('contar-fora-prazo')
   async contarRegistros() {
     return this.admissibilidadeService.contarForaDoPrazo();
-  }  
+  }
 
   @IsPublic()
   @Get('contar-dentro-prazo')
   async contarDentroPrazo() {
     return this.admissibilidadeService.contarDentroDoPrazo();
   }
-  
+
   @IsPublic()
   @Get('admissibilidade-finalizada')
   async admissibilidadeFinalizada() {
     return this.admissibilidadeService.admissibilidadeFinalizada();
   }
-  
+
   @IsPublic()
   @Get('mediana-admissibilidade')
-  async medianaAdmissibilidade(){
+  async medianaAdmissibilidade() {
     return this.admissibilidadeService.medianaTempoAdmissibilidade();
   }
   @IsPublic()
   @Get('registros-admissibilidade')
-  async registrosAdmibilidade(){
+  async registrosAdmibilidade() {
     return this.admissibilidadeService.registrosAdmissibilidadeFinalizada();
+  }
+
+  @Get('verificar-existencia/:inicial_id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ description: "Verificar se já existe admissibilidade para uma inicial.", summary: 'Verificar existência de admissibilidade.' })
+  @ApiParam({ name: 'inicial_id', type: 'number', required: true })
+  @ApiResponse({ status: 200, description: 'Retorna true se existe, false se não existe.' })
+  @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
+  async verificarExistencia(@Param('inicial_id') inicial_id: string): Promise<{ existe: boolean }> {
+    const existe = await this.admissibilidadeService.verificarAdmissibilidadeExistente(+inicial_id);
+    return { existe };
   }
 }

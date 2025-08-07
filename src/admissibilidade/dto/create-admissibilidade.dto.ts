@@ -18,8 +18,6 @@ export class CreateAdmissibilidadeDto {
     @ApiProperty()
     status?: number
     interfaces?: IInterfaces
-    @ApiProperty()
-    tipo_processo?: number
 }
 
 export class IInterfaces {
