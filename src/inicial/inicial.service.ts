@@ -225,7 +225,10 @@ export class InicialService {
       });
     }
     await this.prisma.admissibilidade.create({
-      data: { inicial_id: novo_inicial.id }
+      data: {
+        ...admissibilidade,
+        inicial_id: novo_inicial.id,
+      }
     });
     return novo_inicial;
   }

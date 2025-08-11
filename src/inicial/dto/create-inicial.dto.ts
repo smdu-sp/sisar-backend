@@ -65,6 +65,10 @@ export class CreateAdmissibilidadeDto {
   categoria_id: string
   @ApiProperty()
   status?: number
+  @ApiProperty()
+  reconsiderado: boolean
+  @ApiProperty()
+  motivo?: number
   interfaces?: IInterfaces
 }
 
