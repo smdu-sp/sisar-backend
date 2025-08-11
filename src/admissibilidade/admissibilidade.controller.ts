@@ -92,7 +92,7 @@ export class AdmissibilidadeController {
   @ApiOperation({ description: "Deletar a admissibilidade.", summary: 'Delete admissibilidade.' })
   @ApiResponse({ status: 200, description: 'Retorna 200 se deletar a admissibilidade com sucesso.', type: String })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  remove(@Param('id') id: string): Promise<string> {
+  remove(@Param('id') id: string): string {
     return this.admissibilidadeService.remove(+id);
   }
 
@@ -129,16 +129,5 @@ export class AdmissibilidadeController {
   @Get('registros-admissibilidade')
   async registrosAdmibilidade() {
     return this.admissibilidadeService.registrosAdmissibilidadeFinalizada();
-  }
-
-  @Get('verificar-existencia/:inicial_id')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ description: "Verificar se já existe admissibilidade para uma inicial.", summary: 'Verificar existência de admissibilidade.' })
-  @ApiParam({ name: 'inicial_id', type: 'number', required: true })
-  @ApiResponse({ status: 200, description: 'Retorna true se existe, false se não existe.' })
-  @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
-  async verificarExistencia(@Param('inicial_id') inicial_id: string): Promise<{ existe: boolean }> {
-    const existe = await this.admissibilidadeService.verificarAdmissibilidadeExistente(+inicial_id);
-    return { existe };
   }
 }

@@ -5,6 +5,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial, Inicial_Sqls, Reuniao_Processo } from '@prisma/client';
 import { AppService } from 'src/app.service';
 import { IniciaisPaginado } from './dto/inicial-response.dto';
+import { Admissibilidade } from '@prisma/client';
+import { AdmissibilidadeService } from 'src/admissibilidade/admissibilidade.service';
+import { CreateAdmissibilidadeDto } from 'src/admissibilidade/dto/create-admissibilidade.dto';
 
 @Injectable()
 export class InicialService {
@@ -199,17 +202,16 @@ export class InicialService {
   }
 
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
-    const { nums_sql, interfaces } = createInicialDto;
-    delete createInicialDto.nums_sql;
-    delete createInicialDto.interfaces;
-    createInicialDto.sei = createInicialDto.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
-    createInicialDto.aprova_digital = createInicialDto.aprova_digital.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
-    createInicialDto.processo_fisico = createInicialDto.processo_fisico.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
-    if (createInicialDto.envio_admissibilidade) createInicialDto.status = 0;
-    const tipo_alvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: createInicialDto.alvara_tipo_id } });
+    const { nums_sql, interfaces, admissibilidade, id, ...inicialData } = createInicialDto;
+
+    inicialData.sei = inicialData.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    inicialData.aprova_digital = inicialData.aprova_digital.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    inicialData.processo_fisico = inicialData.processo_fisico.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    if (inicialData.envio_admissibilidade) inicialData.status = 0;
+    const tipo_alvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: inicialData.alvara_tipo_id } });
     if (!tipo_alvara) throw new ForbiddenException('Alvara inválido.');
     const novo_inicial = await this.prisma.inicial.create({
-      data: { ...createInicialDto },
+      data: inicialData,
     });
     if (!novo_inicial) throw new ForbiddenException('Erro ao criar processo');
     if (novo_inicial.tipo_processo === 2) {
@@ -445,15 +447,13 @@ export class InicialService {
       }
     });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
-    const { interfaces } = updateInicialDto;
-    delete updateInicialDto.interfaces;
+    const { interfaces, admissibilidade, id: dtoId, ...updateData } = updateInicialDto;
+
     const inicial_atualizado = await this.prisma.inicial.update({
       where: {
         id
       },
-      data: {
-        ...updateInicialDto
-      },
+      data: updateData,
     });
     if (inicial_atualizado.tipo_processo === 2) {
       await this.geraReuniaoData(inicial_atualizado);
