@@ -46,11 +46,9 @@ export class ArGraficoProgressaoMensalService {
         const mes = Number(row.mes);
         const total = Number(row.total_registros);
 
-        console.log("row.total aqui", row.total_registros)
-
-        anoData[ano].mes[mes] = total;
+        anoData[ano].mes[mes - 1] = total;
         acc += total;
-        anoData[ano].acc[mes] = acc;
+        anoData[ano].acc[mes - 1] = acc;
       });
     }
 

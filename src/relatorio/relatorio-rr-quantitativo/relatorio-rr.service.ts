@@ -39,15 +39,12 @@ export class RelatorioRRService {
       }
     });
 
-    console.log("resultados aqui", resultados)
-
     // Inicializar o objeto com todas as unidades com valor 0
     const lista: Record<string, number> = {};
     unidades.forEach(unidade => {
       lista[unidade.sigla] = 0;
     });
 
-    console.log("lista aqui", lista)
     // Contar as ocorrências por unidade
     resultados.forEach(item => {
       if (item.admissibilidade?.unidade?.sigla) {
@@ -55,8 +52,6 @@ export class RelatorioRRService {
         lista[sigla] = (lista[sigla] || 0) + 1;
       }
     });
-
-    console.log("lista pós foreach aqui", lista)
 
     return lista;
   };
