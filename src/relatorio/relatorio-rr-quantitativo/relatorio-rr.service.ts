@@ -23,6 +23,7 @@ export class RelatorioRRService {
       where: {
         status,
         tipo_processo: tipo,
+        requalifica_rapido: true,
         admissibilidade: {
           data_decisao_interlocutoria: periodFilter,
           unidade_id: { not: null }

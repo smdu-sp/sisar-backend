@@ -57,7 +57,6 @@ export class RelatorioService {
       return lista;
     } catch (error) {
       console.error('Erro ao contar por inicial:', error);
-      // Retornar objeto com todas as unidades zeradas em caso de erro
       const lista: Record<string, number> = {};
       unidades.forEach(unidade => {
         lista[unidade.sigla] = 0;
@@ -114,11 +113,11 @@ export class RelatorioService {
         lte: new Date(),
       };
     }
-    
+
     if (!mes || !ano || isNaN(Number(mes)) || isNaN(Number(ano))) {
       throw new Error('Parâmetros de data inválidos');
     }
-    
+
     const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
     const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
     const periodFilter: { gte: Date, lte: Date } = { gte: primeiroDia, lte: ultimoDia };
