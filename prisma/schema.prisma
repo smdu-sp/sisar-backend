@@ -74,6 +74,22 @@ model Alvara_Tipo {
   @@map("alvara_tipos")
 }
 
+model Autor_Projeto {
+  id                       String             @id @default(uuid())
+  nome                     String 
+  tipo_autor               Tipo_Autor_Projeto
+  cpf                      String? 
+  crea                     String? 
+  cau                      String?
+
+  iniciais                  Inicial[]            @relation(fields: [inicial_id], references: [id])
+
+  criado_em                DateTime   @default(now())
+  alterado_em              DateTime   @default(now()) @updatedAt
+
+  @@map("autor_projeto")
+}
+
 model Categoria {
   id               String            @id @default(uuid())
   categoria        String            @unique
@@ -231,6 +247,10 @@ model Inicial {
   obs                            String?                         @db.Text
   status                         Int?                            @default(1)
   tipo_processo                  Int                             @default(1)
+  proprietario                   Proprietario?                   @relation(fields: [proprietario_id], references: [id])
+  proprietario_id                String?
+  autor                          Autor_Projeto?                  @relation(fields: [autor_projeto_id], references: [id])
+  autor_projeto_id               String?
   pagamento                      Int?                            @default(1)
   requalifica_rapido             Boolean?                        @default(false)
   associado_reforma              Boolean?                        @default(false)
@@ -250,6 +270,7 @@ model Inicial {
   distribuicao                   Distribuicao?
   reconsideracao_admissibilidade Reconsideracao_Admissibilidade?
   interfaces                     Interface?
+
 
   criado_em                      DateTime                        @default(now())
   alterado_em                    DateTime                        @default(now()) @updatedAt
@@ -318,6 +339,23 @@ model Pedido_Inicial {
 
   @@unique([inicial_id, pedido_id])
   @@map("pedidos_inicial")
+}
+
+model Proprietario {
+  id                         String             @id @default(uuid())
+  inicial_id                 Int                @unique
+  nome                       String      
+  cpf                        String?    
+  cnpj                       String? 
+  tipo_proprietario          Tipo_Proprietario  @default(PESSOA_FISICA)
+
+  iniciais                   Inicial[]          
+
+  criado_em                  DateTime           @default(now())
+  alterado_em                DateTime           @default(now()) @updatedAt
+
+  @@unique(inicial_id)
+  @@map("proprietario")
 }
 
 model Reconsideracao_Admissibilidade {
@@ -499,4 +537,14 @@ enum Permissao {
   SUP
   ADM
   USR
+}
+
+enum Tipo_Proprietario {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+}
+
+enum Tipo_Autor_Projeto {
+  ARQUITETO
+  ENGENHEIRO
 }
