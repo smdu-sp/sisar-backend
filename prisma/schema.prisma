@@ -74,7 +74,7 @@ model Alvara_Tipo {
   @@map("alvara_tipos")
 }
 
-model Autor_Projeto {
+model Autor_Responsavel_Projeto {
   id              String   @id @default(uuid())
   nome            String
   tipo_autor      Tipo_Autor_Projeto
@@ -82,7 +82,9 @@ model Autor_Projeto {
   crea            String?
   cau             String?
 
-  iniciais        Inicial[]
+  iniciais_autor    Inicial[] @relation(name: "AutorDoProjeto")
+
+  iniciais_tecnico  Inicial[] @relation(name: "ResponsavelTecnicoDoProjeto")
 
   criado_em       DateTime @default(now())
   alterado_em     DateTime @default(now()) @updatedAt
@@ -249,8 +251,12 @@ model Inicial {
   tipo_processo                  Int                             @default(1)
   proprietario                   Proprietario?                   @relation(fields: [proprietario_id], references: [id])
   proprietario_id                String?
-  autor                          Autor_Projeto?                  @relation(fields: [autor_projeto_id], references: [id])
+  autor                          Autor_Responsavel_Projeto?      @relation(fields: [autor_projeto_id], references: [id], name: "AutorDoProjeto")
   autor_projeto_id               String?
+  responsavel_tecnico            Autor_Responsavel_Projeto?      @relation(fields: [responsavel_tecnico_id], references: [id], name: "ResponsavelTecnicoDoProjeto")
+  responsavel_tecnico_id         String?
+  area                           Decimal?                        @db.Decimal(10, 2)
+  resumo_projeto                 String                          @db.Text
   pagamento                      Int?                            @default(1)
   requalifica_rapido             Boolean?                        @default(false)
   associado_reforma              Boolean?                        @default(false)
