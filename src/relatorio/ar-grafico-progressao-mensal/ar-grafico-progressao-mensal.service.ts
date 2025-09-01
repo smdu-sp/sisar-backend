@@ -9,16 +9,22 @@ export class ArGraficoProgressaoMensalService {
   async getDataPorAno(periodFilter: PeriodFilterDto) {
 
     const result = await this.prisma.$queryRaw`
+  SELECT 
+    ano,
+    mes,
+    COUNT(*) AS total_registros
+  FROM (
     SELECT 
       YEAR(criado_em) AS ano,
-      MONTH(criado_em) - 1 AS mes,
-      COUNT(*) AS total
-    FROM admissibilidades
-    WHERE criado_em >= ${periodFilter.gte}
-      AND criado_em <= ${periodFilter.lte}
-    GROUP BY YEAR(criado_em), MONTH(criado_em)
-    ORDER BY YEAR(criado_em), MONTH(criado_em);
-  `;
+      MONTH(criado_em) AS mes
+    FROM 
+      admissibilidades
+  ) AS subquery
+  GROUP BY 
+    ano, mes
+  ORDER BY 
+    ano, mes;
+    `;
 
     const anoData: { [key: number]: { ano: number; mes: number[]; acc: number[] } } = {};
 
@@ -38,11 +44,11 @@ export class ArGraficoProgressaoMensalService {
       result.forEach((row) => {
         const ano = Number(row.ano);
         const mes = Number(row.mes);
-        const total = Number(row.total);
+        const total = Number(row.total_registros);
 
-        anoData[ano].mes[mes] = total;
+        anoData[ano].mes[mes - 1] = total;
         acc += total;
-        anoData[ano].acc[mes] = acc;
+        anoData[ano].acc[mes - 1] = acc;
       });
     }
 
@@ -92,6 +98,7 @@ export class ArGraficoProgressaoMensalService {
   }
 
   async getRelatorio(anoInit: string, anoFinal: string) {
+    console.log(anoInit, anoFinal)
     const periodFilter: PeriodFilterDto = this.verificarData(anoInit, anoFinal)
     return await this.getDataPorAno(periodFilter)
   }

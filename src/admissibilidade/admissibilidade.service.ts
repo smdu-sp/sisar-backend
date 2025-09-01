@@ -20,29 +20,12 @@ export class AdmissibilidadeService {
   async create(
     createAdmissibilidadeDto: CreateAdmissibilidadeDto
   ): Promise<CreateResponseAdmissibilidadeDTO> {
-    const { interfaces, tipo_processo, inicial_id } = createAdmissibilidadeDto;
+    const { interfaces, inicial_id } = createAdmissibilidadeDto;
     const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.create({
       data: createAdmissibilidadeDto,
       include: { inicial: true }
     });
-    if (tipo_processo) {
-      await this.prisma.inicial.update({
-        where: { id: inicial_id },
-        data: { tipo_processo }
-      });
-    };
-    if (tipo_processo === 2 && interfaces) {
-      const interface_nova = this.prisma.interface.upsert({
-        where: { inicial_id },
-        create: {
-          inicial_id,
-          ...interfaces
-        },
-        update: {
-          ...interfaces
-        }
-      });
-    }
+
     if (!admissibilidade)
       throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
     return admissibilidade;
@@ -210,29 +193,12 @@ export class AdmissibilidadeService {
     id: number,
     updateAdmissibilidadeDto: UpdateAdmissibilidadeDto
   ): Promise<Admissibilidade> {
-    const { interfaces, tipo_processo, inicial_id } = updateAdmissibilidadeDto;
+    const { interfaces, inicial_id } = updateAdmissibilidadeDto;
     const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },
       data: updateAdmissibilidadeDto
     });
-    if (tipo_processo) {
-      await this.prisma.inicial.update({
-        where: { id: inicial_id },
-        data: { tipo_processo }
-      });
-      this.ultimaAtualizacao(id);
-    };
-    if (tipo_processo === 2 && interfaces) {
-      this.ultimaAtualizacao(id)
-      const interface_nova = this.prisma.interface.upsert({
-        where: { inicial_id },
-        create: {
-          inicial_id,
-          ...interfaces
-        },
-        update: { ...interfaces }
-      });
-    }
+
     if (!admissibilidade)
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     this.ultimaAtualizacao(id)
@@ -280,8 +246,7 @@ export class AdmissibilidadeService {
                 reconsideracao_multi_tipo: true,
                 reconsideracao_smul_tipo: true
               }
-            },
-            tipo_processo: true
+            }
           }
         }
       }
@@ -289,21 +254,6 @@ export class AdmissibilidadeService {
     if (!reconsiderados) throw new InternalServerErrorException('Nenhum processo encontrado');
     for (let i = 0; i < reconsiderados.length; i++) {
       let dataFinal: Date;
-      if (
-        reconsiderados[i].inicial.tipo_processo === 1
-        && reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul_tipo === 0
-      ) {
-        const diasUteisSmul: DiasUteis = await this.verificaDiasUteis(
-          reconsiderados[i].data_decisao_interlocutoria.toString(),
-          reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
-        );
-        dataFinal = new Date(diasUteisSmul.dataExpiracao.valueOf());
-      } else {
-        dataFinal = this.dataExperacaoNaoUtil(
-          reconsiderados[i].data_decisao_interlocutoria.toString(),
-          reconsiderados[i].inicial.alvara_tipo.reconsideracao_smul
-        );
-      }
       if (new Date() >= dataFinal) {
         await this.prisma.admissibilidade.update({
           where: { inicial_id: reconsiderados[i].inicial_id },

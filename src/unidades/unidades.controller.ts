@@ -11,7 +11,7 @@ import { UnidadeResponseDTO } from './dto/unidade-response.dto';
 @ApiBearerAuth()
 @Controller('unidades')
 export class UnidadesController {
-  constructor(private readonly unidadesService: UnidadesService) {}
+  constructor(private readonly unidadesService: UnidadesService) { }
 
   @Permissoes('SUP', 'ADM')
   @Post('criar')
@@ -39,9 +39,9 @@ export class UnidadesController {
     @Query('limite') limite?: string,
     @Query('busca') busca?: string,
     @Query('filtro') filtro?: string
-) {
+  ) {
     return this.unidadesService.buscarTudo(+pagina, +limite, busca, +filtro);
-}
+  }
 
   @Permissoes('SUP', 'ADM')
   @Get('lista-completa')
@@ -60,6 +60,7 @@ export class UnidadesController {
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Buscar uma unidade.", summary: 'Busque uma unidade.' })
   buscarPorId(@Param('id') id: string): Promise<UnidadeResponseDTO> {
+
     return this.unidadesService.buscarPorId(id);
   }
 
@@ -71,7 +72,7 @@ export class UnidadesController {
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Atualizar uma unidade.", summary: 'Atualize uma unidade.' })
   atualizar(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateUnidadeDto: UpdateUnidadeDto
   ): Promise<UnidadeResponseDTO> {
     return this.unidadesService.atualizar(id, updateUnidadeDto);
