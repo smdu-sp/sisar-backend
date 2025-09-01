@@ -256,7 +256,8 @@ model Inicial {
   responsavel_tecnico            Autor_Responsavel_Projeto?      @relation(fields: [responsavel_tecnico_id], references: [id], name: "ResponsavelTecnicoDoProjeto")
   responsavel_tecnico_id         String?
   area                           Decimal?                        @db.Decimal(10, 2)
-  resumo_projeto                 String?                          @db.Text
+  resumo_projeto                 String?                         @db.Text
+  zona                           Zona                            @default(CENTRO)
   pagamento                      Int?                            @default(1)
   requalifica_rapido             Boolean?                        @default(false)
   associado_reforma              Boolean?                        @default(false)
@@ -551,4 +552,12 @@ enum Tipo_Proprietario {
 enum Tipo_Autor_Projeto {
   ARQUITETO
   ENGENHEIRO
+}
+
+enum Zona {
+  ZONA_OESTE
+  ZONA_SUL
+  ZONA_NORTE
+  ZONA_LESTE
+  CENTRO
 }

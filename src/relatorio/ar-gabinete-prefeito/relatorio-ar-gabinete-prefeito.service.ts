@@ -185,15 +185,30 @@ export class ArGabineteDoPrefeito {
             }
         }
 
-        lista.forEach((obj) => {
-            delete obj.dados
-        })
+        // lista.forEach((obj) => {
+        //     console.log("antes do delete", obj)
+        //     delete obj.dados
+        //     console.log("depois do delete", obj)
+        // })
+
+        // const listaDeProcessos = lista.map((obj) => {
+        //     const { dados, ...resto } = obj;
+        //     return {
+        //         ...resto,
+        //         dados: dados.map((inicial) => this.getNumerosDeProcesso(inicial))
+        //     };
+        // });
+
+
+        // for (const obj of lista) {
+        //     const processos = await Promise.all(obj.dados.map((inicial) => this.getNumerosDeProcesso(inicial)))
+        //     listaDeProcessos.push({ ...obj, dados: processos })
+        // }
 
         return lista
     }
 
     async getControlesDePrazo(id?: string) {
-
         const res = await this.prisma.controle_Prazo.findMany()
         return res
     }
@@ -218,10 +233,43 @@ export class ArGabineteDoPrefeito {
     async atribuirCategoriaDeUso(inicial: any) {
     }
 
+    async getNumerosDeProcesso(inicial: any) {
+
+        let numeroDoProcesso: string;
+
+        if (inicial.sei) {
+            numeroDoProcesso = inicial.sei
+        } else if (inicial.aprova_digital) {
+            numeroDoProcesso = inicial.aprova_digital
+        } else if (inicial.processo_fisico) {
+            numeroDoProcesso = inicial.processo_fisico
+        } else {
+            throw new HttpException(
+                `a inicial de id ${inicial.id} não possui um numero SEI, aprova digital ou processo físico`,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+        return numeroDoProcesso
+    }
+
+    async incrementarListaDeProcessos(lista: { ano: number, dados: Inicial[], [key: string]: any }[]) {
+        lista.forEach((obj) => {
+            obj.numeros_de_processos = []
+            obj.dados.forEach(async (inicial) => {
+                const numeroDoProcesso = await this.getNumerosDeProcesso(inicial)
+                console.log("numeroDoProcesso", numeroDoProcesso)
+                obj.numeros_de_processos.push(numeroDoProcesso)
+            });
+        });
+
+        return lista
+    }
+
     async getRelatorioGabineteDoPrefeito() {
         const agrupamentoAnual = await this.segregarIniaisPorAno();
         const agrupamentoMensal = await this.segregarIniciaisPorMes(agrupamentoAnual)
+        const listaComNumerosDeProcesso = await this.incrementarListaDeProcessos(agrupamentoMensal)
 
-        return agrupamentoMensal
+        return listaComNumerosDeProcesso
     }
 }
