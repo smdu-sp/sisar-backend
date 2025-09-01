@@ -165,12 +165,10 @@ export class ArGabineteDoPrefeito {
     async segregarIniciaisPorMes(lista: { ano: number, dados: Inicial[] }[]) {
 
         lista.forEach((obj) => {
-
             for (let i = 1; i <= 12; i++) {
                 const mes = String(i).padStart(2, '0');
                 obj[new Date(`2020-${mes}`).toLocaleString('pt-BR', { month: 'short' })] = []
             }
-
         })
 
         lista.forEach((obj) => {
@@ -218,9 +216,7 @@ export class ArGabineteDoPrefeito {
     }
 
     async atribuirCategoriaDeUso(inicial: any) {
-
     }
-
 
     async getRelatorioGabineteDoPrefeito() {
         const agrupamentoAnual = await this.segregarIniaisPorAno();

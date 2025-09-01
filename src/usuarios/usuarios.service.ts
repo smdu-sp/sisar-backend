@@ -21,11 +21,11 @@ export class UsuariosService {
     private prisma: PrismaService,
     private sgu: SGUService,
     private app: AppService,
-  ) {}
+  ) { }
 
   async retornaPermissao(id: string): Promise<Permissao> {
-    const usuario: Usuario = await this.prisma.usuario.findUnique({ 
-      where: { id } 
+    const usuario: Usuario = await this.prisma.usuario.findUnique({
+      where: { id }
     });
     return usuario.permissao;
   }
@@ -34,7 +34,7 @@ export class UsuariosService {
     const lista: Usuario[] = await this.prisma.usuario.findMany({
       orderBy: { nome: 'asc' },
     });
-    if (!lista || lista.length == 0) 
+    if (!lista || lista.length == 0)
       throw new ForbiddenException('Nenhum usuário encontrado.');
     return lista;
   }
@@ -58,7 +58,7 @@ export class UsuariosService {
   }
 
   async criar(
-    createUsuarioDto: CreateUsuarioDto, 
+    createUsuarioDto: CreateUsuarioDto,
     criador?: Usuario
   ): Promise<UsuarioResponseDTO> {
     const loguser: UsuarioResponseDTO = await this.buscarPorLogin(createUsuarioDto.login);
@@ -95,11 +95,13 @@ export class UsuariosService {
   ): Promise<UsuarioPaginadoResponseDTO> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
-      ...(busca && { OR: [
-        { nome: { contains: busca } },
-        { login: { contains: busca } },
-        { email: { contains: busca } },
-      ]}),
+      ...(busca && {
+        OR: [
+          { nome: { contains: busca } },
+          { login: { contains: busca } },
+          { email: { contains: busca } },
+        ]
+      }),
       ...(unidade_id !== '' && { unidade_id }),
       ...(permissao !== '' && { permissao: $Enums.Permissao[permissao] }),
       ...(usuario.permissao !== 'DEV' ? { status: 1 } : (status !== 4 && { status })),
@@ -132,7 +134,7 @@ export class UsuariosService {
           where: {
             OR: [
               { inicio: { gte: new Date() } },
-              { final:  { lte: new Date() } },
+              { final: { lte: new Date() } },
             ]
           }
         },
@@ -208,14 +210,14 @@ export class UsuariosService {
   }
 
   async validaUsuario(id: string): Promise<UsuarioResponseDTO> {
-    const usuario: Usuario = await this.prisma.usuario.findUnique({ where: { id }});
+    const usuario: Usuario = await this.prisma.usuario.findUnique({ where: { id } });
     if (!usuario) throw new ForbiddenException('Usuário não encontrado.');
     if (usuario.status !== 1) throw new ForbiddenException('Usuário inativo.');
     return usuario;
   }
 
   async adicionaFerias(
-    id: string, 
+    id: string,
     addFeriasDto: AddFeriasDto
   ): Promise<Ferias> {
     const usuario: Usuario = await this.prisma.usuario.findUnique({ where: { id } });
@@ -235,10 +237,10 @@ export class UsuariosService {
         cpRF: { startsWith: login.substring(1) },
       },
     });
-    if (usuario_sgu){
+    if (usuario_sgu) {
       const codigo: string = usuario_sgu.cpUnid;
-      const unidade: Unidade = await this.prisma.unidade.findUnique({ 
-        where: { codigo } 
+      const unidade: Unidade = await this.prisma.unidade.findUnique({
+        where: { codigo }
       });
       unidade_id = unidade ? unidade.id : '';
     }
@@ -248,10 +250,10 @@ export class UsuariosService {
   async buscarNovo(login: string): Promise<BuscarNovoResponseDTO> {
     const usuarioExiste: Usuario = await this.buscarPorLogin(login);
     if (usuarioExiste && usuarioExiste.status === 1) throw new ForbiddenException('Login já cadastrado.');
-    if (usuarioExiste && usuarioExiste.status !== 1){
-      const usuarioReativado: Usuario = await this.prisma.usuario.update({ 
-        where: { id: usuarioExiste.id }, 
-        data: { status: 1 } 
+    if (usuarioExiste && usuarioExiste.status !== 1) {
+      const usuarioReativado: Usuario = await this.prisma.usuario.update({
+        where: { id: usuarioExiste.id },
+        data: { status: 1 }
       });
       return usuarioReativado;
     }
@@ -312,10 +314,10 @@ export class UsuariosService {
   }
 
   async adicionarSubstituto(
-    usuario_id: string, 
+    usuario_id: string,
     substituto_id: string
   ): Promise<AddSubstitutoDTO> {
-    if (usuario_id === substituto_id) 
+    if (usuario_id === substituto_id)
       throw new ForbiddenException('Substituto não pode ser o usuário.');
     const substituto: Substituto = await this.prisma.substituto.findFirst({
       where: { substituto_id, usuario_id },
@@ -331,8 +333,8 @@ export class UsuariosService {
   }
 
   async removerSubstituto(id: string): Promise<boolean> {
-    const substituto: Substituto = await this.prisma.substituto.findUnique({ 
-      where: { id } 
+    const substituto: Substituto = await this.prisma.substituto.findUnique({
+      where: { id }
     });
     if (!substituto) throw new ForbiddenException('Substituto não cadastrado.');
     await this.prisma.substituto.delete({ where: { id } });
@@ -343,7 +345,7 @@ export class UsuariosService {
     const administrativos: Usuario[] = await this.prisma.usuario.findMany({
       where: { cargo: 'ADM' },
     });
-    if (!administrativos) 
+    if (!administrativos)
       throw new ForbiddenException('Nenhum administrativo encontrado.');
     return administrativos;
   }
