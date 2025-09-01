@@ -257,7 +257,6 @@ export class ArGabineteDoPrefeito {
             obj.numeros_de_processos = []
             obj.dados.forEach(async (inicial) => {
                 const numeroDoProcesso = await this.getNumerosDeProcesso(inicial)
-                console.log("numeroDoProcesso", numeroDoProcesso)
                 obj.numeros_de_processos.push(numeroDoProcesso)
             });
         });
