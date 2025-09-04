@@ -185,26 +185,6 @@ export class ArGabineteDoPrefeito {
             }
         }
 
-        // lista.forEach((obj) => {
-        //     console.log("antes do delete", obj)
-        //     delete obj.dados
-        //     console.log("depois do delete", obj)
-        // })
-
-        // const listaDeProcessos = lista.map((obj) => {
-        //     const { dados, ...resto } = obj;
-        //     return {
-        //         ...resto,
-        //         dados: dados.map((inicial) => this.getNumerosDeProcesso(inicial))
-        //     };
-        // });
-
-
-        // for (const obj of lista) {
-        //     const processos = await Promise.all(obj.dados.map((inicial) => this.getNumerosDeProcesso(inicial)))
-        //     listaDeProcessos.push({ ...obj, dados: processos })
-        // }
-
         return lista
     }
 
@@ -264,11 +244,31 @@ export class ArGabineteDoPrefeito {
         return lista
     }
 
+    async atribuirProtocoladosEAprovados(lista: { ano: number, dados: Inicial[], [key: string]: any }[]) {
+
+        lista.forEach((obj) => {
+            const ARprotocolados = []
+            const ARaprovados = []
+            obj.dados.forEach(async (inicial) => {
+                if (inicial.status === 2) {
+                    ARprotocolados.push(inicial)
+                } else if (inicial.status === 3) {
+                    ARaprovados.push(inicial)
+                }
+            })
+            obj.processos_protocolados = ARprotocolados.length
+            obj.processos_aprovados = ARaprovados.length
+        })
+
+        return lista
+    }
+
     async getRelatorioGabineteDoPrefeito() {
         const agrupamentoAnual = await this.segregarIniaisPorAno();
         const agrupamentoMensal = await this.segregarIniciaisPorMes(agrupamentoAnual)
         const listaComNumerosDeProcesso = await this.incrementarListaDeProcessos(agrupamentoMensal)
+        const listaComNumeroDeProtocoladosEAprovados = await this.atribuirProtocoladosEAprovados(listaComNumerosDeProcesso)
 
-        return listaComNumerosDeProcesso
+        return listaComNumeroDeProtocoladosEAprovados
     }
 }
