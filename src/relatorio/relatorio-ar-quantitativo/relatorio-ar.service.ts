@@ -3,7 +3,7 @@ import { Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class RelatorioService {
+export class RelatorioARService {
   constructor(private prisma: PrismaService) { }
 
   async getUnidades(): Promise<Partial<Unidade>[]> {
@@ -16,7 +16,7 @@ export class RelatorioService {
   // Função auxiliar para contagem e agrupamento
   async countByInicial(
     status: number, tipo: number, unidades: Partial<Unidade>[], periodFilter: { gte: Date, lte: Date }
-  ): Promise<Record<string, number>> {
+  ): Promise<{ sigla: string, quantidade: number }[]> {
     try {
       // Buscar iniciais com o status e tipo especificados, incluindo filtro requalifica_rapido = false
       const resultados = await this.prisma.inicial.findMany({
@@ -41,27 +41,30 @@ export class RelatorioService {
       });
 
       // Inicializar o objeto com todas as unidades com valor 0
-      const lista: Record<string, number> = {};
+      const unidadesObjeto: Record<string, number> = {};
       unidades.forEach(unidade => {
-        lista[unidade.sigla] = 0;
+        if (unidade.sigla) {
+          unidadesObjeto[unidade.sigla] = 0;
+        }
       });
 
       // Contar as ocorrências por unidade
       resultados.forEach(item => {
-        if (item.admissibilidade?.unidade?.sigla) {
-          const sigla = item.admissibilidade.unidade.sigla;
-          lista[sigla] = (lista[sigla] || 0) + 1;
+        const sigla = item.admissibilidade?.unidade?.sigla;
+        if (sigla) {
+          unidadesObjeto[sigla] = (unidadesObjeto[sigla] || 0) + 1;
         }
       });
 
+      // Converter para array de objetos
+      const lista = Object.entries(unidadesObjeto).map(([sigla, quantidade]) => ({ sigla, quantidade }));
       return lista;
     } catch (error) {
       console.error('Erro ao contar por inicial:', error);
-      const lista: Record<string, number> = {};
-      unidades.forEach(unidade => {
-        lista[unidade.sigla] = 0;
-      });
-      return lista;
+      // Retornar todas as unidades com quantidade 0 em caso de erro
+      return unidades
+        .filter(unidade => unidade.sigla)
+        .map(unidade => ({ sigla: unidade.sigla as string, quantidade: 0 }));
     }
   }
 
@@ -135,16 +138,16 @@ export class RelatorioService {
       const admissiveis: number = await this.countTotal(0, false, periodFilter); // Status 0 = Em análise de admissibilidade
 
       // Dados por tipo e status - Em análise (status 2)
-      const analiseGeralSmul: Record<string, number> = await this.countByInicial(2, 1, unidades, periodFilter);
-      const analiseGeralGrap: Record<string, number> = await this.countByInicial(2, 2, unidades, periodFilter);
+      const analiseGeralSmul: { sigla: string, quantidade: number }[] = await this.countByInicial(2, 1, unidades, periodFilter);
+      const analiseGeralGrap: { sigla: string, quantidade: number }[] = await this.countByInicial(2, 2, unidades, periodFilter);
 
       // Dados por tipo e status - Deferidos (status 3)
-      const deferidoGeralSmul: Record<string, number> = await this.countByInicial(3, 1, unidades, periodFilter);
-      const deferidoGeralGrap: Record<string, number> = await this.countByInicial(3, 2, unidades, periodFilter);
+      const deferidoGeralSmul: { sigla: string, quantidade: number }[] = await this.countByInicial(3, 1, unidades, periodFilter);
+      const deferidoGeralGrap: { sigla: string, quantidade: number }[] = await this.countByInicial(3, 2, unidades, periodFilter);
 
       // Dados por tipo e status - Indeferidos (status 4)
-      const indeferidosGeralSmul: Record<string, number> = await this.countByInicial(4, 1, unidades, periodFilter);
-      const indeferidosGeralGrap: Record<string, number> = await this.countByInicial(4, 2, unidades, periodFilter);
+      const indeferidosGeralSmul: { sigla: string, quantidade: number }[] = await this.countByInicial(4, 1, unidades, periodFilter);
+      const indeferidosGeralGrap: { sigla: string, quantidade: number }[] = await this.countByInicial(4, 2, unidades, periodFilter);
 
       const data_gerado: string = new Date().toLocaleDateString('pt-BR');
 
@@ -156,31 +159,31 @@ export class RelatorioService {
         "data_gerado": data_gerado,
         "em_analise": {
           "smul": {
-            "quantidade": Object.values(analiseGeralSmul).reduce((a, b) => a + b, 0),
+            "quantidade": analiseGeralSmul.reduce((a, b) => a + b.quantidade, 0),
             "data": analiseGeralSmul
           },
           "graproem": {
-            "quantidade": Object.values(analiseGeralGrap).reduce((a, b) => a + b, 0),
+            "quantidade": analiseGeralGrap.reduce((a, b) => a + b.quantidade, 0),
             "data": analiseGeralGrap
           }
         },
         "deferidos": {
           "smul": {
-            "quantidade": Object.values(deferidoGeralSmul).reduce((a, b) => a + b, 0),
+            "quantidade": deferidoGeralSmul.reduce((a, b) => a + b.quantidade, 0),
             "data": deferidoGeralSmul
           },
           "graproem": {
-            "quantidade": Object.values(deferidoGeralGrap).reduce((a, b) => a + b, 0),
+            "quantidade": deferidoGeralGrap.reduce((a, b) => a + b.quantidade, 0),
             "data": deferidoGeralGrap
           }
         },
         "indeferidos": {
           "smul": {
-            "quantidade": Object.values(indeferidosGeralSmul).reduce((a, b) => a + b, 0),
+            "quantidade": indeferidosGeralSmul.reduce((a, b) => a + b.quantidade, 0),
             "data": indeferidosGeralSmul
           },
           "graproem": {
-            "quantidade": Object.values(indeferidosGeralGrap).reduce((a, b) => a + b, 0),
+            "quantidade": indeferidosGeralGrap.reduce((a, b) => a + b.quantidade, 0),
             "data": indeferidosGeralGrap
           }
         },
