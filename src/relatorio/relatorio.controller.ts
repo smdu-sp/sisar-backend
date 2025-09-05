@@ -6,6 +6,7 @@ import { RelatorioARService } from './relatorio-ar-quantitativo/relatorio-ar.ser
 import { RelatorioRRService } from './relatorio-rr-quantitativo/relatorio-rr.service';
 import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal/ar-grafico-progressao-mensal.service';
 import { ArGabineteDoPrefeito } from './ar-gabinete-prefeito/relatorio-ar-gabinete-prefeito.service';
+import { ArPrazoAnaliseAdmissibilidadeService } from './ar-prazo-analise-admissibilidade/relatorio-ar-prazo-analise-admissibilidade';
 import { MesData } from './ar-grafico-progressao-mensal/dto/response-relatorio';
 
 @Controller('relatorio')
@@ -15,7 +16,8 @@ export class RelatorioController {
     private readonly relatorioARService: RelatorioARService,
     private readonly relatorioRRService: RelatorioRRService,
     private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService,
-    private readonly ArGabineteDoPrefeito: ArGabineteDoPrefeito
+    private readonly ArGabineteDoPrefeito: ArGabineteDoPrefeito,
+    private readonly arPrazoAnaliseAdmissibilidadeService: ArPrazoAnaliseAdmissibilidadeService
   ) { }
 
   @IsPublic()
@@ -60,5 +62,16 @@ export class RelatorioController {
   async RelatorioArGabineteDoPrefeito() {
     console.log('endpoint ar/ganinete-do-prefeito é chamado sem parâmetro')
     return await this.ArGabineteDoPrefeito.getRelatorioGabineteDoPrefeito()
+  }
+
+  @IsPublic()
+  @Get('ar/prazo-analise-admissibilidade/:data_inicio/:data_fim')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório de progressão mensal com sucesso.', type: MesData })
+  @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
+  @ApiOperation({ summary: 'Obtém a análise de prazos de admissibilidade' })
+  async relatorioArPrazoAnaliseAdmissibilidade(@Param('data_inicio') data_inicio: string, @Param('data_fim') data_fim: string) {
+    console.log('endpoint ar/prazo-analise-admissibilidade chamado com:', data_inicio, data_fim);
+    return await this.arPrazoAnaliseAdmissibilidadeService.getPrazoAnaliseAdmissibilidade(data_inicio, data_fim)
   }
 }
