@@ -85,7 +85,7 @@ export class ArPrazoAnaliseAdmissibilidadeService {
     }
 
     async includeReconsideracaoESuspensaoData(lista: IPrazoAnaliseAdmissibilidadeDto[]) {
-        const listaIcrementada = lista.map(async (inicial) => {
+        const listaIncrementada = lista.map(async (inicial) => {
 
             const inicialHasDataInReconsideracao = await this.prisma.reconsideracao_Admissibilidade.findUnique({
                 where: {
@@ -118,11 +118,8 @@ export class ArPrazoAnaliseAdmissibilidadeService {
 
                 inicial.suspensao_prazo = totalDiasSuspensao;
             }
-
-
         })
-
-
+        return listaIncrementada;
     }
 
 
