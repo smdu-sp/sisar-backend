@@ -31,7 +31,9 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
     tempo_de_analise_admissibilidade?: number | null;
     tempo_de_analise_reconsideracao?: number | null;
     suspensao_prazo?: number | null;
-    motivo_suspensao?: string | null;
+    suspensao_prazo_etapa_1?: number | null;
+    suspensao_prazo_etapa_2?: number | null;
+    motivos_suspensao?: string[] | null;
 
 }
 
