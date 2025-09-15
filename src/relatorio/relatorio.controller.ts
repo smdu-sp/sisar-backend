@@ -7,6 +7,7 @@ import { RelatorioRRService } from './relatorio-rr-quantitativo/relatorio-rr.ser
 import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal/ar-grafico-progressao-mensal.service';
 import { ArGabineteDoPrefeito } from './ar-gabinete-prefeito/relatorio-ar-gabinete-prefeito.service';
 import { ArPrazoAnaliseAdmissibilidadeService } from './ar-prazo-analise-admissibilidade/relatorio-ar-prazo-analise-admissibilidade';
+import { ArProcessosAprovadosService } from './ar-processos-aprovados/relatorio-ar-processos-aprovados';
 import { MesData } from './ar-grafico-progressao-mensal/dto/response-relatorio';
 
 @Controller('relatorio')
@@ -17,7 +18,8 @@ export class RelatorioController {
     private readonly relatorioRRService: RelatorioRRService,
     private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService,
     private readonly ArGabineteDoPrefeito: ArGabineteDoPrefeito,
-    private readonly arPrazoAnaliseAdmissibilidadeService: ArPrazoAnaliseAdmissibilidadeService
+    private readonly arPrazoAnaliseAdmissibilidadeService: ArPrazoAnaliseAdmissibilidadeService,
+    private readonly arProcessosAprovadosService: ArProcessosAprovadosService
   ) { }
 
   @IsPublic()
@@ -73,5 +75,15 @@ export class RelatorioController {
   async relatorioArPrazoAnaliseAdmissibilidade(@Param('data_inicio') data_inicio: string, @Param('data_fim') data_fim: string) {
     console.log('endpoint ar/prazo-analise-admissibilidade chamado com:', data_inicio, data_fim);
     return await this.arPrazoAnaliseAdmissibilidadeService.getPrazoAnaliseAdmissibilidade(data_inicio, data_fim)
+  }
+
+  @IsPublic()
+  @Get('ar/processos-aprovados/:ano')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório de progressão mensal com sucesso.', type: MesData })
+  @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
+  @ApiOperation({ summary: 'Obtém a análise de prazos de admissibilidade' })
+  async relatorioArProcessosAprovados(@Param('ano') ano: string) {
+    return this.arProcessosAprovadosService.getDataPorAno(ano)
   }
 }
