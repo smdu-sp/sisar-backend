@@ -17,9 +17,6 @@ export class RrPrazoAnaliseAdmissibilidadeService {
           gte: periodFilterDto.gte,
           lte: periodFilterDto.lte,
         },
-        admissibilidade: {
-          reconsiderado: true,
-        },
       },
     })
 
