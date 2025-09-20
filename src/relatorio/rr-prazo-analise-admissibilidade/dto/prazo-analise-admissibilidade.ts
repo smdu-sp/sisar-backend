@@ -8,8 +8,8 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
     requerimento: string;
     aprova_digital: string;
     processo_fisico: string;
-    data_protocolo: string | Date;
-    envio_admissibilidade: string | Date;
+    data_protocolo: string | Date; // ISO date string
+    envio_admissibilidade: string | Date; // ISO date string
     alvara_tipo_id: string;
     obs: string;
     status: number;
@@ -23,11 +23,11 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
     pagamento: number;
     requalifica_rapido: boolean;
     associado_reforma: boolean;
-    data_limiteSmul: string | Date;
-    data_limiteMulti?: string | Date | null;
-    criado_em: string | Date;
-    alterado_em: string | Date;
-    data_requalificacao?: string | Date | null;
+    data_limiteSmul: string | Date; // ISO date string
+    data_limiteMulti?: string | Date | null; // ISO date string or null
+    criado_em: string | Date; // ISO datetime string
+    alterado_em: string | Date; // ISO datetime string
+    data_requalificacao?: string | Date | null; // ISO datetime string
     tempo_de_analise_admissibilidade?: number | null;
     tempo_de_analise_reconsideracao?: number | null;
     suspensao_prazo?: number | null;
