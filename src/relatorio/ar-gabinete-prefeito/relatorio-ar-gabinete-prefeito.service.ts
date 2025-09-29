@@ -163,7 +163,6 @@ export class ArGabineteDoPrefeito {
     }
 
     async segregarIniciaisPorMes(lista: { ano: number, dados: Inicial[] }[]) {
-
         lista.forEach((obj) => {
             for (let i = 1; i <= 12; i++) {
                 const mes = String(i).padStart(2, '0');
@@ -188,26 +187,30 @@ export class ArGabineteDoPrefeito {
         return lista
     }
 
-    async getControlesDePrazo(id?: string) {
-        const res = await this.prisma.controle_Prazo.findMany()
-        return res
-    }
-
     async atribuirTempoDeAnalize(inicial: any) {
 
-        const admissibilidade = this.prisma.admissibilidade.findUnique({
+
+        const admissibilidade = await this.prisma.admissibilidade.findUnique({
             where: {
                 inicial_id: inicial.id
             }
         })
 
-        const data_enviado = new Date((await admissibilidade).data_envio)
-        const data_decidido = new Date((await admissibilidade).data_decisao_interlocutoria)
+        if (!admissibilidade) {
+            throw new HttpException(
+                `a inicial de id ${inicial.id} não possui uma admissibilidade relacionada`,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+
+        const data_enviado = new Date(admissibilidade.data_envio)
+        const data_decidido = new Date(admissibilidade.data_decisao_interlocutoria)
         const diferenca = data_decidido.getTime() - data_enviado.getTime()
         const diferencaEmDias = diferenca / (1000 * 60 * 60 * 24)
 
         inicial.tempo_de_analise_pedido_inicial = diferencaEmDias
         return inicial
+
     }
 
     async atribuirCategoriaDeUso(inicial: any) {
