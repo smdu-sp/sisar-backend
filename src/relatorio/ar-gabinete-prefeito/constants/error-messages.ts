@@ -6,4 +6,5 @@ export const ERROR_MESSAGES = {
     FALHA_ENCONTRAR_ADMISSIBILIDADE: (inicial_id: number | string) => `Falha ao encontrar a admissibilidade para a inicial de id ${inicial_id}.`,
     FALHA_ATRIBUIR_TEMPO_ANALISE: (inicial_id: number | string) => `Falha ao atribuir o tempo de análise para a inicial de id ${inicial_id}.`,
     FALHA_ATRIBUIR_NUMERO_DO_PROCESSO_VARIOS: 'Falha ao incrementar a lista com numero do processo para todas iniciais',
+    FALHA_LISTA_NULA: 'Falha ao receber uma lista de iniciais. O parâmetro ecebido é nulo',
 }

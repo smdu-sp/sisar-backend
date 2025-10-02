@@ -216,21 +216,41 @@ export class ArGabineteDoPrefeito {
 
     async atribuirProtocoladosEAprovados(lista: { ano: number, dados: Inicial[], [key: string]: any }[]) {
 
-        lista.forEach((obj) => {
-            const ARprotocolados = []
-            const ARaprovados = []
-            obj.dados.forEach(async (inicial) => {
-                if (inicial.status === 2) {
-                    ARprotocolados.push(inicial)
-                } else if (inicial.status === 3) {
-                    ARaprovados.push(inicial)
-                }
-            })
-            obj.processos_protocolados = ARprotocolados.length
-            obj.processos_aprovados = ARaprovados.length
-        })
+        try {
 
-        return lista
+            if (!lista) {
+                throw new HttpException(
+                    ERROR_MESSAGES.FALHA_LISTA_NULA,
+                    HttpStatus.BAD_REQUEST
+                )
+            }
+
+            lista.forEach((obj) => {
+                const ARprotocolados = []
+                const ARaprovados = []
+                obj.dados.forEach(async (inicial) => {
+                    if (inicial.status === 2) {
+                        ARprotocolados.push(inicial)
+                    } else if (inicial.status === 3) {
+                        ARaprovados.push(inicial)
+                    }
+                })
+                obj.processos_protocolados = ARprotocolados.length
+                obj.processos_aprovados = ARaprovados.length
+            })
+
+            return lista
+        } catch (error) {
+            const objectError = {
+                api_mensagem: 'Falha ao atribuir o número de protocolados e aprovados',
+                detalhe_tecnico: error.message,
+                tipo_erro: error.name,
+            };
+            throw new HttpException(
+                objectError,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     async getRelatorioGabineteDoPrefeito(): Promise<RelatorioGabinetePrefeitoDto[]> {
