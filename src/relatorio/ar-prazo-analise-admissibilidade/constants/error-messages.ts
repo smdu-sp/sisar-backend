@@ -1,0 +1,15 @@
+export const ERROR_MESSAGES = {
+    FALHA_GET_DATA_POR_PERIODO: 'Falha ao obter dados por período.',
+    FALHA_LISTA_NULA: 'Um valor null ou undefined foi retornado em vez de uma lista',
+    FALHA_AGRUPAR_POR_ANO: 'Falha ao agrupar dados por ano.',
+    FALHA_AGRUPAR_POR_MES: 'Falha ao agrupar dados por mês.',
+    FALHA_BUSCAR_INICIAL_RECONSIDERACAO: 'Falha ao buscar inicial de reconsideração.',
+    FALHA_CALCULO_DIAS_SUSPENSAO_1: (inicial_id: number | string) => `Falha ao calcular os dias de suspensão para a inicial de id ${inicial_id} na etapa 1.`,
+    FALHA_CALCULO_DIAS_SUSPENSAO_2: (inicial_id: number | string) => `Falha ao calcular os dias de suspensão para a inicial de id ${inicial_id} na etapa 2.`,
+    FALHA_CALCULO_DIAS_SUSPENSAO_TOTAL: (inicial_id: number | string) => `Falha ao calcular os dias de suspensão para a inicial de id ${inicial_id} ao todo.`,
+    FALHA_AO_INCLUIR_SUSPENSAO_E_RECONSIDERACAO: 'Falha ao incluir prazo de suspensão e reconsideração em todas as iniciais da lista.',
+    FALHA_ENCONTRAR_ADMISSIBILIDADE: (inicial_id: number | string) => `Falha ao encontrar uma admissibilidade para a inicial de id ${inicial_id}.`,
+    FALHA_CONSTRUIR_CHAVES_COM_MESES: 'Falha na ação de construir as chaves dos meses dentro de um objeto referente a ano no relatório.',
+    FALHA_ORDENAR_INICIAIS_POR_MES: 'Falha ao incluir as iniciais dentro do relatório anual por mês e ano.',
+    FALHA_ENCONTRAR_RECONSIDERACAO: (inicial_id: number | string) => `Falha ao encontrar uma reconsideração de admissibilidade para a inicial de id ${inicial_id}.`,
+}

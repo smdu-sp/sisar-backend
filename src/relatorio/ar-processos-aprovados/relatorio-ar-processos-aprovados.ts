@@ -3,60 +3,89 @@ import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relat
 import { HttpStatus, HttpException, Injectable } from "@nestjs/common";
 import { InicialProcessosAprovadosDto } from "./dto/inicial-processos-aprovados.dto";
 import { calcularDiferencaEmDias } from "src/utils/date.utils";
+import { ERROR_MESSAGES } from "./constants/error-messages";
 
 @Injectable()
 export class ArProcessosAprovadosService {
     constructor(private prisma: PrismaService) { }
 
     async includeTemPoDeAnalise(lista: InicialProcessosAprovadosDto[]): Promise<InicialProcessosAprovadosDto[]> {
-        const listaComPrazos = await Promise.all(lista.map(async (item) => {
-            const admissibilidade = await this.prisma.admissibilidade.findUnique({
-                where: {
-                    inicial_id: item.id
-                }
-            })
-
-            // Primeiro verificar se admissibilidade existe, depois verificar se as datas são null
-            if (!admissibilidade || admissibilidade.data_envio === null || admissibilidade.data_decisao_interlocutoria === null) {
-                item.tempo_analise_inicial = 0;
-                item.tempo_analise_recurso_1 = 0;
-                return item
-            }
-
-            if (!admissibilidade.reconsiderado) {
-                const prazo_pedido_inicial = calcularDiferencaEmDias(new Date(admissibilidade.data_decisao_interlocutoria), new Date(admissibilidade.data_envio));
-                item.tempo_analise_inicial = prazo_pedido_inicial;
-            } else {
-                const reconsideracao_Admissibilidade = await this.prisma.reconsideracao_Admissibilidade.findUnique({
+        try {
+            const listaComPrazos = await Promise.all(lista.map(async (item) => {
+                const admissibilidade = await this.prisma.admissibilidade.findUnique({
                     where: {
-                        inicial_id: item.id,
+                        inicial_id: item.id
                     }
                 })
-                if (reconsideracao_Admissibilidade) {
-                    item.tempo_analise_recurso_1 = calcularDiferencaEmDias(new Date(admissibilidade.data_decisao_interlocutoria), new Date(reconsideracao_Admissibilidade.pedido_reconsideracao));
+
+                // Primeiro verificar se admissibilidade existe, depois verificar se as datas são null
+                if (!admissibilidade || admissibilidade.data_envio === null || admissibilidade.data_decisao_interlocutoria === null) {
+                    item.tempo_analise_inicial = 0;
+                    item.tempo_analise_recurso_1 = 0;
+                    return item
                 }
+
+                if (!admissibilidade.reconsiderado) {
+                    const prazo_pedido_inicial = calcularDiferencaEmDias(new Date(admissibilidade.data_decisao_interlocutoria), new Date(admissibilidade.data_envio));
+                    item.tempo_analise_inicial = prazo_pedido_inicial;
+                } else {
+                    const reconsideracao_Admissibilidade = await this.prisma.reconsideracao_Admissibilidade.findUnique({
+                        where: {
+                            inicial_id: item.id,
+                        }
+                    })
+                    if (reconsideracao_Admissibilidade) {
+                        item.tempo_analise_recurso_1 = calcularDiferencaEmDias(new Date(admissibilidade.data_decisao_interlocutoria), new Date(reconsideracao_Admissibilidade.pedido_reconsideracao));
+                    }
+                }
+                return item
+            }));
+            return listaComPrazos;
+        } catch (error) {
+            const objectError = {
+                api_mensagem: ERROR_MESSAGES.FALHA_AO_ATRIBUIR_TEMPO_ANALISE,
+                tipo_erro: error.name,
+                detalhe_tecnico: error.message,
             }
-            return item
-        }));
-        return listaComPrazos;
+            throw new HttpException(
+                objectError,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     async getDataPorAno(ano: string) {
-        console.log(ano)
 
-        const processosAprovados = await this.prisma.inicial.findMany({
-            where: {
-                status: 3,
-                criado_em: {
-                    gte: new Date(`${ano}-01-01`),
-                    lt: new Date(`${ano}-12-31`)
+        try {
+            const processosAprovados = await this.prisma.inicial.findMany({
+                where: {
+                    status: 3,
+                    criado_em: {
+                        gte: new Date(`${ano}-01-01`),
+                        lt: new Date(`${ano}-12-31`)
+                    }
                 }
+            });
+
+            if (processosAprovados.length === null || processosAprovados.length === undefined) {
+                throw new Error(ERROR_MESSAGES.FALHA_LISTA_INDEFINIDA);
             }
-        });
 
-        const processosComPrazosAprovados = await this.includeTemPoDeAnalise(processosAprovados);
+            const processosComPrazosAprovados = await this.includeTemPoDeAnalise(processosAprovados);
 
-        return processosComPrazosAprovados;
+            return processosComPrazosAprovados;
+        } catch (error) {
+            const objectError = {
+                api_mensagem: ERROR_MESSAGES.FALHA_AGRUPAR_POR_ANO,
+                tipo_erro: error.name,
+                detalhe_tecnico: error.message,
+            };
+            throw new HttpException(
+                objectError,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+
     }
 
 }
