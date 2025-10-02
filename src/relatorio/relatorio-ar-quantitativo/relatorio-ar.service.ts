@@ -1,16 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ERROR_MESSAGES } from './constants/error-messages';
+import { HttpException, HttpStatus } from '@nestjs/common';
+
 
 @Injectable()
 export class RelatorioARService {
   constructor(private prisma: PrismaService) { }
 
   async getUnidades(): Promise<Partial<Unidade>[]> {
-    return await this.prisma.unidade.findMany({
-      where: { status: 1 },
-      select: { id: true, nome: true, sigla: true }
-    });
+    try {
+      return await this.prisma.unidade.findMany({
+        where: { status: 1 },
+        select: { id: true, nome: true, sigla: true }
+      });
+    } catch (error) {
+      const objectError = {
+        api_mensagem: ERROR_MESSAGES.FALHA_BUSCAR_UNIDADES,
+        tipo_error: error.name,
+        detalhe_tecnico: error.message,
+      };
+      throw new HttpException(
+        objectError,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   // Função auxiliar para contagem e agrupamento
@@ -18,12 +33,12 @@ export class RelatorioARService {
     status: number, tipo: number, unidades: Partial<Unidade>[], periodFilter: { gte: Date, lte: Date }
   ): Promise<{ sigla: string, quantidade: number }[]> {
     try {
-      // Buscar iniciais com o status e tipo especificados, incluindo filtro requalifica_rapido = false
+
       const resultados = await this.prisma.inicial.findMany({
         where: {
           status,
           tipo_processo: tipo,
-          requalifica_rapido: false, // Filtro para requalifica_rapido = 0
+          requalifica_rapido: false,
           admissibilidade: {
             data_decisao_interlocutoria: periodFilter,
             unidade_id: { not: null }
@@ -40,7 +55,10 @@ export class RelatorioARService {
         }
       });
 
-      // Inicializar o objeto com todas as unidades com valor 0
+      if (resultados.length === null || resultados === undefined) {
+        throw new Error(ERROR_MESSAGES.FALHA_ENCONTRAR_INICIAIS_PARA_CONTAGEM);
+      }
+
       const unidadesObjeto: Record<string, number> = {};
       unidades.forEach(unidade => {
         if (unidade.sigla) {
@@ -48,15 +66,25 @@ export class RelatorioARService {
         }
       });
 
-      // Contar as ocorrências por unidade
       resultados.forEach(item => {
-        const sigla = item.admissibilidade?.unidade?.sigla;
-        if (sigla) {
-          unidadesObjeto[sigla] = (unidadesObjeto[sigla] || 0) + 1;
+        try {
+          const sigla = item.admissibilidade?.unidade?.sigla;
+          if (sigla) {
+            unidadesObjeto[sigla] = (unidadesObjeto[sigla] || 0) + 1;
+          }
+        } catch (error) {
+          const objectError = {
+            api_mensagem: ERROR_MESSAGES.FALHA_CONTAR_INICIAIS_POR_UNIDADE,
+            tipo_erro: error.name,
+            detalhe_tecnico: error.message,
+          };
+          throw new HttpException(
+            objectError,
+            HttpStatus.INTERNAL_SERVER_ERROR
+          );
         }
       });
 
-      // Converter para array de objetos
       const lista = Object.entries(unidadesObjeto).map(([sigla, quantidade]) => ({ sigla, quantidade }));
       return lista;
     } catch (error) {
@@ -83,8 +111,15 @@ export class RelatorioARService {
         }
       });
     } catch (error) {
-      console.error('Erro ao contar total:', error);
-      return 0;
+      const objectError = {
+        api_mensagem: ERROR_MESSAGES.FALHA_CONTAR_INICIAIS_TOTAL,
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      };
+      throw new HttpException(
+        objectError,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -95,7 +130,7 @@ export class RelatorioARService {
         where: {
           inicial: {
             status,
-            requalifica_rapido: false // Filtro para requalifica_rapido = 0
+            requalifica_rapido: false
           },
           criado_em: periodFilter,
           data_decisao_interlocutoria: decisaoNull ? null : periodFilter
@@ -103,28 +138,47 @@ export class RelatorioARService {
         include: { inicial: true }
       });
     } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-      return [];
+      const objectError = {
+        api_mensagem: ERROR_MESSAGES.FALHA_GET_ADMISSIBILIDADES,
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      };
+      throw new HttpException(
+        objectError,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
   // Função para verificar e validar as datas
   verificarData(mes?: string, ano?: string): { gte: Date, lte: Date } {
-    if (!mes && !ano) {
-      return {
-        gte: new Date(0),
-        lte: new Date(),
+    try {
+      if (!mes && !ano) {
+        return {
+          gte: new Date(0),
+          lte: new Date(),
+        };
+      }
+
+      if (!mes || !ano || isNaN(Number(mes)) || isNaN(Number(ano))) {
+        throw new Error('Parâmetros de data inválidos');
+      }
+
+      const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
+      const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
+      const periodFilter: { gte: Date, lte: Date } = { gte: primeiroDia, lte: ultimoDia };
+      return periodFilter;
+    } catch (error) {
+      const objectError = {
+        api_mensagem: ERROR_MESSAGES.FALHA_VERIFICAR_DATE,
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
       };
+      throw new HttpException(
+        objectError,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-
-    if (!mes || !ano || isNaN(Number(mes)) || isNaN(Number(ano))) {
-      throw new Error('Parâmetros de data inválidos');
-    }
-
-    const primeiroDia: Date = new Date(Number(ano), Number(mes) - 1, 1);
-    const ultimoDia: Date = new Date(Number(ano), Number(mes), 0);
-    const periodFilter: { gte: Date, lte: Date } = { gte: primeiroDia, lte: ultimoDia };
-    return periodFilter;
   }
 
   async getRelatorio(mes?: string, ano?: string) {
@@ -192,8 +246,15 @@ export class RelatorioARService {
         "em_analise_dados": await this.getData(2, false, periodFilter)
       };
     } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
-      throw new Error(`Erro ao gerar relatório: ${error.message}`);
+      const objectError = {
+        api_mensagem: ERROR_MESSAGES.FALHA_RELATORIO_PROGRESSAO_MENSAL,
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      };
+      throw new HttpException(
+        objectError,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }
