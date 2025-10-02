@@ -1,16 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { Inicial, Unidade } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ERROR_MESSAGES } from './constants/error-messages';
+import { HttpStatus, HttpException } from '@nestjs/common';
 
 @Injectable()
 export class RelatorioRRService {
   constructor(private prisma: PrismaService) { }
 
   async getUnidades(): Promise<Partial<Unidade>[]> {
-    return await this.prisma.unidade.findMany({
-      where: { status: 1 },
-      select: { id: true, nome: true, sigla: true }
-    });
+    try {
+      return await this.prisma.unidade.findMany({
+        where: { status: 1 },
+        select: { id: true, nome: true, sigla: true }
+      });
+    } catch (error) {
+      const objectError = {
+        api_mensagem: ERROR_MESSAGES.FALHA_BUSCAR_UNIDADES,
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      };
+      throw new HttpException(objectError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   // Função auxiliar para contagem e agrupamento
