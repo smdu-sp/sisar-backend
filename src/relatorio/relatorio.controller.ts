@@ -86,7 +86,7 @@ export class RelatorioController {
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ summary: 'Obtém a análise de prazos de admissibilidade' })
   async relatorioArProcessosAprovados(@Param('ano') ano: string) {
-    return this.arProcessosAprovadosService.getDataPorAno(ano)
+    return this.arProcessosAprovadosService.getRelatorioAnaliseAdmissibilidade(ano)
   }
 
   @IsPublic()

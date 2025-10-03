@@ -88,4 +88,51 @@ export class ArProcessosAprovadosService {
 
     }
 
+    async getDataPorMes(lista: InicialProcessosAprovadosDto[]) {
+        try {
+
+            if (lista.length === null || lista.length === undefined) {
+                throw new Error(ERROR_MESSAGES.FALHA_LISTA_INDEFINIDA);
+            }
+
+            let relatorioPorMeses = {}
+
+            for (let i = 1; i <= 12; i++) {
+                const mes = String(i).padStart(2, '0');
+                relatorioPorMeses[new Date(`2020-${mes}`).toLocaleString('pt-BR', { month: 'short' })] = []
+            }
+
+            lista.forEach((inicial) => {
+                if (Object.keys(relatorioPorMeses).includes(inicial.data_protocolo.toLocaleString('pt-BR', { month: 'short' }))) {
+                    relatorioPorMeses[inicial.data_protocolo.toLocaleString('pt-BR', { month: 'short' })].push(inicial)
+                }
+            })
+
+            const listaConvertida = Object.entries(relatorioPorMeses)
+            const dezembro = listaConvertida.shift()
+            listaConvertida.push(dezembro)
+            relatorioPorMeses = Object.fromEntries(listaConvertida)
+
+            return relatorioPorMeses
+
+        } catch (error) {
+            const objectError = {
+                api_mensagem: ERROR_MESSAGES.FALHA_AGRUPAR_POR_ANO,
+                tipo_erro: error.name,
+                detalhe_tecnico: error.message,
+            };
+            throw new HttpException(
+                objectError,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    async getRelatorioAnaliseAdmissibilidade(ano: string) {
+        const listaPorAno = await this.getDataPorAno(ano);
+        const listaPorMes = await this.getDataPorMes(listaPorAno);
+        return listaPorMes;
+    }
+
+
 }
