@@ -12,4 +12,5 @@ export const ERROR_MESSAGES = {
     FALHA_CONSTRUIR_CHAVES_COM_MESES: 'Falha na ação de construir as chaves dos meses dentro de um objeto referente a ano no relatório.',
     FALHA_ORDENAR_INICIAIS_POR_MES: 'Falha ao incluir as iniciais dentro do relatório anual por mês e ano.',
     FALHA_ENCONTRAR_RECONSIDERACAO: (inicial_id: number | string) => `Falha ao encontrar uma reconsideração de admissibilidade para a inicial de id ${inicial_id}.`,
+    FALHA_INCLUIR_PRAZO_ADMISSIBILIDADE: 'Falha ao incluir prazo de análise de admissibilidade e reconsideração em todas as iniciais da lista.'
 }

@@ -244,63 +244,69 @@ export class ArPrazoAnaliseAdmissibilidadeService {
     async includePrazoDeAdmissibilidade(lista: IPrazoAnaliseAdmissibilidadeDto[]): Promise<IPrazoAnaliseAdmissibilidadeDto[]> {
         try {
             const listaComTempoDeAnalise = await Promise.all(lista.map(async (inicial) => {
-                const admissibilidade = await this.prisma.admissibilidade.findUnique({
-                    where: {
-                        inicial_id: inicial.id
-                    }
-                });
-
-                if (!admissibilidade) {
-                    throw new Error(ERROR_MESSAGES.FALHA_ENCONTRAR_ADMISSIBILIDADE(inicial.id));
-                }
-
-                if (!inicial.requalifica_rapido && admissibilidade) {
-                    const envio = new Date(admissibilidade.data_envio);
-                    const decisao = new Date(admissibilidade.data_decisao_interlocutoria);
-                    const tempoDeAnalise = (decisao.getTime() - envio.getTime()) / (1000 * 60 * 60 * 24);
-
-                    inicial.tempo_de_analise_admissibilidade = tempoDeAnalise < 1 ? 1 : tempoDeAnalise;
-                    inicial.tempo_de_analise_reconsideracao = null;
-                }
-
-                if (inicial.requalifica_rapido) {
-                    const reconsideracaoAdmissibilidade = await this.prisma.reconsideracao_Admissibilidade.findUnique({
+                try {
+                    const admissibilidade = await this.prisma.admissibilidade.findUnique({
                         where: {
                             inicial_id: inicial.id
                         }
                     });
 
-                    if (!reconsideracaoAdmissibilidade) {
-                        throw new Error(ERROR_MESSAGES.FALHA_ENCONTRAR_RECONSIDERACAO(inicial.id));
+                    if (!admissibilidade) {
+                        console.error(ERROR_MESSAGES.FALHA_ENCONTRAR_ADMISSIBILIDADE(inicial.id));
+                        return inicial; // Retorna a inicial sem modificar os prazos
                     }
 
-                    if (reconsideracaoAdmissibilidade) {
-                        const envio = new Date(reconsideracaoAdmissibilidade.publicacao);
-                        const decisao = new Date(reconsideracaoAdmissibilidade.pedido_reconsideracao);
+                    if (!inicial.requalifica_rapido && admissibilidade) {
+                        const envio = new Date(admissibilidade.data_envio);
+                        const decisao = new Date(admissibilidade.data_decisao_interlocutoria);
                         const tempoDeAnalise = (decisao.getTime() - envio.getTime()) / (1000 * 60 * 60 * 24);
 
-                        if (tempoDeAnalise < 1 && reconsideracaoAdmissibilidade.parecer) {
-                            inicial.tempo_de_analise_reconsideracao = 1;
+                        inicial.tempo_de_analise_admissibilidade = tempoDeAnalise < 1 ? 1 : tempoDeAnalise;
+                        inicial.tempo_de_analise_reconsideracao = null;
+                    }
+
+                    if (inicial.requalifica_rapido) {
+                        const reconsideracaoAdmissibilidade = await this.prisma.reconsideracao_Admissibilidade.findUnique({
+                            where: {
+                                inicial_id: inicial.id
+                            }
+                        });
+
+                        if (!reconsideracaoAdmissibilidade) {
+                            throw new Error(ERROR_MESSAGES.FALHA_ENCONTRAR_RECONSIDERACAO(inicial.id));
                         }
 
-                        if (reconsideracaoAdmissibilidade.parecer) {
-                            inicial.tempo_de_analise_reconsideracao = tempoDeAnalise;
-                            inicial.tempo_de_analise_admissibilidade = null;
-                        } else {
-                            inicial.tempo_de_analise_reconsideracao = null;
-                            inicial.tempo_de_analise_admissibilidade = null;
+                        if (reconsideracaoAdmissibilidade) {
+                            const envio = new Date(reconsideracaoAdmissibilidade.publicacao);
+                            const decisao = new Date(reconsideracaoAdmissibilidade.pedido_reconsideracao);
+                            const tempoDeAnalise = (decisao.getTime() - envio.getTime()) / (1000 * 60 * 60 * 24);
+
+                            if (tempoDeAnalise < 1 && reconsideracaoAdmissibilidade.parecer) {
+                                inicial.tempo_de_analise_reconsideracao = 1;
+                            }
+
+                            if (reconsideracaoAdmissibilidade.parecer) {
+                                inicial.tempo_de_analise_reconsideracao = tempoDeAnalise;
+                                inicial.tempo_de_analise_admissibilidade = null;
+                            } else {
+                                inicial.tempo_de_analise_reconsideracao = null;
+                                inicial.tempo_de_analise_admissibilidade = null;
+                            }
                         }
                     }
-                }
 
-                return inicial;
+                    return inicial;
+                } catch (error) {
+
+                }
             }));
 
             return listaComTempoDeAnalise;
         } catch (error) {
             const objectError = {
-                api_mensagem: 'Falha ao incluir prazo de análise de admissibilidade e reconsideração em todas as iniciais da lista.',
+                api_mensagem: ERROR_MESSAGES.FALHA_INCLUIR_PRAZO_ADMISSIBILIDADE,
                 tipo_erro: error.name,
+                detalhe_tecnico: error.message,
             };
 
             throw new HttpException(

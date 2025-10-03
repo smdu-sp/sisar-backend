@@ -8,6 +8,7 @@ import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal
 import { ArGabineteDoPrefeito } from './ar-gabinete-prefeito/relatorio-ar-gabinete-prefeito.service';
 import { ArPrazoAnaliseAdmissibilidadeService } from './ar-prazo-analise-admissibilidade/relatorio-ar-prazo-analise-admissibilidade';
 import { ArProcessosAprovadosService } from './ar-processos-aprovados/relatorio-ar-processos-aprovados';
+import { RrPrazoAnaliseAdmissibilidadeService } from './rr-prazo-analise-admissibilidade/relatorio-rr-prazo-analise-admissibilidade';
 import { MesData } from './ar-grafico-progressao-mensal/dto/response-relatorio';
 
 @Controller('relatorio')
@@ -19,7 +20,8 @@ export class RelatorioController {
     private readonly arGraficoProgressaoMensal: ArGraficoProgressaoMensalService,
     private readonly ArGabineteDoPrefeito: ArGabineteDoPrefeito,
     private readonly arPrazoAnaliseAdmissibilidadeService: ArPrazoAnaliseAdmissibilidadeService,
-    private readonly arProcessosAprovadosService: ArProcessosAprovadosService
+    private readonly arProcessosAprovadosService: ArProcessosAprovadosService,
+    private readonly rrPrazoAnaliseAdmissibilidadeService: RrPrazoAnaliseAdmissibilidadeService,
   ) { }
 
   @IsPublic()
@@ -85,5 +87,15 @@ export class RelatorioController {
   @ApiOperation({ summary: 'Obtém a análise de prazos de admissibilidade' })
   async relatorioArProcessosAprovados(@Param('ano') ano: string) {
     return this.arProcessosAprovadosService.getDataPorAno(ano)
+  }
+
+  @IsPublic()
+  @Get('rr/processos-aprovados/:data_inicio/:data_fim')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório de progressão mensal com sucesso.', type: MesData })
+  @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
+  @ApiOperation({ summary: 'Obtém a análise de prazos de admissibilidade' })
+  async relatorioRRPrazoAnaliseAdmissibilidade(@Param('data_inicio') data_inicio: string, @Param('data_fim') data_fim: string) {
+    return this.rrPrazoAnaliseAdmissibilidadeService.getPrazoAnaliseAdmissibilidade(data_inicio, data_fim)
   }
 }

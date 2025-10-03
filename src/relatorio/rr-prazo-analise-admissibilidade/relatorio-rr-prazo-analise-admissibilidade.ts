@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common"
-import type { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto"
-import type { PrismaService } from "src/prisma/prisma.service"
-import type {
+import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto"
+import { PrismaService } from "src/prisma/prisma.service"
+import {
   IPrazoAnaliseAdmissibilidadeDto,
   IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto,
 } from "./dto/prazo-analise-admissibilidade"
@@ -236,48 +236,60 @@ export class RrPrazoAnaliseAdmissibilidadeService {
     try {
       const listaComTempoDeAnalise = await Promise.all(
         lista.map(async (inicial) => {
-          const admissibilidade = await this.prisma.admissibilidade.findUnique({
-            where: {
-              inicial_id: inicial.id,
-            },
-          })
-
-          if (!inicial.requalifica_rapido && admissibilidade) {
-            const envio = new Date(admissibilidade.data_envio)
-            const decisao = new Date(admissibilidade.data_decisao_interlocutoria)
-            const tempoDeAnalise = (decisao.getTime() - envio.getTime()) / (1000 * 60 * 60 * 24)
-
-            inicial.tempo_de_analise_admissibilidade = tempoDeAnalise < 1 ? 1 : tempoDeAnalise
-            inicial.tempo_de_analise_reconsideracao = null
-          }
-
-          if (inicial.requalifica_rapido) {
-            const reconsideracaoAdmissibilidade = await this.prisma.reconsideracao_Admissibilidade.findUnique({
+          try {
+            const admissibilidade = await this.prisma.admissibilidade.findUnique({
               where: {
                 inicial_id: inicial.id,
               },
             })
 
-            if (reconsideracaoAdmissibilidade) {
-              const envio = new Date(reconsideracaoAdmissibilidade.publicacao)
-              const decisao = new Date(reconsideracaoAdmissibilidade.pedido_reconsideracao)
+            if (!admissibilidade) {
+              console.error(ERROR_MESSAGES.FALHA_ENCONTRAR_ADMISSIBILIDADE(inicial.id));
+              inicial.tempo_de_analise_admissibilidade = null
+              inicial.tempo_de_analise_reconsideracao = null
+              return inicial
+            }
+
+            if (!inicial.requalifica_rapido && admissibilidade) {
+              const envio = new Date(admissibilidade.data_envio)
+              const decisao = new Date(admissibilidade.data_decisao_interlocutoria)
               const tempoDeAnalise = (decisao.getTime() - envio.getTime()) / (1000 * 60 * 60 * 24)
 
-              if (tempoDeAnalise < 1 && reconsideracaoAdmissibilidade.parecer) {
-                inicial.tempo_de_analise_reconsideracao = 1
-              }
+              inicial.tempo_de_analise_admissibilidade = tempoDeAnalise < 1 ? 1 : tempoDeAnalise
+              inicial.tempo_de_analise_reconsideracao = null
+            }
 
-              if (reconsideracaoAdmissibilidade.parecer) {
-                inicial.tempo_de_analise_reconsideracao = tempoDeAnalise
-                inicial.tempo_de_analise_admissibilidade = null
-              } else {
-                inicial.tempo_de_analise_reconsideracao = null
-                inicial.tempo_de_analise_admissibilidade = null
+            if (inicial.requalifica_rapido) {
+              const reconsideracaoAdmissibilidade = await this.prisma.reconsideracao_Admissibilidade.findUnique({
+                where: {
+                  inicial_id: inicial.id,
+                },
+              })
+
+              if (reconsideracaoAdmissibilidade) {
+                const envio = new Date(reconsideracaoAdmissibilidade.publicacao)
+                const decisao = new Date(reconsideracaoAdmissibilidade.pedido_reconsideracao)
+                const tempoDeAnalise = (decisao.getTime() - envio.getTime()) / (1000 * 60 * 60 * 24)
+
+                if (tempoDeAnalise < 1 && reconsideracaoAdmissibilidade.parecer) {
+                  inicial.tempo_de_analise_reconsideracao = 1
+                }
+
+                if (reconsideracaoAdmissibilidade.parecer) {
+                  inicial.tempo_de_analise_reconsideracao = tempoDeAnalise
+                  inicial.tempo_de_analise_admissibilidade = null
+                } else {
+                  inicial.tempo_de_analise_reconsideracao = null
+                  inicial.tempo_de_analise_admissibilidade = null
+                }
               }
             }
-          }
 
-          return inicial
+            return inicial
+          } catch (error) {
+            console.error(ERROR_MESSAGES.FALHA_INICIAL_INDEX(inicial.id), error);
+            return inicial
+          }
         }),
       )
 

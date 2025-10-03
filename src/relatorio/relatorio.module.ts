@@ -6,9 +6,10 @@ import { ArGraficoProgressaoMensalService } from './ar-grafico-progressao-mensal
 import { ArGabineteDoPrefeito } from './ar-gabinete-prefeito/relatorio-ar-gabinete-prefeito.service';
 import { ArPrazoAnaliseAdmissibilidadeService } from './ar-prazo-analise-admissibilidade/relatorio-ar-prazo-analise-admissibilidade';
 import { ArProcessosAprovadosService } from './ar-processos-aprovados/relatorio-ar-processos-aprovados';
+import { RrPrazoAnaliseAdmissibilidadeService } from './rr-prazo-analise-admissibilidade/relatorio-rr-prazo-analise-admissibilidade';
 
 @Module({
   controllers: [RelatorioController],
-  providers: [RelatorioARService, RelatorioRRService, ArGraficoProgressaoMensalService, ArGabineteDoPrefeito, ArPrazoAnaliseAdmissibilidadeService, ArProcessosAprovadosService],
+  providers: [RelatorioARService, RelatorioRRService, ArGraficoProgressaoMensalService, ArGabineteDoPrefeito, ArPrazoAnaliseAdmissibilidadeService, ArProcessosAprovadosService, RrPrazoAnaliseAdmissibilidadeService],
 })
 export class RelatorioModule { }
