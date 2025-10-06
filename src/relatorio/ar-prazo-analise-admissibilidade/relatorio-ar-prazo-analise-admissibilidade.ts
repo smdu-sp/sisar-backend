@@ -8,6 +8,43 @@ import { ERROR_MESSAGES } from "./constants/error-messages";
 export class ArPrazoAnaliseAdmissibilidadeService {
     constructor(private prisma: PrismaService) { }
 
+    /**
+     * Converte uma string de data no formato DD-MM-YYYY ou YYYY-MM-DD para um objeto Date válido
+     * @param dateString String da data nos formatos DD-MM-YYYY, YYYY-MM-DD ou ISO
+     * @returns Objeto Date válido
+     */
+    private parseDate(dateString: string): Date {
+        if (!dateString) {
+            throw new Error('Data não fornecida');
+        }
+
+        // Verifica se é uma data no formato DD-MM-YYYY
+        const ddmmyyyyPattern = /^(\d{2})-(\d{2})-(\d{4})$/;
+        const ddmmyyyyMatch = dateString.match(ddmmyyyyPattern);
+
+        if (ddmmyyyyMatch) {
+            const [, day, month, year] = ddmmyyyyMatch;
+            // Converte para YYYY-MM-DD
+            const isoString = `${year}-${month}-${day}`;
+            const date = new Date(isoString);
+
+            if (isNaN(date.getTime())) {
+                throw new Error(`Data inválida: ${dateString}`);
+            }
+
+            return date;
+        }
+
+        // Tenta converter diretamente (para formatos ISO ou YYYY-MM-DD)
+        const date = new Date(dateString);
+
+        if (isNaN(date.getTime())) {
+            throw new Error(`Formato de data não suportado: ${dateString}`);
+        }
+
+        return date;
+    }
+
     async getDataPorPeriodo(periodFilterDto: PeriodFilterDto) {
         try {
             const iniciais = this.prisma.inicial.findMany({
@@ -317,10 +354,13 @@ export class ArPrazoAnaliseAdmissibilidadeService {
     }
 
     async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string) {
+        // Converte as strings de data para objetos Date válidos
+        const dataInicio = this.parseDate(data_inicio);
+        const dataFim = this.parseDate(data_fim);
 
         const listaData = await this.getDataPorPeriodo({
-            gte: new Date(data_inicio),
-            lte: new Date(data_fim)
+            gte: dataInicio,
+            lte: dataFim
         });
 
         const listaIncrementada = await this.includeReconsideracaoESuspensaoData(listaData);
@@ -328,13 +368,13 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         const listaComPrazosDeAdmissibilidades = await this.includePrazoDeAdmissibilidade(listaIncrementada);
 
         const listaDataPorAno = await this.groupByDataYear(listaComPrazosDeAdmissibilidades, {
-            gte: new Date(data_inicio),
-            lte: new Date(data_fim)
+            gte: dataInicio,
+            lte: dataFim
         })
 
         const listaDataPorMes = await this.groupByDataMonth(listaDataPorAno, {
-            gte: new Date(data_inicio),
-            lte: new Date(data_fim)
+            gte: dataInicio,
+            lte: dataFim
         });
 
         return listaDataPorMes;
