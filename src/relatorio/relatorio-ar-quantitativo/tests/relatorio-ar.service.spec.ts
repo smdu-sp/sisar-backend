@@ -1,11 +1,12 @@
-import { RelatorioService } from "../relatorio-ar.service";
+import { RelatorioARService } from "../relatorio-ar.service";
 import { Admissibilidade, Inicial, Unidade } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-import { PeriodFilterDto } from "../dto/response-relatorio.dto";
 import { Test, TestingModule } from "@nestjs/testing";
+import { HttpException, HttpStatus } from "@nestjs/common";
+import { ERROR_MESSAGES } from "../constants/error-messages";
 
 describe('Relatorio AR quantitativo test', () => {
-    let service: RelatorioService;
+    let service: RelatorioARService;
     let prisma: PrismaService;
 
     const MockPrismaService = {
@@ -39,14 +40,14 @@ describe('Relatorio AR quantitativo test', () => {
         jest.clearAllMocks();
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                RelatorioService,
+                RelatorioARService,
                 {
                     provide: PrismaService,
                     useValue: MockPrismaService
                 }
             ]
         }).compile()
-        service = module.get<RelatorioService>(RelatorioService);
+        service = module.get<RelatorioARService>(RelatorioARService);
         prisma = module.get<PrismaService>(PrismaService);
     })
 
@@ -55,425 +56,312 @@ describe('Relatorio AR quantitativo test', () => {
         expect(prisma).toBeDefined();
     })
 
-    it('deverá retornar um objeto do tipo PeriodFilterDto ao receber duas strings numéricas', () => {
-        const mockPeriodDate: PeriodFilterDto = {
-            gte: new Date("2019-01-01T00:00:00.000Z"),
-            lte: new Date("2020-12-31T23:59:59.999Z"),
-        };
+    describe('verificarData', () => {
+        it('deverá retornar um objeto com datas válidas ao receber mês e ano como strings', () => {
+            const result = service.verificarData('7', '2019');
+            
+            expect(result).toEqual({
+                gte: new Date(2019, 6, 1), // julho é mês 6 (0-indexed)
+                lte: new Date(2019, 6, 31)
+            });
+        });
 
-        jest.spyOn(service, 'verificarData').mockReturnValue(mockPeriodDate);
+        it('ao receber parâmetros vazios, deverá retornar data do início dos tempos até agora', () => {
+            const result = service.verificarData();
+            
+            expect(result.gte).toEqual(new Date(0));
+            expect(result.lte).toBeInstanceOf(Date);
+        });
 
-        const result = service.verificarData('2019', '2020')
+        it('deverá lançar HttpException ao receber parâmetros inválidos', () => {
+            expect(() => service.verificarData('abc', '2019')).toThrow(HttpException);
+            expect(() => service.verificarData('13', '2019')).toThrow(HttpException);
+            expect(() => service.verificarData('7', 'abc')).toThrow(HttpException);
+        });
+    });
 
-        expect(result).toEqual(mockPeriodDate)
-        expect(service.verificarData).toHaveBeenCalledWith('2019', '2020')
-    })
+    describe('getUnidades', () => {
+        it('deverá retornar lista de unidades ativas', async () => {
+            const mockUnidades = [
+                { id: '1', nome: 'SMUL', sigla: 'SMUL' },
+                { id: '2', nome: 'GRAPROEM', sigla: 'GRAP' }
+            ];
 
-    it('deverá retornar uma lista de iniciais com o status em analise dentro do período de PeriodFilter passado', async () => {
-        const mockPeriodDate: PeriodFilterDto = {
-            gte: new Date("2019-01-01T00:00:00.000Z"),
-            lte: new Date("2020-12-31T23:59:59.999Z"),
-        };
+            (prisma.unidade.findMany as jest.Mock).mockResolvedValue(mockUnidades);
 
-        const mockIniciaisResult = [
-            {
-                id: 1,
-                decreto: true,
-                sei: "1",
-                tipo_requerimento: 1,
-                requerimento: "11",
-                aprova_digital: null,
-                processo_fisico: null,
-                data_protocolo: new Date("2018-07-31T00:00:00.000Z"),
-                envio_admissibilidade: new Date("2018-08-31T00:00:00.000Z"),
-                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                tipo_processo: 2,
-                obs: "",
-                status: 2,
-                pagamento: 1,
-                requalifica_rapido: false,
-                associado_reforma: false,
-                data_limiteSmul: new Date("2018-09-31T00:00:00.000Z"),
-                data_limiteMulti: null,
-                criado_em: new Date("2018-07-31T14:07:24.888Z"),
-                alterado_em: new Date("2018-10-31T17:36:21.412Z"),
-                alvara_tipo: {
-                    id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                    nome: "Alvará de Aprovação e Execução de Edificação Nova",
-                    prazo_admissibilidade_smul: 15,
-                    reconsideracao_smul: 3,
-                    reconsideracao_smul_tipo: 0,
-                    analise_reconsideracao_smul: 15,
-                    prazo_analise_smul1: 30,
-                    prazo_analise_smul2: 60,
-                    prazo_emissao_alvara_smul: 10,
-                    prazo_admissibilidade_multi: 15,
-                    reconsideracao_multi: 3,
-                    reconsideracao_multi_tipo: 0,
-                    analise_reconsideracao_multi: 15,
-                    prazo_analise_multi1: 60,
-                    prazo_analise_multi2: 55,
-                    prazo_emissao_alvara_multi: 10,
-                    prazo_comunique_se: 1,
-                    prazo_encaminhar_coord: 1,
-                    status: 1,
-                    criado_em: new Date("2024-07-31T14:05:38.866Z"),
-                    alterado_em: new Date("2024-10-09T15:39:21.633Z")
-                }
-            },
+            const result = await service.getUnidades();
 
-        ];
-        jest.spyOn(service, 'getInicialData').mockResolvedValue(mockIniciaisResult);
-        (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockIniciaisResult);
+            expect(result).toEqual(mockUnidades);
+            expect(prisma.unidade.findMany).toHaveBeenCalledWith({
+                where: { status: 1 },
+                select: { id: true, nome: true, sigla: true }
+            });
+        });
 
-        const result = await service.getInicialData(2, mockPeriodDate)
+        it('deverá lançar HttpException em caso de erro do banco', async () => {
+            (prisma.unidade.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
 
-        expect(result).toEqual(mockIniciaisResult)
-        expect(service.getInicialData).toHaveBeenCalledWith(2, { gte: new Date("2019-01-01T00:00:00.000Z"), lte: new Date("2020-12-31T23:59:59.999Z") })
+            await expect(service.getUnidades()).rejects.toThrow(HttpException);
+        });
+    });
 
-    })
-
-    it('deverá retornar uma lista de iniciais com o status deferidos dentro do período de PeriodFilter passado', async () => {
-        const mockPeriodDate: PeriodFilterDto = {
-            gte: new Date("2019-01-01T00:00:00.000Z"),
-            lte: new Date("2020-12-31T23:59:59.999Z"),
-        };
-
-        const mockIniciaisResult = [
-            {
-                id: 1,
-                decreto: true,
-                sei: "1",
-                tipo_requerimento: 1,
-                requerimento: "11",
-                aprova_digital: null,
-                processo_fisico: null,
-                data_protocolo: new Date("2018-07-31T00:00:00.000Z"),
-                envio_admissibilidade: new Date("2018-08-31T00:00:00.000Z"),
-                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                tipo_processo: 2,
-                obs: "",
-                status: 3,
-                pagamento: 1,
-                requalifica_rapido: false,
-                associado_reforma: false,
-                data_limiteSmul: new Date("2018-09-31T00:00:00.000Z"),
-                data_limiteMulti: null,
-                criado_em: new Date("2018-07-31T14:07:24.888Z"),
-                alterado_em: new Date("2018-10-31T17:36:21.412Z"),
-                alvara_tipo: {
-                    id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                    nome: "Alvará de Aprovação e Execução de Edificação Nova",
-                    prazo_admissibilidade_smul: 15,
-                    reconsideracao_smul: 3,
-                    reconsideracao_smul_tipo: 0,
-                    analise_reconsideracao_smul: 15,
-                    prazo_analise_smul1: 30,
-                    prazo_analise_smul2: 60,
-                    prazo_emissao_alvara_smul: 10,
-                    prazo_admissibilidade_multi: 15,
-                    reconsideracao_multi: 3,
-                    reconsideracao_multi_tipo: 0,
-                    analise_reconsideracao_multi: 15,
-                    prazo_analise_multi1: 60,
-                    prazo_analise_multi2: 55,
-                    prazo_emissao_alvara_multi: 10,
-                    prazo_comunique_se: 1,
-                    prazo_encaminhar_coord: 1,
-                    status: 1,
-                    criado_em: new Date("2024-07-31T14:05:38.866Z"),
-                    alterado_em: new Date("2024-10-09T15:39:21.633Z")
-                }
-            },
-
-        ];
-
-        jest.spyOn(service, 'getInicialData').mockResolvedValue(mockIniciaisResult);
-        (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockIniciaisResult);
-
-        const result = await service.getInicialData(3, mockPeriodDate)
-
-        expect(result).toEqual(mockIniciaisResult)
-        expect(service.getInicialData).toHaveBeenCalledWith(3, { gte: new Date("2019-01-01T00:00:00.000Z"), lte: new Date("2020-12-31T23:59:59.999Z") })
-    })
-
-    it('deverá retornar uma lista de iniciais com o status indeferidos dentro do período de PeriodFilter passado', async () => {
-        const mockPeriodDate: PeriodFilterDto = {
-            gte: new Date("2019-01-01T00:00:00.000Z"),
-            lte: new Date("2020-12-31T23:59:59.999Z"),
-        };
-
-        const mockIniciaisResult = [
-            {
-                id: 1,
-                decreto: true,
-                sei: "1",
-                tipo_requerimento: 1,
-                requerimento: "11",
-                aprova_digital: null,
-                processo_fisico: null,
-                data_protocolo: new Date("2018-07-31T00:00:00.000Z"),
-                envio_admissibilidade: new Date("2018-08-31T00:00:00.000Z"),
-                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                tipo_processo: 2,
-                obs: "",
-                status: 4,
-                pagamento: 1,
-                requalifica_rapido: false,
-                associado_reforma: false,
-                data_limiteSmul: new Date("2018-09-31T00:00:00.000Z"),
-                data_limiteMulti: null,
-                criado_em: new Date("2018-07-31T14:07:24.888Z"),
-                alterado_em: new Date("2018-10-31T17:36:21.412Z"),
-                alvara_tipo: {
-                    id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                    nome: "Alvará de Aprovação e Execução de Edificação Nova",
-                    prazo_admissibilidade_smul: 15,
-                    reconsideracao_smul: 3,
-                    reconsideracao_smul_tipo: 0,
-                    analise_reconsideracao_smul: 15,
-                    prazo_analise_smul1: 30,
-                    prazo_analise_smul2: 60,
-                    prazo_emissao_alvara_smul: 10,
-                    prazo_admissibilidade_multi: 15,
-                    reconsideracao_multi: 3,
-                    reconsideracao_multi_tipo: 0,
-                    analise_reconsideracao_multi: 15,
-                    prazo_analise_multi1: 60,
-                    prazo_analise_multi2: 55,
-                    prazo_emissao_alvara_multi: 10,
-                    prazo_comunique_se: 1,
-                    prazo_encaminhar_coord: 1,
-                    status: 1,
-                    criado_em: new Date("2024-07-31T14:05:38.866Z"),
-                    alterado_em: new Date("2024-10-09T15:39:21.633Z")
-                }
-            },
-
-        ];
-
-        jest.spyOn(service, 'getInicialData').mockResolvedValue(mockIniciaisResult);
-        (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockIniciaisResult);
-
-        const result = await service.getInicialData(4, mockPeriodDate)
-
-        expect(result).toEqual(mockIniciaisResult)
-        expect(service.getInicialData).toHaveBeenCalledWith(4, { gte: new Date("2019-01-01T00:00:00.000Z"), lte: new Date("2020-12-31T23:59:59.999Z") })
-    })
-
-    it('deverá verificar se duas strings podem ser convertidas eem uma data MM--YYYY validos', () => {
-
-        const mockDateResult = {
-            gte: new Date("2019-07-01T00:00:00.000Z"),
-            lte: new Date("2019-12-31T23:59:59.999Z"),
-        }
-
-        jest.spyOn(service, 'verificarData').mockReturnValue(mockDateResult)
-
-        const result = service.verificarData("7", "2019")
-
-        expect(result).toEqual(mockDateResult)
-        expect(service.verificarData).toHaveBeenCalledWith("7", "2019")
-    })
-
-    it('ao receber um param vazio, deverá retornar a data do mês e ano atuaiss', () => {
-
-        const mockDateResult = {
-            gte: new Date(0),
-            lte: new Date(),
-        }
-
-        jest.spyOn(service, 'verificarData').mockReturnValue(mockDateResult)
-
-        const result = service.verificarData()
-
-        expect(result).toEqual(mockDateResult)
-    })
-
-    it('deverá contar processos por unidade corretamente', async () => {
+    describe('countByInicial', () => {
         const mockPeriodFilter = {
             gte: new Date("2019-07-01T00:00:00.000Z"),
-            lte: new Date("2019-12-31T23:59:59.999Z"),
+            lte: new Date("2019-07-31T23:59:59.999Z"),
         };
 
-        (prisma.admissibilidade.count as jest.Mock).mockResolvedValue(6);
+        const mockUnidades = [
+            { id: '1', nome: 'SMUL', sigla: 'SMUL' },
+            { id: '2', nome: 'GRAPROEM', sigla: 'GRAP' }
+        ];
 
-        const result = await service.countByUnidade(1, mockPeriodFilter, null, 1);
-
-        expect(result).toEqual({ SMUL: 6 });
-
-        expect(prisma.admissibilidade.count).toHaveBeenCalledWith({
-            where: {
-                inicial: {
-                    status: 1,
-                    tipo_processo: 1,
+        it('deverá contar iniciais por unidade corretamente', async () => {
+            const mockResultados = [
+                {
+                    admissibilidade: {
+                        unidade: { sigla: 'SMUL' }
+                    }
                 },
-                data_decisao_interlocutoria: mockPeriodFilter,
+                {
+                    admissibilidade: {
+                        unidade: { sigla: 'SMUL' }
+                    }
+                },
+                {
+                    admissibilidade: {
+                        unidade: { sigla: 'GRAP' }
+                    }
+                }
+            ];
+
+            (prisma.inicial.findMany as jest.Mock).mockResolvedValue(mockResultados);
+
+            const result = await service.countByInicial(2, 1, mockUnidades, mockPeriodFilter);
+
+            expect(result).toEqual([
+                { sigla: 'SMUL', quantidade: 2 },
+                { sigla: 'GRAP', quantidade: 1 }
+            ]);
+
+            expect(prisma.inicial.findMany).toHaveBeenCalledWith({
+                where: {
+                    status: 2,
+                    tipo_processo: 1,
+                    requalifica_rapido: false,
+                    admissibilidade: {
+                        data_decisao_interlocutoria: mockPeriodFilter,
+                        unidade_id: { not: null }
+                    }
+                },
+                select: {
+                    admissibilidade: {
+                        select: {
+                            unidade: {
+                                select: { sigla: true }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        it('deverá retornar unidades com quantidade 0 em caso de erro', async () => {
+            (prisma.inicial.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+            const result = await service.countByInicial(2, 1, mockUnidades, mockPeriodFilter);
+
+            expect(result).toEqual([
+                { sigla: 'SMUL', quantidade: 0 },
+                { sigla: 'GRAP', quantidade: 0 }
+            ]);
+        });
+    });
+
+    describe('countTotal', () => {
+        const mockPeriodFilter = {
+            gte: new Date("2019-07-01T00:00:00.000Z"),
+            lte: new Date("2019-07-31T23:59:59.999Z"),
+        };
+
+        it('deverá contar total de iniciais com decisao_interlocutoria preenchida', async () => {
+            (prisma.inicial.count as jest.Mock).mockResolvedValue(5);
+
+            const result = await service.countTotal(2, false, mockPeriodFilter);
+
+            expect(result).toBe(5);
+            expect(prisma.inicial.count).toHaveBeenCalledWith({
+                where: {
+                    status: 2,
+                    requalifica_rapido: false,
+                    criado_em: mockPeriodFilter,
+                    admissibilidade: { data_decisao_interlocutoria: mockPeriodFilter }
+                }
+            });
+        });
+
+        it('deverá contar total de iniciais com decisao_interlocutoria null', async () => {
+            (prisma.inicial.count as jest.Mock).mockResolvedValue(3);
+
+            const result = await service.countTotal(2, true, mockPeriodFilter);
+
+            expect(result).toBe(3);
+            expect(prisma.inicial.count).toHaveBeenCalledWith({
+                where: {
+                    status: 2,
+                    requalifica_rapido: false,
+                    criado_em: mockPeriodFilter,
+                    admissibilidade: { data_decisao_interlocutoria: null }
+                }
+            });
+        });
+
+        it('deverá lançar HttpException em caso de erro', async () => {
+            (prisma.inicial.count as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+            await expect(service.countTotal(2, false, mockPeriodFilter)).rejects.toThrow(HttpException);
+        });
+    });
+
+    describe('getData', () => {
+        const mockPeriodFilter = {
+            gte: new Date("2019-07-01T00:00:00.000Z"),
+            lte: new Date("2019-07-31T23:59:59.999Z"),
+        };
+
+        it('deverá retornar dados de admissibilidade com inicial incluída', async () => {
+            const mockData = [
+                {
+                    id: 1,
+                    inicial: { id: 1, status: 2 }
+                }
+            ];
+
+            (prisma.admissibilidade.findMany as jest.Mock).mockResolvedValue(mockData);
+
+            const result = await service.getData(2, false, mockPeriodFilter);
+
+            expect(result).toEqual(mockData);
+            expect(prisma.admissibilidade.findMany).toHaveBeenCalledWith({
+                where: {
+                    inicial: {
+                        status: 2,
+                        requalifica_rapido: false
+                    },
+                    criado_em: mockPeriodFilter,
+                    data_decisao_interlocutoria: mockPeriodFilter
+                },
+                include: { inicial: true }
+            });
+        });
+
+        it('deverá lançar HttpException em caso de erro', async () => {
+            (prisma.admissibilidade.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+            await expect(service.getData(2, false, mockPeriodFilter)).rejects.toThrow(HttpException);
+        });
+    });
+
+    describe('getRelatorio', () => {
+        const mockUnidades = [
+            { id: '1', nome: 'SMUL', sigla: 'SMUL' },
+            { id: '2', nome: 'GRAPROEM', sigla: 'GRAP' }
+        ];
+
+        beforeEach(() => {
+            jest.spyOn(service, 'getUnidades').mockResolvedValue(mockUnidades);
+            jest.spyOn(service, 'countTotal').mockResolvedValue(10);
+            jest.spyOn(service, 'countByInicial').mockResolvedValue([
+                { sigla: 'SMUL', quantidade: 5 },
+                { sigla: 'GRAP', quantidade: 3 }
+            ]);
+            jest.spyOn(service, 'getData').mockResolvedValue([]);
+        });
+
+        it('deverá gerar relatório completo com estrutura correta', async () => {
+            const result = await service.getRelatorio('7', '2019');
+
+            expect(result).toHaveProperty('total');
+            expect(result).toHaveProperty('analise');
+            expect(result).toHaveProperty('inadmissiveis');
+            expect(result).toHaveProperty('admissiveis');
+            expect(result).toHaveProperty('data_gerado');
+            expect(result).toHaveProperty('em_analise');
+            expect(result).toHaveProperty('deferidos');
+            expect(result).toHaveProperty('indeferidos');
+            expect(result).toHaveProperty('inadmissiveis_dados');
+            expect(result).toHaveProperty('admissiveis_dados');
+            expect(result).toHaveProperty('em_analise_dados');
+
+            expect(result.em_analise).toHaveProperty('smul');
+            expect(result.em_analise).toHaveProperty('graproem');
+            expect(result.deferidos).toHaveProperty('smul');
+            expect(result.deferidos).toHaveProperty('graproem');
+            expect(result.indeferidos).toHaveProperty('smul');
+            expect(result.indeferidos).toHaveProperty('graproem');
+        });
+
+        it('deverá calcular total corretamente', async () => {
+            jest.spyOn(service, 'countTotal')
+                .mockResolvedValueOnce(5) // analise
+                .mockResolvedValueOnce(3) // inadmissiveis
+                .mockResolvedValueOnce(2); // admissiveis
+
+            const result = await service.getRelatorio('7', '2019');
+
+            expect(result.total).toBe(10); // 5 + 3 + 2
+            expect(result.analise).toBe(5);
+            expect(result.inadmissiveis).toBe(3);
+            expect(result.admissiveis).toBe(2);
+        });
+
+        it('deverá calcular quantidades por categoria corretamente', async () => {
+            jest.spyOn(service, 'countByInicial').mockResolvedValue([
+                { sigla: 'SMUL', quantidade: 5 },
+                { sigla: 'GRAP', quantidade: 3 }
+            ]);
+
+            const result = await service.getRelatorio('7', '2019');
+
+            expect(result.em_analise.smul.quantidade).toBe(8); // 5 + 3
+            expect(result.em_analise.graproem.quantidade).toBe(8); // 5 + 3
+        });
+
+        it('deverá incluir data de geração do relatório', async () => {
+            const result = await service.getRelatorio('7', '2019');
+
+            expect(result.data_gerado).toBe(new Date().toLocaleDateString('pt-BR'));
+        });
+
+        it('deverá lançar HttpException em caso de erro', async () => {
+            jest.spyOn(service, 'getUnidades').mockRejectedValue(new Error('Database error'));
+
+            await expect(service.getRelatorio('7', '2019')).rejects.toThrow(HttpException);
+        });
+
+        it('deverá funcionar sem parâmetros de mês e ano', async () => {
+            const result = await service.getRelatorio();
+
+            expect(result).toHaveProperty('total');
+            expect(service.getUnidades).toHaveBeenCalled();
+        });
+    });
+
+    describe('Error Handling', () => {
+        it('deverá lançar HttpException com estrutura correta de erro', async () => {
+            (prisma.unidade.findMany as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
+
+            try {
+                await service.getUnidades();
+            } catch (error) {
+                expect(error).toBeInstanceOf(HttpException);
+                expect(error.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+                
+                const response = error.getResponse();
+                expect(response).toHaveProperty('api_mensagem');
+                expect(response).toHaveProperty('tipo_error');
+                expect(response).toHaveProperty('detalhe_tecnico');
             }
         });
     });
-
-    it('deverá contar todos os processos de status 2 de uma unidade especifica pelo ID', async () => {
-        const mockPeriodFilter = {
-            gte: new Date("2019-07-01T00:00:00.000Z"),
-            lte: new Date("2019-12-31T23:59:59.999Z"),
-        };
-
-        //params status: 2, mockPeriodFilter, "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7, null 
-
-        const unidadeFind = {
-            id: "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7",
-            nome: "COORDENADORIA DE EDIFICACAO DE USO COMERCIAL E INDUSTRIAL",
-            sigla: "COMIN",
-            codigo: "290300000000000",
-            status: 1,
-        };
-
-        const mockFindMany = [
-            {
-                id: 11,
-                decreto: true,
-                sei: "11",
-                tipo_requerimento: 1,
-                requerimento: "2",
-                aprova_digital: "",
-                processo_fisico: "",
-                data_protocolo: "2024-10-01T00:00:00.000Z",
-                envio_admissibilidade: "2024-10-01T00:00:00.000Z",
-                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                tipo_processo: 1,
-                obs: "a",
-                status: 2,
-                pagamento: 1,
-                requalifica_rapido: false,
-                associado_reforma: false,
-                data_limiteSmul: "2024-10-16T00:00:00.000Z",
-                data_limiteMulti: null,
-                criado_em: "2019-07-01T00:00:00.000Z",
-                alterado_em: "2024-11-13T21:31:39.173Z",
-                unidade_id: unidadeFind.id,
-                unidade: {
-                    nome: unidadeFind.nome,
-                    id: unidadeFind.id
-                }
-            },
-            {
-                id: 12,
-                decreto: true,
-                sei: "11",
-                tipo_requerimento: 1,
-                requerimento: "2",
-                aprova_digital: "",
-                processo_fisico: "",
-                data_protocolo: "2024-10-01T00:00:00.000Z",
-                envio_admissibilidade: "2024-10-01T00:00:00.000Z",
-                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                tipo_processo: 1,
-                obs: "a",
-                status: 2,
-                pagamento: 2,
-                requalifica_rapido: false,
-                associado_reforma: false,
-                data_limiteSmul: "2024-10-16T00:00:00.000Z",
-                data_limiteMulti: null,
-                criado_em: "2019-07-01T00:00:00.000Z",
-                alterado_em: "2024-11-13T21:31:39.173Z",
-                unidade: {
-                    nome: unidadeFind.nome,
-                    id: unidadeFind.id
-                }
-            },
-            {
-                id: 13,
-                decreto: true,
-                sei: "11",
-                tipo_requerimento: 1,
-                requerimento: "2",
-                aprova_digital: "",
-                processo_fisico: "",
-                data_protocolo: "2024-10-01T00:00:00.000Z",
-                envio_admissibilidade: "2024-10-01T00:00:00.000Z",
-                alvara_tipo_id: "48eee3f6-0ea8-400e-bfe6-a60cb9908936",
-                tipo_processo: 1,
-                obs: "a",
-                status: 2,
-                pagamento: 1,
-                requalifica_rapido: false,
-                associado_reforma: false,
-                data_limiteSmul: "2024-10-16T00:00:00.000Z",
-                data_limiteMulti: null,
-                criado_em: "2019-07-01T00:00:00.000Z",
-                alterado_em: "2024-11-13T21:31:39.173Z",
-                unidade: {
-                    nome: unidadeFind.nome,
-                    id: unidadeFind.id
-                }
-            },
-        ];
-
-        (prisma.admissibilidade.findMany as jest.Mock).mockResolvedValue(mockFindMany)
-
-        const result = await service.countByUnidade(2, mockPeriodFilter, "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7")
-        const mockResult = { "COORDENADORIA DE EDIFICACAO DE USO COMERCIAL E INDUSTRIAL": 3 }
-
-        expect(mockResult).toEqual(result)
-        expect(prisma.admissibilidade.findMany).toHaveBeenCalledWith({
-            where: {
-                inicial: {
-                    status: 2,
-                    tipo_processo: { in: [1, 2] },
-                },
-                data_decisao_interlocutoria: mockPeriodFilter,
-                unidade_id: "0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7",
-            },
-            select: { unidade: { select: { nome: true, id: true } } }
-        })
-    })
-
-
-    it('deverá gerar um relatório de todos os processos de todas as unidades dentro de um intervalo de tempo periodFilterDto', async () => {
-
-        const mockPeriodFilter = {
-            gte: new Date("2019-07-01T00:00:00.000Z"),
-            lte: new Date("2019-12-31T23:59:59.999Z"),
-        };
-        // Mock básico para verificarData
-        jest.spyOn(service, 'verificarData').mockReturnValue(mockPeriodFilter);
-
-
-        // Mock para getIdByUnidade
-        jest.spyOn(service, 'getIdByUnidade').mockImplementation(async (sigla) => {
-            const units: Record<string, string> = {
-                'PARHIS': '4d7987e9-4b59-46cf-ac90-1c2cb5f144a8',
-                'RESID': 'eafff5eb-e8f0-459c-9267-ca6f91e91f06',
-                'SERVIN': '7d20188e-c7a0-4f0b-87bf-5e70248d38a3',
-                'COMIN': '0d7d9dad-686f-4fb8-bc86-c06a6f0b77e7',
-                'CAEPP': '71ef22d1-a92d-4b8e-a576-ff158f9eb1ab'
-            };
-            return units[sigla] || null;
-        });
-
-        jest.spyOn(service, 'countByUnidade').mockImplementation(async (status, period, unidadeId, tipo) => {
-            // Retorna contagem fictícia baseada no status
-            return { [`${unidadeId || 'tipo'}-${status}`]: status * 10 };
-        });
-
-        // Mock para getInicialData
-        jest.spyOn(service, 'getInicialData').mockImplementation(async (status, period) => {
-            // Retorna array com tamanho igual ao status + 1
-            return new Array(status + 1).fill({});
-        });
-
-        jest.spyOn(service, 'countByUnidade').mockImplementation(async (status, period, unidadeId, tipo) => {
-            // Retorna contagem fictícia baseada no status
-            return { [`${unidadeId || 'tipo'}-${status}`]: status * 10 };
-        });
-
-        // Mock para getInicialData
-        jest.spyOn(service, 'getInicialData').mockImplementation(async (status, period) => {
-            // Retorna array com tamanho igual ao status + 1
-            return new Array(status + 1).fill({});
-        });
-    });
-
-})
+});
