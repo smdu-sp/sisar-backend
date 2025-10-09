@@ -8,11 +8,6 @@ import { ERROR_MESSAGES } from "./constants/error-messages";
 export class ArPrazoAnaliseAdmissibilidadeService {
     constructor(private prisma: PrismaService) { }
 
-    /**
-     * Converte uma string de data no formato DD-MM-YYYY ou YYYY-MM-DD para um objeto Date válido
-     * @param dateString String da data nos formatos DD-MM-YYYY, YYYY-MM-DD ou ISO
-     * @returns Objeto Date válido
-     */
     private parseDate(dateString: string): Date {
         if (!dateString) {
             throw new Error('Data não fornecida');
@@ -168,8 +163,10 @@ export class ArPrazoAnaliseAdmissibilidadeService {
 
                 if (inicial.requalifica_rapido && inicialHasDataInReconsideracao) {
                     inicial.data_requalificacao = inicialHasDataInReconsideracao.publicacao;
+                    inicial.reconsiderado = true;
                 } else {
                     inicial.data_requalificacao = null;
+                    inicial.reconsiderado = false;
                 }
 
                 if (inicialHasDataInSuspensao && inicialHasDataInSuspensao.length > 0) {
@@ -353,8 +350,38 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         }
     }
 
+    async includeAnoEMesAdmisibilidade(lista: IPrazoAnaliseAdmissibilidadeDto[]): Promise<IPrazoAnaliseAdmissibilidadeDto[]> {
+
+        try {
+            const listaComAnoEMes = lista.map((inicial) => {
+                try {
+                    inicial.ano = new Date(inicial.criado_em).getFullYear();
+                    inicial.mes = new Date(inicial.criado_em).toLocaleDateString('pt-BR', { month: 'long' });
+                    return inicial; // IMPORTANTE: sempre retornar o objeto modificado
+                } catch (error) {
+                    console.error(ERROR_MESSAGES.FALHA_INCLUIR_ANO_E_MES(inicial.id), error);
+                    return inicial;
+                }
+            })
+
+            return listaComAnoEMes;
+
+        } catch (error) {
+            const objectError = {
+                api_mensagem: ERROR_MESSAGES.FALHA_INCLUIR_ANO_E_MES_GERAL,
+                tipo_erro: error.name,
+                detalhe_tecnico: error.message,
+            };
+
+            throw new HttpException(
+                objectError,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+
+    }
+
     async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string) {
-        // Converte as strings de data para objetos Date válidos
         const dataInicio = this.parseDate(data_inicio);
         const dataFim = this.parseDate(data_fim);
 
@@ -366,8 +393,11 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         const listaIncrementada = await this.includeReconsideracaoESuspensaoData(listaData);
 
         const listaComPrazosDeAdmissibilidades = await this.includePrazoDeAdmissibilidade(listaIncrementada);
+        const listaComAnoEMes = await this.includeAnoEMesAdmisibilidade(listaComPrazosDeAdmissibilidades);
 
-        const listaDataPorAno = await this.groupByDataYear(listaComPrazosDeAdmissibilidades, {
+        console.log(listaComAnoEMes)
+
+        const listaDataPorAno = await this.groupByDataYear(listaComAnoEMes, {
             gte: dataInicio,
             lte: dataFim
         })

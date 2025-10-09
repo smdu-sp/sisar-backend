@@ -20,6 +20,7 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
     area?: number | Decimal | null;
     resumo_projeto?: string | null;
     zona?: string;
+    reconsiderado?: boolean;
     pagamento: number;
     requalifica_rapido: boolean;
     associado_reforma: boolean;
@@ -34,6 +35,8 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
     suspensao_prazo_etapa_1?: number | null;
     suspensao_prazo_etapa_2?: number | null;
     motivos_suspensao?: string[] | null;
+    ano?: number;
+    mes?: string;
 
 }
 
