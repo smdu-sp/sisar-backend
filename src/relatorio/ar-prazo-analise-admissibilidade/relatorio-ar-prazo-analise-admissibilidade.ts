@@ -1,7 +1,7 @@
 import { HttpStatus, HttpException, Injectable } from "@nestjs/common";
 import { PeriodFilterDto } from "../relatorio-ar-quantitativo/dto/response-relatorio.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { IPrazoAnaliseAdmissibilidadeDto, IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto } from "./dto/prazo-analise-admissibilidade";
+import { IPrazoAnaliseAdmissibilidadeDto, IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto, IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto, IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto } from "./dto/prazo-analise-admissibilidade.Dto";
 import { ERROR_MESSAGES } from "./constants/error-messages";
 
 @Injectable()
@@ -40,9 +40,9 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         return date;
     }
 
-    async getDataPorPeriodo(periodFilterDto: PeriodFilterDto) {
+    async getDataPorPeriodo(periodFilterDto: PeriodFilterDto): Promise<IPrazoAnaliseAdmissibilidadeDto[]> {
         try {
-            const iniciais = this.prisma.inicial.findMany({
+            const iniciais = await this.prisma.inicial.findMany({
                 where: {
                     data_protocolo: {
                         gte: periodFilterDto.gte,
@@ -69,9 +69,9 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         }
     }
 
-    async groupByDataYear(lista: IPrazoAnaliseAdmissibilidadeDto[], periodFilter: PeriodFilterDto) {
+    async groupByDataYear(lista: IPrazoAnaliseAdmissibilidadeDto[], periodFilter: PeriodFilterDto): Promise<Record<string, IPrazoAnaliseAdmissibilidadeDto[]>> {
         try {
-            const objetoDeRetorno = {}
+            const objetoDeRetorno: Record<string, IPrazoAnaliseAdmissibilidadeDto[]> = {}
 
             for (let ano = periodFilter.gte.getFullYear(); ano <= periodFilter.lte.getFullYear(); ano++) {
                 objetoDeRetorno[ano] = []
@@ -100,7 +100,7 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         }
     }
 
-    async groupByDataMonth(relatorioAnual: IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto, periodFilter: PeriodFilterDto) {
+    async groupByDataMonth(relatorioAnual: Record<string, IPrazoAnaliseAdmissibilidadeDto[]>, periodFilter: PeriodFilterDto): Promise<IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto> {
         try {
             const listaDeMeses = new Array(12).fill(0).map((_, index) => index + 1);
             const relatorioEditado: Record<string, Record<string, IPrazoAnaliseAdmissibilidadeDto[]>> = {};
@@ -108,10 +108,12 @@ export class ArPrazoAnaliseAdmissibilidadeService {
             for (let ano = periodFilter.gte.getFullYear(); ano <= periodFilter.lte.getFullYear(); ano++) {
                 relatorioEditado[ano] = {};
                 try {
-                    for (let i = 0; i < listaDeMeses.length; i++) {
-                        const mes = new Date(`${ano}-${String(listaDeMeses[i]).padStart(2, '0')}-01`).toLocaleDateString('pt-BR', { month: 'short' });
-                        relatorioEditado[ano][mes] = [];
-                    }
+                    listaDeMeses.map((mes) => {
+                        const mesNome = new Date(`${ano}-${String(mes).padStart(2, '0')}-01`).toLocaleDateString('pt-BR', { month: 'short' });
+                        if (!relatorioEditado[ano][mesNome]) {
+                            relatorioEditado[ano][mesNome] = [];
+                        }
+                    })
                 } catch (error) {
                     throw new Error(ERROR_MESSAGES.FALHA_CONSTRUIR_CHAVES_COM_MESES);
                 }
@@ -130,7 +132,6 @@ export class ArPrazoAnaliseAdmissibilidadeService {
                     }
                 }
             }
-
             return relatorioEditado;
         } catch (error) {
             const objectError = {
@@ -357,7 +358,7 @@ export class ArPrazoAnaliseAdmissibilidadeService {
                 try {
                     inicial.ano = new Date(inicial.criado_em).getFullYear();
                     inicial.mes = new Date(inicial.criado_em).toLocaleDateString('pt-BR', { month: 'long' });
-                    return inicial; // IMPORTANTE: sempre retornar o objeto modificado
+                    return inicial;
                 } catch (error) {
                     console.error(ERROR_MESSAGES.FALHA_INCLUIR_ANO_E_MES(inicial.id), error);
                     return inicial;
@@ -378,10 +379,96 @@ export class ArPrazoAnaliseAdmissibilidadeService {
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-
     }
 
-    async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string) {
+    /**
+     * 0 - em análise de admissibilidade
+     * 1 - inadmitido
+     * 2 - em análise
+     * 3 - deferido
+     * 4 - indeferido
+     */
+
+    async includeQtdAdmissibilidadesFinalizadas(
+        lista: IPrazoAnaliseAdmissibilidadeDto[],
+        cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto> {
+
+        const listaFinalizadas = lista.filter(inicial => inicial.status === 1 || inicial.status === 3 || inicial.status === 4);
+        cabecalho.qtdAnaliseFinalizada = listaFinalizadas.length.toString()
+        return cabecalho;
+    }
+
+    async includeQtdAdmissibilidadesNoPrazo(lista: IPrazoAnaliseAdmissibilidadeDto[],
+        cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto> {
+
+        const listaNoPrazo = lista.filter(inicial => {
+            if (inicial.tempo_de_analise_admissibilidade | inicial.tempo_de_analise_reconsideracao) {
+                let prazoAnalise = 0
+                let prazoReconsideracao = 0
+
+                inicial.tempo_de_analise_admissibilidade ? prazoAnalise = inicial.tempo_de_analise_admissibilidade : prazoAnalise = 0
+                inicial.tempo_de_analise_reconsideracao ? prazoReconsideracao = inicial.tempo_de_analise_reconsideracao : prazoReconsideracao = 0
+
+                const prazoTotal = prazoAnalise + prazoReconsideracao
+
+                if (prazoTotal <= 15) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        })
+
+        cabecalho.qtdAnaliseNoPrazo = listaNoPrazo.length.toString()
+        return cabecalho;
+    }
+
+    async includeQtdAdmissibilidadesForaDoPrazo(lista: IPrazoAnaliseAdmissibilidadeDto[],
+        cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto> {
+
+        const listaNoPrazo = lista.filter(inicial => {
+            if (inicial.tempo_de_analise_admissibilidade | inicial.tempo_de_analise_reconsideracao) {
+                let prazoAnalise = 0
+                let prazoReconsideracao = 0
+
+                inicial.tempo_de_analise_admissibilidade ? prazoAnalise = inicial.tempo_de_analise_admissibilidade : prazoAnalise = 0
+                inicial.tempo_de_analise_reconsideracao ? prazoReconsideracao = inicial.tempo_de_analise_reconsideracao : prazoReconsideracao = 0
+
+                const prazoTotal = prazoAnalise + prazoReconsideracao
+
+                if (prazoTotal <= 15) {
+                    return false
+                } else {
+                    return true
+                }
+            }
+        })
+
+        cabecalho.qtdAnaliseExcedido = listaNoPrazo.length.toString()
+        return cabecalho;
+    }
+
+    async includeMediaDiasDeAnalise(lista: IPrazoAnaliseAdmissibilidadeDto[],
+        cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto> {
+
+        const totalDias = lista.reduce((acc, curr) => {
+            const diasAnalise = curr.tempo_de_analise_admissibilidade || 0;
+            return acc + diasAnalise;
+        }, 0);
+
+        const totalDiasReconsideracao = lista.reduce((acc, curr) => {
+            const diasReconsideracao = curr.tempo_de_analise_reconsideracao || 0;
+            return acc + diasReconsideracao;
+        }, 0);
+
+        const totalProcessos = lista.length;
+        cabecalho.mediaPeriodoAnalise = totalProcessos > 0 ? (totalDias / totalProcessos).toFixed(2) : "0.00";
+        cabecalho.mediaPeriodoReconsideracao = totalProcessos > 0 ? (totalDiasReconsideracao / totalProcessos).toFixed(2) : "0.00";
+
+        return cabecalho;
+    }
+
+    async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto> {
         const dataInicio = this.parseDate(data_inicio);
         const dataFim = this.parseDate(data_fim);
 
@@ -394,9 +481,6 @@ export class ArPrazoAnaliseAdmissibilidadeService {
 
         const listaComPrazosDeAdmissibilidades = await this.includePrazoDeAdmissibilidade(listaIncrementada);
         const listaComAnoEMes = await this.includeAnoEMesAdmisibilidade(listaComPrazosDeAdmissibilidades);
-
-        console.log(listaComAnoEMes)
-
         const listaDataPorAno = await this.groupByDataYear(listaComAnoEMes, {
             gte: dataInicio,
             lte: dataFim
@@ -407,6 +491,22 @@ export class ArPrazoAnaliseAdmissibilidadeService {
             lte: dataFim
         });
 
-        return listaDataPorMes;
+        const cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto = {
+            prazoFixoAnalise: "15 dias",
+            dataInicio: data_inicio,
+            dataFim: data_fim,
+        }
+
+        const cabecalhoComQtdFinalizadas = await this.includeQtdAdmissibilidadesFinalizadas(listaComAnoEMes, cabecalho);
+        const cabecalhoComQtdNoPrazo = await this.includeQtdAdmissibilidadesNoPrazo(listaComAnoEMes, cabecalhoComQtdFinalizadas);
+        const cabecalhoComQtdForaDoPrazo = await this.includeQtdAdmissibilidadesForaDoPrazo(listaComAnoEMes, cabecalhoComQtdNoPrazo);
+        const cabecalhoComMediaDeDias = await this.includeMediaDiasDeAnalise(listaComAnoEMes, cabecalhoComQtdForaDoPrazo);
+
+        const relatorioCompleto: IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto = {
+            cabecalho: cabecalhoComMediaDeDias,
+            dados: listaDataPorMes
+
+        }
+        return relatorioCompleto;
     }
-}
+} 
