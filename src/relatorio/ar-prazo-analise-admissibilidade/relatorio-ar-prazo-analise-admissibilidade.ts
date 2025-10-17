@@ -478,7 +478,6 @@ export class ArPrazoAnaliseAdmissibilidadeService {
         });
 
         const listaIncrementada = await this.includeReconsideracaoESuspensaoData(listaData);
-
         const listaComPrazosDeAdmissibilidades = await this.includePrazoDeAdmissibilidade(listaIncrementada);
         const listaComAnoEMes = await this.includeAnoEMesAdmisibilidade(listaComPrazosDeAdmissibilidades);
         const listaDataPorAno = await this.groupByDataYear(listaComAnoEMes, {
