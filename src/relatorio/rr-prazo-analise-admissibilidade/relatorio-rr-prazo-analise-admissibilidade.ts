@@ -7,6 +7,7 @@ import {
 } from "./dto/prazo-analise-admissibilidade"
 import { ERROR_MESSAGES } from "./constants/error-messages"
 import { HttpException, HttpStatus } from "@nestjs/common"
+import { formatadorDeDatas } from "src/utils/date.utils"
 
 @Injectable()
 export class RrPrazoAnaliseAdmissibilidadeService {
@@ -22,8 +23,8 @@ export class RrPrazoAnaliseAdmissibilidadeService {
           },
         },
       })
-
-      return iniciais
+      const orderIniciais = (await iniciais).sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime())
+      return orderIniciais
     } catch (error) {
       throw new HttpException({
         api_mensagem: ERROR_MESSAGES.FALHA_GET_INICIAIS_POR_PERIODO,
@@ -105,6 +106,8 @@ export class RrPrazoAnaliseAdmissibilidadeService {
       }, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+
 
   async includeReconsideracaoESuspensaoData(
     lista: IPrazoAnaliseAdmissibilidadeDto[],
@@ -304,6 +307,23 @@ export class RrPrazoAnaliseAdmissibilidadeService {
     }
   }
 
+  async formatadorDeCamposDate(lista: IPrazoAnaliseAdmissibilidadeDto[]) {
+
+    const listaFormatada = await Promise.all(lista.map(async (inicial) => {
+      inicial.data_protocolo = inicial.data_protocolo ? formatadorDeDatas(new Date(inicial.data_protocolo)) : inicial.data_protocolo
+      inicial.criado_em = inicial.criado_em ? formatadorDeDatas(new Date(inicial.criado_em)) : inicial.criado_em
+      inicial.envio_admissibilidade = inicial.envio_admissibilidade ? formatadorDeDatas(new Date(inicial.envio_admissibilidade)) : inicial.envio_admissibilidade
+      inicial.data_limiteSmul = inicial.data_limiteSmul ? formatadorDeDatas(new Date(inicial.data_limiteSmul)) : inicial.data_limiteSmul
+      inicial.data_limiteMulti = inicial.data_limiteMulti ? formatadorDeDatas(new Date(inicial.data_limiteMulti)) : inicial.data_limiteMulti
+      inicial.alterado_em = inicial.alterado_em ? formatadorDeDatas(new Date(inicial.alterado_em)) : inicial.alterado_em
+      inicial.ano = new Date(inicial.criado_em).getFullYear().toString(),
+        inicial.mes = new Date(inicial.criado_em).toLocaleDateString("pt-BR", { month: "long" })
+      return inicial
+    }))
+
+    return listaFormatada
+  }
+
   async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string) {
     const listaData = await this.getDataPorPeriodo({
       gte: new Date(data_inicio),
@@ -313,17 +333,7 @@ export class RrPrazoAnaliseAdmissibilidadeService {
     const listaIncrementada = await this.includeReconsideracaoESuspensaoData(listaData)
 
     const listaComPrazosDeAdmissibilidades = await this.includePrazoDeAdmissibilidade(listaIncrementada)
-
-    const listaDataPorAno = await this.groupByDataYear(listaComPrazosDeAdmissibilidades, {
-      gte: new Date(data_inicio),
-      lte: new Date(data_fim),
-    })
-
-    const listaDataPorMes = await this.groupByDataMonth(listaDataPorAno, {
-      gte: new Date(data_inicio),
-      lte: new Date(data_fim),
-    })
-
-    return listaDataPorMes
+    const listaComDatasFormatadas = await this.formatadorDeCamposDate(listaComPrazosDeAdmissibilidades)
+    return listaComDatasFormatadas
   }
 }

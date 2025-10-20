@@ -90,7 +90,7 @@ export class RelatorioController {
   }
 
   @IsPublic()
-  @Get('rr/processos-aprovados/:data_inicio/:data_fim')
+  @Get('rr/prazo-analise-admissibilidade/:data_inicio/:data_fim')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: 'Retorna 200 se buscar o relatório de progressão mensal com sucesso.', type: MesData })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })

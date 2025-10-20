@@ -34,6 +34,8 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
     suspensao_prazo_etapa_1?: number | null;
     suspensao_prazo_etapa_2?: number | null;
     motivos_suspensao?: string[] | null;
+    ano?: string | Date | null;
+    mes?: string | Date | null;
 
 }
 
