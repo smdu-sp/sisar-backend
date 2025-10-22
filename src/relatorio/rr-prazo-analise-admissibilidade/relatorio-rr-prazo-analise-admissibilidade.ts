@@ -307,22 +307,78 @@ export class RrPrazoAnaliseAdmissibilidadeService {
     }
   }
 
-  async formatadorDeCamposDate(lista: IPrazoAnaliseAdmissibilidadeDto[]) {
+async formatadorDeCamposDate(lista: IPrazoAnaliseAdmissibilidadeDto[]): Promise<IPrazoAnaliseAdmissibilidadeDto[]> {
+  try {
+    const listaFormatada = lista.map((inicial) => {
+      const formatarDataBrasileira = (data: any): string | null => {
+        if (!data) return null;
+        
+        try {
+          const dataObj = new Date(data);
+          if (isNaN(dataObj.getTime())) return null;
+          
+          const dia = dataObj.getDate().toString().padStart(2, '0');
+          const mes = (dataObj.getMonth() + 1).toString().padStart(2, '0');
+          const ano = dataObj.getFullYear().toString();
+          
+          return `${dia}/${mes}/${ano}`;
+        } catch (error) {
+          console.error(`Erro ao formatar data para inicial ${inicial.id}:`, error);
+          return null;
+        }
+      };
 
-    const listaFormatada = await Promise.all(lista.map(async (inicial) => {
-      inicial.data_protocolo = inicial.data_protocolo ? formatadorDeDatas(new Date(inicial.data_protocolo)) : inicial.data_protocolo
-      inicial.criado_em = inicial.criado_em ? formatadorDeDatas(new Date(inicial.criado_em)) : inicial.criado_em
-      inicial.envio_admissibilidade = inicial.envio_admissibilidade ? formatadorDeDatas(new Date(inicial.envio_admissibilidade)) : inicial.envio_admissibilidade
-      inicial.data_limiteSmul = inicial.data_limiteSmul ? formatadorDeDatas(new Date(inicial.data_limiteSmul)) : inicial.data_limiteSmul
-      inicial.data_limiteMulti = inicial.data_limiteMulti ? formatadorDeDatas(new Date(inicial.data_limiteMulti)) : inicial.data_limiteMulti
-      inicial.alterado_em = inicial.alterado_em ? formatadorDeDatas(new Date(inicial.alterado_em)) : inicial.alterado_em
-      inicial.ano = new Date(inicial.criado_em).getFullYear().toString(),
-        inicial.mes = new Date(inicial.criado_em).toLocaleDateString("pt-BR", { month: "long" })
-      return inicial
-    }))
+      const obterNomeMes = (data: any): string | null => {
+        if (!data) return null;
+        
+        try {
+          const dataObj = new Date(data);
+          if (isNaN(dataObj.getTime())) return null;
+          
+          return dataObj.toLocaleDateString("pt-BR", { month: "long" });
+        } catch (error) {
+          console.error(`Erro ao obter nome do mês para inicial ${inicial.id}:`, error);
+          return null;
+        }
+      };
 
-    return listaFormatada
+      const obterAno = (data: any): string | null => {
+        if (!data) return null;
+        
+        try {
+          const dataObj = new Date(data);
+          if (isNaN(dataObj.getTime())) return null;
+          
+          return dataObj.getFullYear().toString();
+        } catch (error) {
+          console.error(`Erro ao obter ano para inicial ${inicial.id}:`, error);
+          return null;
+        }
+      };
+
+      return {
+        ...inicial,
+        data_protocolo: formatarDataBrasileira(inicial.data_protocolo),
+        criado_em: formatarDataBrasileira(inicial.criado_em),
+        envio_admissibilidade: formatarDataBrasileira(inicial.envio_admissibilidade),
+        data_limiteSmul: formatarDataBrasileira(inicial.data_limiteSmul),
+        data_limiteMulti: formatarDataBrasileira(inicial.data_limiteMulti),
+        alterado_em: formatarDataBrasileira(inicial.alterado_em),
+        data_requalificacao: formatarDataBrasileira(inicial.data_requalificacao),
+        ano: obterAno(inicial.criado_em),
+        mes: obterNomeMes(inicial.criado_em)
+      };
+    });
+
+    return listaFormatada;
+  } catch (error) {
+    throw new HttpException({
+      api_mensagem: 'Falha ao formatar campos de data',
+      tipo_erro: error.name,
+      detalhe_tecnico: error.message,
+    }, HttpStatus.INTERNAL_SERVER_ERROR);
   }
+}
 
   async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string) {
     const listaData = await this.getDataPorPeriodo({
