@@ -4,6 +4,8 @@ import { PrismaService } from "src/prisma/prisma.service"
 import {
   IPrazoAnaliseAdmissibilidadeDto,
   IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto,
+  IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto,
+  IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto
 } from "./dto/prazo-analise-admissibilidade"
 import { ERROR_MESSAGES } from "./constants/error-messages"
 import { HttpException, HttpStatus } from "@nestjs/common"
@@ -33,81 +35,6 @@ export class RrPrazoAnaliseAdmissibilidadeService {
       }, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
-
-  async groupByDataYear(lista: IPrazoAnaliseAdmissibilidadeDto[], periodFilter: PeriodFilterDto) {
-    try {
-      const objetoDeRetorno = {}
-
-      for (let ano = periodFilter.gte.getFullYear(); ano <= periodFilter.lte.getFullYear(); ano++) {
-        objetoDeRetorno[ano] = []
-      }
-
-      for (const ano of Object.keys(objetoDeRetorno)) {
-        lista.map((inicial) => {
-          try {
-            const anoData = Number(new Date(inicial.criado_em).getFullYear())
-            if (Number(ano) == anoData) {
-              objetoDeRetorno[ano].push(inicial)
-            }
-          } catch (error) {
-            console.error(ERROR_MESSAGES.FALHA_INICIAL_INDEX(inicial.id), error);
-          }
-        })
-      }
-
-      return objetoDeRetorno
-    } catch (error) {
-      throw new HttpException({
-        api_mensagem: ERROR_MESSAGES.FALHA_AGRUPAR_INICIAIS_POR_ANO,
-        tipo_erro: error.name,
-        detalhe_tecnico: error.message,
-      }, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  async groupByDataMonth(
-    relatorioAnual: IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto,
-    periodFilter: PeriodFilterDto,
-  ) {
-    try {
-      const listaDeMeses = new Array(12).fill(0).map((_, index) => index + 1)
-      const relatorioEditado: Record<string, Record<string, IPrazoAnaliseAdmissibilidadeDto[]>> = {}
-
-      for (let ano = periodFilter.gte.getFullYear(); ano <= periodFilter.lte.getFullYear(); ano++) {
-        relatorioEditado[ano] = {}
-        for (let i = 0; i < listaDeMeses.length; i++) {
-          const mes = new Date(`${ano}-${String(listaDeMeses[i]).padStart(2, "0")}-01`).toLocaleDateString("pt-BR", {
-            month: "short",
-          })
-          relatorioEditado[ano][mes] = []
-        }
-      }
-
-      for (const [ano, listaPorAno] of Object.entries(relatorioAnual)) {
-        for (const inicial of listaPorAno) {
-          try {
-            const data = new Date(inicial.criado_em)
-            const mes = data.toLocaleDateString("pt-BR", { month: "short" })
-            if (relatorioEditado[ano] && relatorioEditado[ano][mes]) {
-              relatorioEditado[ano][mes].push(inicial)
-            }
-          } catch (error) {
-            console.error(ERROR_MESSAGES.FALHA_INICIAL_INDEX(inicial.id), error);
-          }
-        }
-      }
-
-      return relatorioEditado
-    } catch (error) {
-      throw new HttpException({
-        api_mensagem: ERROR_MESSAGES.FALHA_AGRUPAR_INICIAIS_POR_MES,
-        tipo_erro: error.name,
-        detalhe_tecnico: error.message,
-      }, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-
 
   async includeReconsideracaoESuspensaoData(
     lista: IPrazoAnaliseAdmissibilidadeDto[],
@@ -307,80 +234,157 @@ export class RrPrazoAnaliseAdmissibilidadeService {
     }
   }
 
-async formatadorDeCamposDate(lista: IPrazoAnaliseAdmissibilidadeDto[]): Promise<IPrazoAnaliseAdmissibilidadeDto[]> {
-  try {
-    const listaFormatada = lista.map((inicial) => {
-      const formatarDataBrasileira = (data: any): string | null => {
-        if (!data) return null;
-        
-        try {
-          const dataObj = new Date(data);
-          if (isNaN(dataObj.getTime())) return null;
-          
-          const dia = dataObj.getDate().toString().padStart(2, '0');
-          const mes = (dataObj.getMonth() + 1).toString().padStart(2, '0');
-          const ano = dataObj.getFullYear().toString();
-          
-          return `${dia}/${mes}/${ano}`;
-        } catch (error) {
-          console.error(`Erro ao formatar data para inicial ${inicial.id}:`, error);
-          return null;
-        }
-      };
+  async formatadorDeCamposDate(lista: IPrazoAnaliseAdmissibilidadeDto[]): Promise<IPrazoAnaliseAdmissibilidadeDto[]> {
+    try {
+      const listaFormatada = lista.map((inicial) => {
+        const formatarDataBrasileira = (data: any): string | null => {
+          if (!data) return null;
 
-      const obterNomeMes = (data: any): string | null => {
-        if (!data) return null;
-        
-        try {
-          const dataObj = new Date(data);
-          if (isNaN(dataObj.getTime())) return null;
-          
-          return dataObj.toLocaleDateString("pt-BR", { month: "long" });
-        } catch (error) {
-          console.error(`Erro ao obter nome do mês para inicial ${inicial.id}:`, error);
-          return null;
-        }
-      };
+          try {
+            const dataObj = new Date(data);
+            if (isNaN(dataObj.getTime())) return null;
 
-      const obterAno = (data: any): string | null => {
-        if (!data) return null;
-        
-        try {
-          const dataObj = new Date(data);
-          if (isNaN(dataObj.getTime())) return null;
-          
-          return dataObj.getFullYear().toString();
-        } catch (error) {
-          console.error(`Erro ao obter ano para inicial ${inicial.id}:`, error);
-          return null;
-        }
-      };
+            const dia = dataObj.getDate().toString().padStart(2, '0');
+            const mes = (dataObj.getMonth() + 1).toString().padStart(2, '0');
+            const ano = dataObj.getFullYear().toString();
 
-      return {
-        ...inicial,
-        data_protocolo: formatarDataBrasileira(inicial.data_protocolo),
-        criado_em: formatarDataBrasileira(inicial.criado_em),
-        envio_admissibilidade: formatarDataBrasileira(inicial.envio_admissibilidade),
-        data_limiteSmul: formatarDataBrasileira(inicial.data_limiteSmul),
-        data_limiteMulti: formatarDataBrasileira(inicial.data_limiteMulti),
-        alterado_em: formatarDataBrasileira(inicial.alterado_em),
-        data_requalificacao: formatarDataBrasileira(inicial.data_requalificacao),
-        ano: obterAno(inicial.criado_em),
-        mes: obterNomeMes(inicial.criado_em)
-      };
-    });
+            return `${dia}/${mes}/${ano}`;
+          } catch (error) {
+            console.error(`Erro ao formatar data para inicial ${inicial.id}:`, error);
+            return null;
+          }
+        };
 
-    return listaFormatada;
-  } catch (error) {
-    throw new HttpException({
-      api_mensagem: 'Falha ao formatar campos de data',
-      tipo_erro: error.name,
-      detalhe_tecnico: error.message,
-    }, HttpStatus.INTERNAL_SERVER_ERROR);
+        const obterNomeMes = (data: any): string | null => {
+          if (!data) return null;
+
+          try {
+            const dataObj = new Date(data);
+            if (isNaN(dataObj.getTime())) return null;
+
+            return dataObj.toLocaleDateString("pt-BR", { month: "long" });
+          } catch (error) {
+            console.error(`Erro ao obter nome do mês para inicial ${inicial.id}:`, error);
+            return null;
+          }
+        };
+
+        const obterAno = (data: any): string | null => {
+          if (!data) return null;
+
+          try {
+            const dataObj = new Date(data);
+            if (isNaN(dataObj.getTime())) return null;
+
+            return dataObj.getFullYear().toString();
+          } catch (error) {
+            console.error(`Erro ao obter ano para inicial ${inicial.id}:`, error);
+            return null;
+          }
+        };
+
+        return {
+          ...inicial,
+          data_protocolo: formatarDataBrasileira(inicial.data_protocolo),
+          criado_em: formatarDataBrasileira(inicial.criado_em),
+          envio_admissibilidade: formatarDataBrasileira(inicial.envio_admissibilidade),
+          data_limiteSmul: formatarDataBrasileira(inicial.data_limiteSmul),
+          data_limiteMulti: formatarDataBrasileira(inicial.data_limiteMulti),
+          alterado_em: formatarDataBrasileira(inicial.alterado_em),
+          data_requalificacao: formatarDataBrasileira(inicial.data_requalificacao),
+          ano: obterAno(inicial.criado_em),
+          mes: obterNomeMes(inicial.criado_em)
+        };
+      });
+
+      return listaFormatada;
+    } catch (error) {
+      throw new HttpException({
+        api_mensagem: 'Falha ao formatar campos de data',
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
-}
 
-  async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string) {
+  async includeQtdProcessosAdmissibilidadeStatus(cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto, lista: IPrazoAnaliseAdmissibilidadeDto[]) {
+    try {
+
+      const listaForaDoPrazo = []
+      const listaNoPrazo = lista.filter(async inicial => {
+        if (inicial.tempo_de_analise_admissibilidade | inicial.tempo_de_analise_reconsideracao) {
+
+          const listaPrazoAnaliseInicial = await this.prisma.controle_Prazo.findMany({
+            where: {
+              inicial_id: Number(inicial.id)
+            }
+          })
+
+          const prazoAnaliseInicial = listaPrazoAnaliseInicial.reduce((acc, controle) => {
+            return acc + controle.duracao_planejada
+          }, 0)
+
+          let prazoAnalise = listaPrazoAnaliseInicial.length > 0 ? prazoAnaliseInicial : 0
+          let prazoReconsideracao = 0
+
+          inicial.tempo_de_analise_admissibilidade ? prazoAnalise = inicial.tempo_de_analise_admissibilidade : prazoAnalise = 0
+          inicial.tempo_de_analise_reconsideracao ? prazoReconsideracao = inicial.tempo_de_analise_reconsideracao : prazoReconsideracao = 0
+
+          const prazoTotal = prazoAnalise + prazoReconsideracao
+
+          if (prazoTotal <= 15) {
+            return true
+          } else {
+            listaForaDoPrazo.push(inicial)
+            return false
+          }
+        }
+      })
+
+      cabecalho.qtdAnaliseNoPrazo = listaNoPrazo.length.toString();
+      cabecalho.qtdAnaliseExcedido = listaForaDoPrazo.length.toString();
+      return cabecalho;
+    } catch (error) {
+      throw new HttpException({
+        api_mensagem: 'Falha ao incluir quantidade de processos no cabeçalho',
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async includeMedianaPrazoAdmissibilidade(cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto, lista: IPrazoAnaliseAdmissibilidadeDto[]) {
+    try {
+      const totalDiasAnalise = lista.reduce((acc, inicial) => {
+        return acc + (inicial.tempo_de_analise_admissibilidade || 0);
+      }, 0)
+      const mediana = totalDiasAnalise / lista.length;
+      cabecalho.mediaPeriodoAnalise = mediana.toFixed(2);
+      return cabecalho;
+    } catch (error) {
+      throw new HttpException({
+        api_mensagem: 'Falha ao incluir mediana de prazo de admissibilidade no cabeçalho',
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async includeAdmissibilidadesFinalizadas(cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto, lista: IPrazoAnaliseAdmissibilidadeDto[]) {
+    try {
+      const listaFinalizadas = lista.filter(item => item.status === 1);
+      cabecalho.qtdAnaliseFinalizada = listaFinalizadas.length.toString();
+      return cabecalho
+    } catch (error) {
+      throw new HttpException({
+        api_mensagem: 'Falha ao incluir quantidade de admissibilidades finalizadas no cabeçalho',
+        tipo_erro: error.name,
+        detalhe_tecnico: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getPrazoAnaliseAdmissibilidade(data_inicio?: string, data_fim?: string): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto> {
     const listaData = await this.getDataPorPeriodo({
       gte: new Date(data_inicio),
       lte: new Date(data_fim),
@@ -390,6 +394,22 @@ async formatadorDeCamposDate(lista: IPrazoAnaliseAdmissibilidadeDto[]): Promise<
 
     const listaComPrazosDeAdmissibilidades = await this.includePrazoDeAdmissibilidade(listaIncrementada)
     const listaComDatasFormatadas = await this.formatadorDeCamposDate(listaComPrazosDeAdmissibilidades)
-    return listaComDatasFormatadas
+
+    const cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto = {
+      dataInicio: data_inicio,
+      dataFim: data_fim,
+      prazoFixoAnalise: '15 dias',
+    }
+
+    const cabecalhoComQtdProcessos = await this.includeQtdProcessosAdmissibilidadeStatus(cabecalho, listaComDatasFormatadas)
+    const cabecalhoComMediaDeDias = await this.includeMedianaPrazoAdmissibilidade(cabecalhoComQtdProcessos, listaComDatasFormatadas)
+    const cabecalhoComAdmissibilidadesFinalizadas = await this.includeAdmissibilidadesFinalizadas(cabecalhoComMediaDeDias, listaComDatasFormatadas)
+
+    const relatorioCompleto: IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto = {
+      cabecalho: cabecalhoComAdmissibilidadesFinalizadas,
+      dados: listaComDatasFormatadas,
+    }
+
+    return relatorioCompleto
   }
 }

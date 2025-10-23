@@ -401,9 +401,20 @@ export class ArPrazoAnaliseAdmissibilidadeService {
     async includeQtdAdmissibilidadesNoPrazo(lista: IPrazoAnaliseAdmissibilidadeDto[],
         cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto): Promise<IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto> {
 
-        const listaNoPrazo = lista.filter(inicial => {
+        const listaNoPrazo = lista.filter(async inicial => {
             if (inicial.tempo_de_analise_admissibilidade | inicial.tempo_de_analise_reconsideracao) {
-                let prazoAnalise = 0
+
+                const listaPrazoAnaliseInicial = await this.prisma.controle_Prazo.findMany({
+                    where: {
+                        inicial_id: Number(inicial.id)
+                    }
+                })
+
+                const prazoAnaliseInicial = listaPrazoAnaliseInicial.reduce((acc, controle) => {
+                    return acc + controle.duracao_planejada
+                }, 0)
+
+                let prazoAnalise = listaPrazoAnaliseInicial.length > 0 ? prazoAnaliseInicial : 0
                 let prazoReconsideracao = 0
 
                 inicial.tempo_de_analise_admissibilidade ? prazoAnalise = inicial.tempo_de_analise_admissibilidade : prazoAnalise = 0

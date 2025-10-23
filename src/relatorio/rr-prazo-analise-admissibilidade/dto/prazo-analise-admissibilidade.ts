@@ -39,6 +39,22 @@ export interface IPrazoAnaliseAdmissibilidadeDto {
 
 }
 
+export interface IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto {
+    dataInicio?: string;
+    dataFim?: string;
+    prazoFixoAnalise?: string;
+    qtdAnaliseFinalizada?: string;
+    qtdAnaliseNoPrazo?: string;
+    qtdAnaliseExcedido?: string;
+    mediaPeriodoAnalise?: string;
+    mediaPeriodoReconsideracao?: string;
+}
+
 export interface IRelatorioPrazoAnaliseAdmissibilidadePorAnoDto {
     [ano: string]: IPrazoAnaliseAdmissibilidadeDto[]
 }
+
+export interface IRelatorioPrazoAnaliseAdmissibilidadeCompletoDto {
+    cabecalho: IRelatorioPrazoAnaliseAdmissibilidadeCabecalhoDto;
+    dados: IPrazoAnaliseAdmissibilidadeDto[];
+} 
