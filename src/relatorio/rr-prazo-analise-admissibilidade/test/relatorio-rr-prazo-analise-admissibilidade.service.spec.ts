@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ERROR_MESSAGES } from '../constants/error-messages';
 import { PeriodFilterDto } from '../../relatorio-ar-quantitativo/dto/response-relatorio.dto';
 
-// <CHANGE> Adicionando tipos auxiliares para resolver problemas de tipagem com lista
+// Tipos auxiliares para resolver problemas de tipagem com lista
 type MockInicial = {
   id: number;
   criado_em: Date;
@@ -18,6 +18,12 @@ type MockInicial = {
   motivos_suspensao?: string[];
   tempo_de_analise_admissibilidade?: number | null;
   tempo_de_analise_reconsideracao?: number | null;
+  envio_admissibilidade?: string | Date | null;
+  data_limiteSmul?: string | Date | null;
+  data_limiteMulti?: string | Date | null;
+  alterado_em?: string | Date | null;
+  ano?: string | null;
+  mes?: string | null;
 };
 
 describe('RrPrazoAnaliseAdmissibilidadeService', () => {
@@ -71,8 +77,7 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
       lte: new Date('2024-01-31'),
     };
 
-    it('deve retornar iniciais por período', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
+    it('deve retornar iniciais por período ordenadas por data de criação', async () => {
       const mockIniciais: MockInicial[] = [
         {
           id: 1,
@@ -90,7 +95,7 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
 
       const result = await service.getDataPorPeriodo(periodFilter);
 
-      expect(result).toEqual(mockIniciais);
+      expect(result).toEqual([mockIniciais[1], mockIniciais[0]]);
       expect(mockPrismaService.inicial.findMany).toHaveBeenCalledWith({
         where: {
           data_protocolo: {
@@ -132,7 +137,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     };
 
     it('deve agrupar iniciais por ano corretamente', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         { id: 1, criado_em: new Date('2023-06-15') },
         { id: 2, criado_em: new Date('2024-03-20') },
@@ -157,7 +161,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve lançar HttpException ao falhar no agrupamento por ano', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         { id: 1, criado_em: new Date('2023-06-15') },
       ];
@@ -191,7 +194,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     };
 
     it('deve agrupar iniciais por mês corretamente', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const relatorioAnual: Record<string, MockInicial[]> = {
         2024: [
           { id: 1, criado_em: new Date('2024-01-15') },
@@ -224,7 +226,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve lançar HttpException ao falhar no agrupamento por mês', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const relatorioAnual: Record<string, MockInicial[]> = {
         2024: [{ id: 1, criado_em: new Date('2024-01-15') }],
       };
@@ -261,7 +262,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve incluir dados de reconsideração para processo de requalificação rápida', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         { id: 1, requalifica_rapido: true, criado_em: new Date('2024-01-01') },
         {
@@ -286,7 +286,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve calcular suspensão de prazo corretamente', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -331,7 +330,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve definir suspensão como null quando não há suspensões', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -352,7 +350,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve lançar HttpException ao falhar na inclusão de dados de suspensão', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -396,7 +393,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve calcular tempo de análise para processo normal', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -421,7 +417,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve calcular tempo de análise para reconsideração', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         { id: 2, requalifica_rapido: true, criado_em: new Date('2024-01-01') },
       ];
@@ -451,7 +446,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve retornar 1 dia quando tempo de análise é menor que 1', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -475,7 +469,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve definir tempos como null quando não encontra admissibilidade', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -493,7 +486,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve lançar HttpException ao falhar na inclusão de prazo de admissibilidade', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const lista: MockInicial[] = [
         {
           id: 1,
@@ -525,6 +517,52 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
   });
 
+  describe('formatadorDeCamposDate', () => {
+    it('deve formatar campos de data corretamente', async () => {
+      const lista: MockInicial[] = [
+        {
+          id: 1,
+          criado_em: new Date('2024-01-15'),
+          data_protocolo: new Date('2024-01-10'),
+          data_requalificacao: new Date('2024-01-20'),
+        },
+      ];
+
+      const result = await service.formatadorDeCamposDate(lista as any);
+
+      expect(result[0].criado_em).toBe('15/01/2024');
+      expect(result[0].data_protocolo).toBe('10/01/2024');
+      expect(result[0].data_requalificacao).toBe('20/01/2024');
+      expect(result[0].ano).toBe('2024');
+      expect(result[0].mes).toBe('janeiro');
+    });
+
+    it('deve retornar null para datas inválidas', async () => {
+      const lista: MockInicial[] = [
+        {
+          id: 1,
+          criado_em: new Date('2024-01-15'),
+          data_protocolo: null,
+          data_requalificacao: undefined,
+        },
+      ];
+
+      const result = await service.formatadorDeCamposDate(lista as any);
+
+      expect(result[0].data_protocolo).toBeNull();
+      expect(result[0].data_requalificacao).toBeNull();
+    });
+
+    it('deve lançar HttpException ao falhar na formatação de datas', async () => {
+      const error = new Error('Formatação error');
+      const lista = null;
+
+      await expect(
+        service.formatadorDeCamposDate(lista as any),
+      ).rejects.toThrow(HttpException);
+    });
+  });
+
   describe('getPrazoAnaliseAdmissibilidade', () => {
     beforeEach(() => {
       jest.spyOn(service, 'getDataPorPeriodo').mockResolvedValue([]);
@@ -534,48 +572,51 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
       jest
         .spyOn(service, 'includePrazoDeAdmissibilidade')
         .mockResolvedValue([]);
-      jest.spyOn(service, 'groupByDataYear').mockResolvedValue({});
-      jest.spyOn(service, 'groupByDataMonth').mockResolvedValue({});
+      jest.spyOn(service, 'formatadorDeCamposDate').mockResolvedValue([]);
     });
 
     it('deve executar todo o fluxo de geração do relatório corretamente', async () => {
-      // <CHANGE> Usando tipo MockInicial para evitar erros de tipagem
       const data: MockInicial[] = [
         { id: 1, criado_em: new Date('2024-01-15') },
       ];
-      const dataIncremented: MockInicial[] = [
+      const dataIncrementada: MockInicial[] = [
         { id: 1, suspensao_prazo: 5, criado_em: new Date('2024-01-15') },
       ];
-      const dataWithTimes: MockInicial[] = [
+      const dataComTempos: MockInicial[] = [
         {
           id: 1,
           tempo_de_analise_admissibilidade: 10,
           criado_em: new Date('2024-01-15'),
         },
       ];
-      const yearlyData = { 2024: dataWithTimes };
-      const monthlyData = { 2024: { 'jan.': dataWithTimes } };
+      const dataFormatada: MockInicial[] = [
+        {
+          id: 1,
+          tempo_de_analise_admissibilidade: 10,
+          criado_em: new Date('2024-01-15'),
+          data_protocolo: new Date('15/01/2024'),
+          ano: '2024',
+          mes: 'janeiro',
+        },
+      ];
 
       jest.spyOn(service, 'getDataPorPeriodo').mockResolvedValue(data as any);
       jest
         .spyOn(service, 'includeReconsideracaoESuspensaoData')
-        .mockResolvedValue(dataIncremented as any);
+        .mockResolvedValue(dataIncrementada as any);
       jest
         .spyOn(service, 'includePrazoDeAdmissibilidade')
-        .mockResolvedValue(dataWithTimes as any);
+        .mockResolvedValue(dataComTempos as any);
       jest
-        .spyOn(service, 'groupByDataYear')
-        .mockResolvedValue(yearlyData as any);
-      jest
-        .spyOn(service, 'groupByDataMonth')
-        .mockResolvedValue(monthlyData as any);
+        .spyOn(service, 'formatadorDeCamposDate')
+        .mockResolvedValue(dataFormatada as any);
 
       const result = await service.getPrazoAnaliseAdmissibilidade(
         '2024-01-01',
         '2024-01-31',
       );
 
-      expect(result).toEqual(monthlyData);
+      expect(result).toEqual(dataFormatada);
       expect(service.getDataPorPeriodo).toHaveBeenCalledWith({
         gte: new Date('2024-01-01'),
         lte: new Date('2024-01-31'),
@@ -584,63 +625,49 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
         data,
       );
       expect(service.includePrazoDeAdmissibilidade).toHaveBeenCalledWith(
-        dataIncremented,
+        dataIncrementada,
       );
-      expect(service.groupByDataYear).toHaveBeenCalledWith(dataWithTimes, {
-        gte: new Date('2024-01-01'),
-        lte: new Date('2024-01-31'),
-      });
-      expect(service.groupByDataMonth).toHaveBeenCalledWith(yearlyData, {
-        gte: new Date('2024-01-01'),
-        lte: new Date('2024-01-31'),
-      });
+      expect(service.formatadorDeCamposDate).toHaveBeenCalledWith(dataComTempos);
     });
 
     it('deve chamar métodos na sequência correta', async () => {
-      const callOrder: string[] = [];
+      const ordemChamadas: string[] = [];
 
       jest
         .spyOn(service, 'getDataPorPeriodo')
         .mockImplementation(async () => {
-          callOrder.push('getDataPorPeriodo');
+          ordemChamadas.push('getDataPorPeriodo');
           return [] as any;
         });
 
       jest
         .spyOn(service, 'includeReconsideracaoESuspensaoData')
         .mockImplementation(async () => {
-          callOrder.push('includeReconsideracaoESuspensaoData');
+          ordemChamadas.push('includeReconsideracaoESuspensaoData');
           return [] as any;
         });
 
       jest
         .spyOn(service, 'includePrazoDeAdmissibilidade')
         .mockImplementation(async () => {
-          callOrder.push('includePrazoDeAdmissibilidade');
+          ordemChamadas.push('includePrazoDeAdmissibilidade');
           return [] as any;
         });
 
-      jest.spyOn(service, 'groupByDataYear').mockImplementation(async () => {
-        callOrder.push('groupByDataYear');
-        return {} as any;
-      });
+      jest
+        .spyOn(service, 'formatadorDeCamposDate')
+        .mockImplementation(async () => {
+          ordemChamadas.push('formatadorDeCamposDate');
+          return [] as any;
+        });
 
-      jest.spyOn(service, 'groupByDataMonth').mockImplementation(async () => {
-        callOrder.push('groupByDataMonth');
-        return {} as any;
-      });
+      await service.getPrazoAnaliseAdmissibilidade('2024-01-01', '2024-01-31');
 
-      await service.getPrazoAnaliseAdmissibilidade(
-        '2024-01-01',
-        '2024-01-31',
-      );
-
-      expect(callOrder).toEqual([
+      expect(ordemChamadas).toEqual([
         'getDataPorPeriodo',
         'includeReconsideracaoESuspensaoData',
         'includePrazoDeAdmissibilidade',
-        'groupByDataYear',
-        'groupByDataMonth',
+        'formatadorDeCamposDate',
       ]);
     });
 

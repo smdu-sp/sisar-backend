@@ -8,14 +8,14 @@ async function main() {
       nome: 'Fernando Lacerda',
       email: 'fanjoslacerda@prefeitura.sp.gov.br',
       status: 1,
-      permissao: 'DEV',
+      permissao: 'ADM',
     },
     update: {
       login: 'x414090',
       nome: 'Fernando Lacerda',
       email: 'fanjoslacerda@prefeitura.sp.gov.br',
       status: 1,
-      permissao: 'DEV',
+      permissao: 'ADM',
     },
   });
   console.log(root);
