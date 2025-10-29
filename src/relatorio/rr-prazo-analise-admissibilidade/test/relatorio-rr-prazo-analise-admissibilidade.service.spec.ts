@@ -24,6 +24,7 @@ type MockInicial = {
   alterado_em?: string | Date | null;
   ano?: string | null;
   mes?: string | null;
+  status?: number;
 };
 
 describe('RrPrazoAnaliseAdmissibilidadeService', () => {
@@ -45,6 +46,9 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     },
     admissibilidade: {
       findUnique: jest.fn(),
+    },
+    controle_Prazo: {
+      findMany: jest.fn(),
     },
   };
 
@@ -125,128 +129,6 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
             tipo_erro: error.name,
             detalhe_tecnico: error.message,
           });
-        }
-      }
-    });
-  });
-
-  describe('groupByDataYear', () => {
-    const periodFilter: PeriodFilterDto = {
-      gte: new Date('2023-01-01'),
-      lte: new Date('2024-12-31'),
-    };
-
-    it('deve agrupar iniciais por ano corretamente', async () => {
-      const lista: MockInicial[] = [
-        { id: 1, criado_em: new Date('2023-06-15') },
-        { id: 2, criado_em: new Date('2024-03-20') },
-        { id: 3, criado_em: new Date('2024-09-10') },
-      ];
-
-      const result = await service.groupByDataYear(lista as any, periodFilter);
-
-      expect(result).toEqual({
-        2023: [lista[0]],
-        2024: [lista[1], lista[2]],
-      });
-    });
-
-    it('deve inicializar anos vazios quando não há dados', async () => {
-      const result = await service.groupByDataYear([], periodFilter);
-
-      expect(result).toEqual({
-        2023: [],
-        2024: [],
-      });
-    });
-
-    it('deve lançar HttpException ao falhar no agrupamento por ano', async () => {
-      const lista: MockInicial[] = [
-        { id: 1, criado_em: new Date('2023-06-15') },
-      ];
-
-      await expect(
-        service.groupByDataYear(lista as any, null as any),
-      ).rejects.toThrow(HttpException);
-
-      try {
-        await service.groupByDataYear(lista as any, null as any);
-      } catch (err) {
-        expect(err).toBeInstanceOf(HttpException);
-        if (err instanceof HttpException) {
-          expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
-          const response = err.getResponse() as Record<string, unknown>;
-          expect(response).toHaveProperty('api_mensagem');
-          expect(response.api_mensagem).toBe(
-            ERROR_MESSAGES.FALHA_AGRUPAR_INICIAIS_POR_ANO,
-          );
-          expect(response).toHaveProperty('tipo_erro');
-          expect(response).toHaveProperty('detalhe_tecnico');
-        }
-      }
-    });
-  });
-
-  describe('groupByDataMonth', () => {
-    const periodFilter: PeriodFilterDto = {
-      gte: new Date('2024-01-01'),
-      lte: new Date('2024-12-31'),
-    };
-
-    it('deve agrupar iniciais por mês corretamente', async () => {
-      const relatorioAnual: Record<string, MockInicial[]> = {
-        2024: [
-          { id: 1, criado_em: new Date('2024-01-15') },
-          { id: 2, criado_em: new Date('2024-03-20') },
-        ],
-      };
-
-      const result = await service.groupByDataMonth(
-        relatorioAnual as any,
-        periodFilter,
-      );
-
-      expect(result).toHaveProperty('2024');
-      expect(result['2024']).toHaveProperty('jan.');
-      expect(result['2024']).toHaveProperty('mar.');
-      expect(result['2024']['jan.']).toContainEqual(relatorioAnual['2024'][0]);
-      expect(result['2024']['mar.']).toContainEqual(relatorioAnual['2024'][1]);
-    });
-
-    it('deve inicializar todos os meses vazios', async () => {
-      const result = await service.groupByDataMonth(
-        { 2024: [] },
-        periodFilter,
-      );
-
-      expect(result['2024']).toHaveProperty('jan.');
-      expect(result['2024']).toHaveProperty('fev.');
-      expect(result['2024']).toHaveProperty('mar.');
-      expect(result['2024']['jan.']).toEqual([]);
-    });
-
-    it('deve lançar HttpException ao falhar no agrupamento por mês', async () => {
-      const relatorioAnual: Record<string, MockInicial[]> = {
-        2024: [{ id: 1, criado_em: new Date('2024-01-15') }],
-      };
-
-      await expect(
-        service.groupByDataMonth(relatorioAnual as any, null as any),
-      ).rejects.toThrow(HttpException);
-
-      try {
-        await service.groupByDataMonth(relatorioAnual as any, null as any);
-      } catch (err) {
-        expect(err).toBeInstanceOf(HttpException);
-        if (err instanceof HttpException) {
-          expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
-          const response = err.getResponse() as Record<string, unknown>;
-          expect(response).toHaveProperty('api_mensagem');
-          expect(response.api_mensagem).toBe(
-            ERROR_MESSAGES.FALHA_AGRUPAR_INICIAIS_POR_MES,
-          );
-          expect(response).toHaveProperty('tipo_erro');
-          expect(response).toHaveProperty('detalhe_tecnico');
         }
       }
     });
@@ -554,11 +436,150 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
     });
 
     it('deve lançar HttpException ao falhar na formatação de datas', async () => {
-      const error = new Error('Formatação error');
       const lista = null;
 
       await expect(
         service.formatadorDeCamposDate(lista as any),
+      ).rejects.toThrow(HttpException);
+    });
+  });
+
+  describe('includeQtdProcessosAdmissibilidadeStatus', () => {
+    beforeEach(() => {
+      mockPrismaService.controle_Prazo.findMany.mockResolvedValue([]);
+    });
+
+    it('deve incluir quantidade de processos no prazo e excedidos no cabeçalho', async () => {
+      const cabecalho = {
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        prazoFixoAnalise: '15 dias',
+      };
+
+      const lista: MockInicial[] = [
+        {
+          id: 1,
+          criado_em: new Date('2024-01-01'),
+          tempo_de_analise_admissibilidade: 10,
+        },
+        {
+          id: 2,
+          criado_em: new Date('2024-01-01'),
+          tempo_de_analise_admissibilidade: 20,
+        },
+      ];
+
+      const controlePrazo = [{ duracao_planejada: 5 }];
+      mockPrismaService.controle_Prazo.findMany.mockResolvedValue(controlePrazo);
+
+      const result = await service.includeQtdProcessosAdmissibilidadeStatus(
+        cabecalho as any,
+        lista as any,
+      );
+
+      expect(result).toHaveProperty('qtdAnaliseNoPrazo');
+      expect(result).toHaveProperty('qtdAnaliseExcedido');
+    });
+
+    it('deve lançar HttpException ao falhar na inclusão de quantidade de processos', async () => {
+      const cabecalho = {
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        prazoFixoAnalise: '15 dias',
+      };
+
+      const error = new Error('Controle prazo error');
+      mockPrismaService.controle_Prazo.findMany.mockRejectedValue(error);
+
+      await expect(
+        service.includeQtdProcessosAdmissibilidadeStatus(
+          cabecalho as any,
+          [] as any,
+        ),
+      ).rejects.toThrow(HttpException);
+    });
+  });
+
+  describe('includeMedianaPrazoAdmissibilidade', () => {
+    it('deve calcular a média de período de análise corretamente', async () => {
+      const cabecalho = {
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        prazoFixoAnalise: '15 dias',
+      };
+
+      const lista: MockInicial[] = [
+        {
+          id: 1,
+          criado_em: new Date('2024-01-01'),
+          tempo_de_analise_admissibilidade: 10,
+        },
+        {
+          id: 2,
+          criado_em: new Date('2024-01-01'),
+          tempo_de_analise_admissibilidade: 20,
+        },
+      ];
+
+      const result = await service.includeMedianaPrazoAdmissibilidade(
+        cabecalho as any,
+        lista as any,
+      );
+
+      expect(result.mediaPeriodoAnalise).toBe('15.00');
+    });
+
+    it('deve lançar HttpException ao falhar no cálculo da mediana', async () => {
+      const cabecalho = null;
+      const lista = null;
+
+      await expect(
+        service.includeMedianaPrazoAdmissibilidade(
+          cabecalho as any,
+          lista as any,
+        ),
+      ).rejects.toThrow(HttpException);
+    });
+  });
+
+  describe('includeAdmissibilidadesFinalizadas', () => {
+    it('deve incluir quantidade de admissibilidades finalizadas no cabeçalho', async () => {
+      const cabecalho = {
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        prazoFixoAnalise: '15 dias',
+      };
+
+      const lista: MockInicial[] = [
+        {
+          id: 1,
+          criado_em: new Date('2024-01-01'),
+          status: 1,
+        },
+        {
+          id: 2,
+          criado_em: new Date('2024-01-01'),
+          status: 0,
+        },
+      ];
+
+      const result = await service.includeAdmissibilidadesFinalizadas(
+        cabecalho as any,
+        lista as any,
+      );
+
+      expect(result.qtdAnaliseFinalizada).toBe('1');
+    });
+
+    it('deve lançar HttpException ao falhar na inclusão de admissibilidades finalizadas', async () => {
+      const cabecalho = null;
+      const lista = null;
+
+      await expect(
+        service.includeAdmissibilidadesFinalizadas(
+          cabecalho as any,
+          lista as any,
+        ),
       ).rejects.toThrow(HttpException);
     });
   });
@@ -573,6 +594,15 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
         .spyOn(service, 'includePrazoDeAdmissibilidade')
         .mockResolvedValue([]);
       jest.spyOn(service, 'formatadorDeCamposDate').mockResolvedValue([]);
+      jest
+        .spyOn(service, 'includeQtdProcessosAdmissibilidadeStatus')
+        .mockResolvedValue({} as any);
+      jest
+        .spyOn(service, 'includeMedianaPrazoAdmissibilidade')
+        .mockResolvedValue({} as any);
+      jest
+        .spyOn(service, 'includeAdmissibilidadesFinalizadas')
+        .mockResolvedValue({} as any);
     });
 
     it('deve executar todo o fluxo de geração do relatório corretamente', async () => {
@@ -600,6 +630,16 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
         },
       ];
 
+      const cabecalhoFinalizado = {
+        dataInicio: '2024-01-01',
+        dataFim: '2024-01-31',
+        prazoFixoAnalise: '15 dias',
+        qtdAnaliseNoPrazo: '1',
+        qtdAnaliseExcedido: '0',
+        mediaPeriodoAnalise: '10.00',
+        qtdAnaliseFinalizada: '1',
+      };
+
       jest.spyOn(service, 'getDataPorPeriodo').mockResolvedValue(data as any);
       jest
         .spyOn(service, 'includeReconsideracaoESuspensaoData')
@@ -610,13 +650,25 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
       jest
         .spyOn(service, 'formatadorDeCamposDate')
         .mockResolvedValue(dataFormatada as any);
+      jest
+        .spyOn(service, 'includeQtdProcessosAdmissibilidadeStatus')
+        .mockResolvedValue(cabecalhoFinalizado as any);
+      jest
+        .spyOn(service, 'includeMedianaPrazoAdmissibilidade')
+        .mockResolvedValue(cabecalhoFinalizado as any);
+      jest
+        .spyOn(service, 'includeAdmissibilidadesFinalizadas')
+        .mockResolvedValue(cabecalhoFinalizado as any);
 
       const result = await service.getPrazoAnaliseAdmissibilidade(
         '2024-01-01',
         '2024-01-31',
       );
 
-      expect(result).toEqual(dataFormatada);
+      expect(result).toEqual({
+        cabecalho: cabecalhoFinalizado,
+        dados: dataFormatada,
+      });
       expect(service.getDataPorPeriodo).toHaveBeenCalledWith({
         gte: new Date('2024-01-01'),
         lte: new Date('2024-01-31'),
@@ -628,6 +680,11 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
         dataIncrementada,
       );
       expect(service.formatadorDeCamposDate).toHaveBeenCalledWith(dataComTempos);
+      expect(
+        service.includeQtdProcessosAdmissibilidadeStatus,
+      ).toHaveBeenCalled();
+      expect(service.includeMedianaPrazoAdmissibilidade).toHaveBeenCalled();
+      expect(service.includeAdmissibilidadesFinalizadas).toHaveBeenCalled();
     });
 
     it('deve chamar métodos na sequência correta', async () => {
@@ -661,6 +718,27 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
           return [] as any;
         });
 
+      jest
+        .spyOn(service, 'includeQtdProcessosAdmissibilidadeStatus')
+        .mockImplementation(async () => {
+          ordemChamadas.push('includeQtdProcessosAdmissibilidadeStatus');
+          return {} as any;
+        });
+
+      jest
+        .spyOn(service, 'includeMedianaPrazoAdmissibilidade')
+        .mockImplementation(async () => {
+          ordemChamadas.push('includeMedianaPrazoAdmissibilidade');
+          return {} as any;
+        });
+
+      jest
+        .spyOn(service, 'includeAdmissibilidadesFinalizadas')
+        .mockImplementation(async () => {
+          ordemChamadas.push('includeAdmissibilidadesFinalizadas');
+          return {} as any;
+        });
+
       await service.getPrazoAnaliseAdmissibilidade('2024-01-01', '2024-01-31');
 
       expect(ordemChamadas).toEqual([
@@ -668,6 +746,9 @@ describe('RrPrazoAnaliseAdmissibilidadeService', () => {
         'includeReconsideracaoESuspensaoData',
         'includePrazoDeAdmissibilidade',
         'formatadorDeCamposDate',
+        'includeQtdProcessosAdmissibilidadeStatus',
+        'includeMedianaPrazoAdmissibilidade',
+        'includeAdmissibilidadesFinalizadas',
       ]);
     });
 
