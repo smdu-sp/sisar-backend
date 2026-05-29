@@ -18,10 +18,15 @@ import { AvisosModule } from './avisos/avisos.module';
 import { ParecerAdmissibilidadeModule } from './parecer_admissibilidade/parecer_admissibilidade.module';
 import { FinalizacaoModule } from './finalizacao/finalizacao.module';
 import { RelatorioModule } from './relatorio/relatorio.module';
+import { CategoriaModule } from './categoria/categoria.module';
+import { MotivoInadmissaoModule } from './motivo-inadmissao/motivo-inadmissao.module';
+import { PedidoModule } from './pedido/pedido.module';
+import { CoordenadoriaModule } from './coordenadoria/coordenadoria.module';
+import { DiretoriaModule } from './diretoria/diretoria.module';
 
 @Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, SGUModule, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule, AdmissibilidadeModule, DistribuicaoModule, AvisosModule, ParecerAdmissibilidadeModule, RelatorioModule, FinalizacaoModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, SGUModule, AlvaraTipoModule, InicialModule, UnidadesModule, SubprefeituraModule, ReunioesModule, AdmissibilidadeModule, DistribuicaoModule, AvisosModule, ParecerAdmissibilidadeModule, RelatorioModule, FinalizacaoModule, CategoriaModule, MotivoInadmissaoModule, PedidoModule, CoordenadoriaModule, DiretoriaModule],
   controllers: [],
   providers: [
     AppService,

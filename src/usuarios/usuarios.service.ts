@@ -88,21 +88,50 @@ export class UsuariosService {
     usuario: Usuario = null,
     pagina: number = 1,
     limite: number = 10,
-    status: number = 1,
+    status: number | string = 1,
     busca?: string,
     permissao?: string,
     unidade_id?: string,
   ): Promise<UsuarioPaginadoResponseDTO> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
+
+    let statusFiltro: number | null = 1;
+    if (usuario?.permissao === 'DEV') {
+      if (typeof status === 'string') {
+        const statusNormalizado = status.trim().toUpperCase();
+        if (statusNormalizado === '' || statusNormalizado === 'ALL' || statusNormalizado === '4') {
+          statusFiltro = null;
+        } else if (statusNormalizado === 'ATIVO') {
+          statusFiltro = 1;
+        } else if (statusNormalizado === 'INATIVO') {
+          statusFiltro = 2;
+        } else {
+          const statusNumerico = Number(status);
+          statusFiltro = !Number.isNaN(statusNumerico) && statusNumerico !== 4
+            ? statusNumerico
+            : null;
+        }
+      } else {
+        statusFiltro = Number.isNaN(status) || status === 4 ? null : status;
+      }
+    }
+
+    const permissaoFiltro =
+      permissao && permissao !== '' && permissao !== 'all'
+        ? $Enums.Permissao[permissao]
+        : undefined;
+
     const searchParams = {
-      ...(busca && { OR: [
-        { nome: { contains: busca } },
-        { login: { contains: busca } },
-        { email: { contains: busca } },
-      ]}),
-      ...(unidade_id !== '' && { unidade_id }),
-      ...(permissao !== '' && { permissao: $Enums.Permissao[permissao] }),
-      ...(usuario.permissao !== 'DEV' ? { status: 1 } : (status !== 4 && { status })),
+      ...(busca && {
+        OR: [
+          { nome: { contains: busca } },
+          { login: { contains: busca } },
+          { email: { contains: busca } },
+        ],
+      }),
+      ...(unidade_id && unidade_id !== '' && { unidade_id }),
+      ...(permissaoFiltro && { permissao: permissaoFiltro }),
+      ...(statusFiltro !== null && { status: statusFiltro }),
     };
     const total: number = await this.prisma.usuario.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };

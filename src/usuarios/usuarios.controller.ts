@@ -58,7 +58,7 @@ export class UsuariosController {
     @Query('busca') busca?: string,
     @Query('permissao') permissao?: string,
   ): Promise<UsuarioPaginadoResponseDTO> {
-    return this.usuariosService.buscarTudo(usuario, +pagina, +limite, +status, busca, permissao);
+    return this.usuariosService.buscarTudo(usuario, +pagina, +limite, status, busca, permissao);
   }
 
   @Permissoes('ADM', 'SUP')

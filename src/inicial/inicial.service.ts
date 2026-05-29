@@ -268,13 +268,12 @@ export class InicialService {
 
   async buscarTudoEmAnalise(pagina: number = 1, limite: number = 10): Promise<IniciaisPaginado> {
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
-    const total = await this.prisma.inicial.count();
+    const where = { status: 2 };
+    const total = await this.prisma.inicial.count({ where });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, data: [] };
     [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
     const iniciais = await this.prisma.inicial.findMany({
-      where: {
-        status: 2
-      },
+      where,
       include: {
         alvara_tipo: true,
       },
