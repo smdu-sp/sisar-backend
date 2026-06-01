@@ -57,6 +57,14 @@ export class ReunioesController {
     return this.unidadesService.buscarPorId(id)
   }
 
+  @Permissoes('SUP', 'ADM', 'USR')
+  @Get('por-processo/:inicialId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reuniões GRAPROEM do processo' })
+  buscarPorInicial(@Param('inicialId') inicialId: string) {
+    return this.unidadesService.buscarPorInicial(+inicialId);
+  }
+
   @Permissoes('SUP', 'ADM')
   @Patch('atualizar-data/:id')
   @HttpCode(HttpStatus.OK)

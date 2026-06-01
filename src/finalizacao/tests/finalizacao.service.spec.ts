@@ -62,32 +62,19 @@ describe('FinalizacaoService tests', () => {
    * Testando chamada do serviço de "criar"
    * 
    */
-  it('Deve envocar prisma.conclusao.create e prisma.inicial.update quando executar função criar.', async () => {
-    // Criando o objeto mockado de retorno da chamada "criar".
+  it('Deve envocar prisma.conclusao.create quando executar função criar para processo deferido.', async () => {
     const mockCreateResult: CreateFinalizacaoDto = { inicial_id: 123, data_apostilamento: new Date(), data_conclusao: new Date(), data_emissao: new Date(), data_outorga: new Date(), data_resposta: new Date(), data_termo: new Date(), num_alvara: "string", obs: 'string', outorga: false };
-    // Configura o retorno do método mockado
+    (prisma.inicial.findUnique as jest.Mock).mockResolvedValue({ id: 123, status: 3 });
+    (prisma.conclusao.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.conclusao.create as jest.Mock).mockResolvedValue(mockCreateResult);
-    (prisma.inicial.update as jest.Mock).mockResolvedValue(null);
 
-    // Chama o método do serviço, fornecendo o CreateFinalizacaoDto.
-    const result: Conclusao = await service.criar(mockCreateResult, true);
+    const result: Conclusao = await service.criar(mockCreateResult);
 
-    // Testa se o resultado não é nulo.
     expect(result).not.toBeNull();
-    // Verifica se o método create mockado de conclusão foi chamado corretamente.
-    expect(prisma.conclusao.create).toHaveBeenCalledWith({ 
-      data: mockCreateResult 
+    expect(prisma.conclusao.create).toHaveBeenCalledWith({
+      data: mockCreateResult,
     });
-    // Verifica se o método update mockado de inicial foi chamado corretamente.
-    expect(prisma.inicial.update).toHaveBeenCalledWith({ 
-      where: { 
-        id: expect.any(Number) 
-      },
-      data: { 
-        status: expect.any(Number) 
-      } 
-    });
-    // Verifica se o retorno está correto.
+    expect(prisma.inicial.update).not.toHaveBeenCalled();
     expect(result).toEqual(mockCreateResult);
   });
 

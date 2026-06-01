@@ -6,5 +6,6 @@ import { InicialController } from './inicial.controller';
   imports: [],
   controllers: [InicialController],
   providers: [InicialService],
+  exports: [InicialService],
 })
 export class InicialModule {}

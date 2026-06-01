@@ -29,7 +29,7 @@ export class DistribuicaoService {
         administrativo_responsavel: true
       }
     });
-    if (distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Processo não existe.');
+    if (!distribuicao) throw new ForbiddenException('Erro ao atualizar distribuição. Processo não existe.');
     const { administrativo_responsavel_id, tecnico_responsavel_id } = updateDistribuicaoDto;
     const atualiza_distribuicao: Distribuicao = await this.prisma.distribuicao.update({
       where: { inicial_id },

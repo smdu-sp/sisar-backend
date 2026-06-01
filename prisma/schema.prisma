@@ -169,11 +169,13 @@ model Decisao {
   analise_svma       DateTime?
   obs                String?
   etapa              Int?
+  instancia          Int?      @default(1)
   graproem           Int?
 
   criado_em          DateTime  @default(now())
   alterado_em        DateTime  @default(now()) @updatedAt
 
+  @@index([inicial_id, instancia])
   @@map("decisoes")
 }
 
@@ -229,6 +231,8 @@ model Inicial {
   alvara_tipo                    Alvara_Tipo                     @relation(fields: [alvara_tipo_id], references: [id])
   alvara_tipo_id                 String
   tipo_processo                  Int?                            @default(1)
+  etapa_analise                  Int?                            @default(1)
+  substatus_analise            Int?                            @default(0)
   obs                            String?                         @db.Text
   status                         Int?                            @default(1)
   pagamento                      Int?                            @default(1)
@@ -337,16 +341,20 @@ model Reconsideracao_Admissibilidade {
 
 model Reuniao_Processo {
   id                       String     @id @default(uuid())
-  inicial_id               Int        @unique
+  inicial_id               Int
+  instancia                Int        @default(1)
   inicial                  Inicial    @relation(fields: [inicial_id], references: [id])
   data_reuniao             DateTime   @db.Date
-  data_processo            DateTime   @db.Date     
+  data_processo            DateTime   @db.Date
   nova_data_reuniao        DateTime?  @db.Date
   justificativa_remarcacao String?
+  numero_reuniao           String?
+  parecer_grupo            String?    @db.Text
 
   criado_em                DateTime   @default(now())
   alterado_em              DateTime   @default(now()) @updatedAt
 
+  @@unique([inicial_id, instancia])
   @@map("reuniao_processos")
 }
 

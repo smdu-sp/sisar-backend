@@ -48,6 +48,15 @@ export class ReunioesService {
     return reuniao_Processo;
   }
 
+  async buscarPorInicial(inicialId: number): Promise<Reuniao_Processo[]> {
+    const reunioes = await this.prisma.reuniao_Processo.findMany({
+      where: { inicial_id: inicialId },
+      orderBy: { instancia: 'asc' },
+      include: { inicial: true },
+    });
+    return reunioes;
+  }
+
   async atualizarData(id: string, updateReunioesDto: UpdateReunioesDto): Promise<Reuniao_Processo> {
     updateReunioesDto.nova_data_reuniao = new Date(updateReunioesDto.nova_data_reuniao);
     updateReunioesDto.nova_data_reuniao.setUTCHours(updateReunioesDto.nova_data_reuniao.getUTCHours() - 3);

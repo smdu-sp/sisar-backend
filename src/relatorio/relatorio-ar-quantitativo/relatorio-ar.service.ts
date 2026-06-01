@@ -46,6 +46,7 @@ export class RelatorioService {
 
       return { [unidadeNome]: processos };
     } else {
+      if (!unidadeId) return {};
       resultados = await this.prisma.admissibilidade.findMany({
         where: {
           inicial: {
@@ -71,13 +72,13 @@ export class RelatorioService {
 
 
   //buscar ID específico de uma unidade
-  async getIdByUnidade(sigla: string): Promise<string> {
+  async getIdByUnidade(sigla: string): Promise<string | null> {
     const unidade = await this.prisma.unidade.findUnique({
       where: {
         sigla
       }
     })
-    return unidade.id
+    return unidade?.id ?? null
   }
 
   // Função auxiliar para contagem total

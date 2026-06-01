@@ -56,6 +56,29 @@ interface ProcessoImport {
   } | null;
 }
 
+const UNIDADES_SETORIAIS = [
+  { sigla: 'PARHIS', nome: 'Patrimônio Histórico', codigo: 'PARHIS' },
+  { sigla: 'RESID', nome: 'Residencial', codigo: 'RESID' },
+  { sigla: 'SERVIN', nome: 'Serviços Institucionais', codigo: 'SERVIN' },
+  { sigla: 'COMIN', nome: 'Comercial e Industrial', codigo: 'COMIN' },
+  { sigla: 'CAEPP', nome: 'Centro de Apoio ao Empreendimento', codigo: 'CAEPP' },
+  { sigla: 'SMUL', nome: 'Secretaria Municipal de Urbanismo e Licenciamento', codigo: 'SMUL' },
+  { sigla: 'GRAPROEM', nome: 'GRAPROEM', codigo: 'GRAPROEM' },
+];
+
+function inferirUnidadeSiglaPorAlvara(nomeAlvara: string): string {
+  const nome = nomeAlvara
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  if (nome.includes('bem tombado')) return 'CAEPP';
+  if (nome.includes('area envoltoria')) return 'PARHIS';
+  if (nome.includes('certificado') || nome.includes('regularizacao')) return 'COMIN';
+  if (nome.includes('aprovacao e execucao')) return 'RESID';
+  if (nome.includes('execucao de')) return 'SERVIN';
+  return 'RESID';
+}
+
 const DEFAULT_PRAZOS = {
   prazo_admissibilidade_smul: 15,
   reconsideracao_smul: 3,
@@ -172,7 +195,17 @@ async function seedReferencias(payload: PlanilhaPayload, adminId: string) {
     tecnicoMap.set(nome, usuario.id);
   }
 
-  return { alvaraMap, parecerMap, tecnicoMap, adminId };
+  const unidadeMap = new Map<string, string>();
+  for (const u of UNIDADES_SETORIAIS) {
+    const registro = await prisma.unidade.upsert({
+      where: { sigla: u.sigla },
+      create: { ...u, status: 1 },
+      update: { nome: u.nome, codigo: u.codigo, status: 1 },
+    });
+    unidadeMap.set(u.sigla, registro.id);
+  }
+
+  return { alvaraMap, parecerMap, tecnicoMap, unidadeMap, adminId };
 }
 
 async function importProcessos(
@@ -181,6 +214,7 @@ async function importProcessos(
     alvaraMap: Map<string, string>;
     parecerMap: Map<string, string>;
     tecnicoMap: Map<string, string>;
+    unidadeMap: Map<string, string>;
     adminId: string;
   },
 ) {
@@ -224,6 +258,9 @@ async function importProcessos(
           ? refs.parecerMap.get(item.admissibilidade.parecer)
           : undefined;
 
+        const unidadeSigla = inferirUnidadeSiglaPorAlvara(item.alvara_tipo);
+        const unidadeId = refs.unidadeMap.get(unidadeSigla);
+
         await tx.admissibilidade.create({
           data: {
             inicial_id: inicial.id,
@@ -234,6 +271,7 @@ async function importProcessos(
             ),
             parecer_admissibilidade_id: parecerId,
             reconsiderado: item.admissibilidade.reconsiderado,
+            unidade_id: unidadeId,
           },
         });
 

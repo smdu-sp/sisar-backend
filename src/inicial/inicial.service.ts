@@ -3,8 +3,9 @@ import { CreateInicialDto, CreateInterfacesDto } from './dto/create-inicial.dto'
 import { UpdateInicialDto } from './dto/update-inicial.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Inicial, Inicial_Sqls, Reuniao_Processo } from '@prisma/client';
+import { calcularDatasReuniaoGraproem } from 'src/common/calcular-datas-reuniao-graproem';
 import { AppService } from 'src/app.service';
-import { IniciaisPaginado } from './dto/inicial-response.dto';
+import { IniciaisPaginado, InicialResponseDTO } from './dto/inicial-response.dto';
 
 @Injectable()
 export class InicialService {
@@ -48,6 +49,108 @@ export class InicialService {
 
   adicionaDiasData(dataInicial: Date, dias: number): Date {
     return new Date(dataInicial.valueOf() + (dias * 24 * 60 * 60 * 1000));
+  }
+
+  /** Calcula prazos de análise (SMUL / múltiplas interfaces) a partir da decisão de admissibilidade. */
+  async calcularLimitesAnalise(
+    inicialId: number,
+  ): Promise<{ data_limiteSmul?: Date; data_limiteMulti?: Date }> {
+    const inicial = await this.prisma.inicial.findUnique({
+      where: { id: inicialId },
+      include: {
+        alvara_tipo: true,
+        admissibilidade: { select: { data_decisao_interlocutoria: true } },
+      },
+    });
+    if (!inicial?.alvara_tipo) return {};
+
+    const decisao = inicial.admissibilidade?.data_decisao_interlocutoria;
+    const baseSmul = decisao ?? inicial.envio_admissibilidade;
+    const limites: { data_limiteSmul?: Date; data_limiteMulti?: Date } = {};
+
+    if (baseSmul && inicial.alvara_tipo.prazo_analise_smul1 > 0) {
+      limites.data_limiteSmul = this.adicionaDiasData(
+        new Date(baseSmul),
+        inicial.alvara_tipo.prazo_analise_smul1,
+      );
+    }
+
+    if (inicial.tipo_processo === 2 && inicial.alvara_tipo.prazo_analise_multi1 > 0) {
+      const baseMulti = decisao ?? inicial.envio_admissibilidade;
+      if (baseMulti) {
+        limites.data_limiteMulti = this.adicionaDiasData(
+          new Date(baseMulti),
+          inicial.alvara_tipo.prazo_analise_multi1,
+        );
+      }
+    }
+
+    return limites;
+  }
+
+  /** Cria registro de decisão e controles de prazo da etapa de análise (idempotente). */
+  async provisionarRegistrosAnalise(inicialId: number): Promise<void> {
+    const inicial = await this.prisma.inicial.findUnique({
+      where: { id: inicialId },
+      include: { alvara_tipo: true, admissibilidade: true },
+    });
+    if (!inicial?.alvara_tipo || inicial.status !== 2) return;
+
+    const base =
+      inicial.admissibilidade?.data_decisao_interlocutoria ??
+      inicial.envio_admissibilidade;
+    if (!base) return;
+
+    const dataInicio = new Date(base);
+    const graproem = inicial.tipo_processo === 2 ? 1 : 0;
+    const alvara = inicial.alvara_tipo;
+
+    const instancia = inicial.etapa_analise ?? 1;
+    const decisaoExistente = await this.prisma.decisao.count({
+      where: { inicial_id: inicialId, instancia },
+    });
+    if (decisaoExistente === 0) {
+      await this.prisma.decisao.create({
+        data: {
+          inicial_id: inicialId,
+          parecer: 0,
+          etapa: 2,
+          instancia,
+          graproem,
+        },
+      });
+    }
+
+    const controlesExistentes = await this.prisma.controle_Prazo.count({
+      where: { inicial_id: inicialId, etapa: 2 },
+    });
+    if (controlesExistentes > 0) return;
+
+    const fases: number[] =
+      inicial.tipo_processo === 2
+        ? [alvara.prazo_analise_multi1, alvara.prazo_analise_multi2].filter(
+            (d) => d > 0,
+          )
+        : [alvara.prazo_analise_smul1, alvara.prazo_analise_smul2].filter(
+            (d) => d > 0,
+          );
+
+    let cursor = new Date(dataInicio);
+    for (const duracao of fases) {
+      const finalPlanejado = this.adicionaDiasData(cursor, duracao);
+      await this.prisma.controle_Prazo.create({
+        data: {
+          inicial_id: inicialId,
+          data_inicio: cursor,
+          final_planejado: finalPlanejado,
+          duracao_planejada: duracao,
+          etapa: 2,
+          graproem,
+          status: 0,
+        },
+      });
+      cursor = finalPlanejado;
+    }
   }
 
   pegaQuarta(data: Date): Date {
@@ -198,13 +301,27 @@ export class InicialService {
     if (inicial.envio_admissibilidade && distribuicao) await this.alocaResponsavelTecnico(inicial);
   }
 
+  private parseDataCampo(valor: Date | string | undefined | null): Date | undefined {
+    if (valor == null || valor === '') return undefined;
+    if (valor instanceof Date) return valor;
+    const texto = String(valor).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) return new Date(`${texto}T12:00:00.000Z`);
+    const data = new Date(texto);
+    if (Number.isNaN(data.getTime())) throw new ForbiddenException('Data inválida.');
+    return data;
+  }
+
   async criar(createInicialDto: CreateInicialDto): Promise<Inicial> {
     const { nums_sql, interfaces } = createInicialDto;
     delete createInicialDto.nums_sql;
     delete createInicialDto.interfaces;
     createInicialDto.sei = createInicialDto.sei.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
-    createInicialDto.aprova_digital = createInicialDto.aprova_digital.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
-    createInicialDto.processo_fisico = createInicialDto.processo_fisico.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    if (createInicialDto.aprova_digital)
+      createInicialDto.aprova_digital = createInicialDto.aprova_digital.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    if (createInicialDto.processo_fisico)
+      createInicialDto.processo_fisico = createInicialDto.processo_fisico.replaceAll('-', '').replaceAll('.', '').replaceAll('/', '');
+    createInicialDto.data_protocolo = this.parseDataCampo(createInicialDto.data_protocolo) as Date;
+    createInicialDto.envio_admissibilidade = this.parseDataCampo(createInicialDto.envio_admissibilidade);
     if (createInicialDto.envio_admissibilidade) createInicialDto.status = 0;
     const tipo_alvara = await this.prisma.alvara_Tipo.findUnique({ where: { id: createInicialDto.alvara_tipo_id } });
     if (!tipo_alvara) throw new ForbiddenException('Alvara inválido.');
@@ -223,7 +340,12 @@ export class InicialService {
       });
     }
     await this.prisma.admissibilidade.create({
-      data: { inicial_id: novo_inicial.id }
+      data: {
+        inicial_id: novo_inicial.id,
+        ...(novo_inicial.envio_admissibilidade
+          ? { data_envio: novo_inicial.envio_admissibilidade }
+          : {}),
+      },
     });
     return novo_inicial;
   }
@@ -253,6 +375,19 @@ export class InicialService {
       where: searchParams,
       include: {
         alvara_tipo: true,
+        admissibilidade: {
+          select: {
+            data_envio: true,
+            data_decisao_interlocutoria: true,
+            status: true,
+          },
+        },
+        distribuicao: {
+          select: { tecnico_responsavel_id: true },
+        },
+        conclusao: {
+          select: { data_conclusao: true },
+        },
       },
       skip: (pagina - 1) * limite,
       take: limite,
@@ -276,6 +411,21 @@ export class InicialService {
       where,
       include: {
         alvara_tipo: true,
+        admissibilidade: {
+          select: {
+            data_envio: true,
+            data_decisao_interlocutoria: true,
+            status: true,
+          },
+        },
+        distribuicao: {
+          include: {
+            tecnico_responsavel: { select: { id: true, nome: true } },
+          },
+        },
+        conclusao: {
+          select: { data_conclusao: true },
+        },
       },
       skip: (pagina - 1) * limite,
       take: limite,
@@ -329,70 +479,37 @@ export class InicialService {
   }
 
   async geraReuniaoData(inicial: Inicial): Promise<void> {
-    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({ 
-      where: { 
-        id: inicial.alvara_tipo_id 
-      } 
+    const tipoAlvara = await this.prisma.alvara_Tipo.findUnique({
+      where: { id: inicial.alvara_tipo_id },
     });
-    if (!tipoAlvara) 
+    if (!tipoAlvara)
       throw new ForbiddenException('Erro ao buscar tipo de alvará.');
-    const { prazo_analise_multi1 } = tipoAlvara;
-    const data = new Date(inicial.envio_admissibilidade);
-    data.setDate(data.getDate() + prazo_analise_multi1);
-    const pegaQuarta = (data: Date) => {
-      const diaSemana = data.getDay();
-      if (diaSemana !== 3) {
-        const quarta = new Date(data);
-        switch (diaSemana) {
-          case 0:
-            quarta.setDate(data.getDate() - 4);
-            break;
-          case 1:
-            quarta.setDate(data.getDate() - 5);
-            break;
-          case 2:
-            quarta.setDate(data.getDate() - 6);
-            break;
-          case 3:
-            quarta.setDate(data.getDate() - 7);
-            break;
-          case 4:
-            quarta.setDate(data.getDate() - 1);
-            break;
-          case 5:
-            quarta.setDate(data.getDate() - 2);
-            break;
-          case 6:
-            quarta.setDate(data.getDate() - 3);
-            break;
-        }
-        return quarta;
-      } else return data;
+    if (!inicial.envio_admissibilidade) {
+      throw new ForbiddenException(
+        'Envio de admissibilidade é obrigatório para gerar data de reunião.',
+      );
     }
-    let data_reuniao = pegaQuarta(new Date(data));
-    const data_formatada = data_reuniao.toISOString().split('T')[0]
-    // const validaFeriado = await this.verificaFeriado(data_formatada);
-    data_reuniao.setUTCHours(0, 0, 0, 0);
-    // if (validaFeriado) data_reuniao.setDate(data_reuniao.getDate() - 7);
-    let dataProcesso = new Date(inicial.envio_admissibilidade);
-    dataProcesso.setDate(
-      dataProcesso.getDate() +
-      tipoAlvara.prazo_admissibilidade_multi +
-      tipoAlvara.prazo_analise_multi1 +
-      tipoAlvara.prazo_analise_multi2 +
-      tipoAlvara.prazo_emissao_alvara_multi
+
+    const { data_reuniao, data_processo } = calcularDatasReuniaoGraproem(
+      inicial.envio_admissibilidade,
+      tipoAlvara,
+      1,
     );
-    dataProcesso.setUTCHours(0, 0, 0, 0);
+
     const reuniao = await this.prisma.reuniao_Processo.upsert({
-      where: { inicial_id: inicial.id },
+      where: {
+        inicial_id_instancia: { inicial_id: inicial.id, instancia: 1 },
+      },
       create: {
         data_reuniao,
         inicial_id: inicial.id,
-        data_processo: dataProcesso
+        instancia: 1,
+        data_processo,
       },
       update: {
-        data_reuniao
-      }
+        data_reuniao,
+        data_processo,
+      },
     });
     if (!reuniao) throw new ForbiddenException('Erro ao gerar reunião.');
   }
@@ -411,26 +528,41 @@ export class InicialService {
     return processos;
   }
 
-  async buscarPorId(id: number): Promise<Inicial> {
+  async buscarPorId(id: number): Promise<InicialResponseDTO> {
     if (!id || id < 1) throw new ForbiddenException('Id inválido');
     const inicial = await this.prisma.inicial.findUnique({
       where: { id },
       include: {
+        alvara_tipo: true,
         iniciais_sqls: {
           orderBy: { sql: 'asc' }
         },
         interfaces: true,
         admissibilidade: true,
+        conclusao: true,
         distribuicao: {
           include: {
             administrativo_responsavel: true,
             tecnico_responsavel: true
           }
-        }
+        },
+        comunique_ses: { orderBy: { criado_em: 'desc' } },
+        decisoes: { orderBy: { instancia: 'asc' } },
+        reunioes: { orderBy: { instancia: 'asc' } },
+        reconsideracao_admissibilidade: true,
       }
     });
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
-    return inicial;
+    if (!inicial.admissibilidade) return inicial;
+    const dataEnvio =
+      inicial.admissibilidade.data_envio ?? inicial.envio_admissibilidade ?? null;
+    return {
+      ...inicial,
+      admissibilidade: {
+        ...inicial.admissibilidade,
+        data_envio: dataEnvio,
+      },
+    };
   }
 
   async atualizar(id: number, updateInicialDto: UpdateInicialDto): Promise<Inicial> {
@@ -442,17 +574,40 @@ export class InicialService {
     if (!inicial) throw new ForbiddenException('Nenhum processo encontrado');
     const { interfaces } = updateInicialDto;
     delete updateInicialDto.interfaces;
+    const limitesAnalise =
+      updateInicialDto.status === 2
+        ? await this.calcularLimitesAnalise(id)
+        : {};
     const inicial_atualizado = await this.prisma.inicial.update({
       where: { 
         id 
       },
       data: { 
-        ...updateInicialDto
+        ...updateInicialDto,
+        ...limitesAnalise,
       },
     });
     if (inicial_atualizado.tipo_processo === 2) {
       await this.geraReuniaoData(inicial_atualizado);
       await this.criaInterfaces(interfaces as CreateInterfacesDto, inicial_atualizado.id);
+    }
+    if (inicial_atualizado.status === 2) {
+      const substatusInicial =
+        inicial_atualizado.tipo_processo === 2 ? 3 : 0;
+      if (
+        inicial.substatus_analise == null ||
+        updateInicialDto.status === 2
+      ) {
+        await this.prisma.inicial.update({
+          where: { id },
+          data: {
+            etapa_analise: inicial_atualizado.etapa_analise ?? 1,
+            substatus_analise:
+              updateInicialDto.substatus_analise ?? substatusInicial,
+          },
+        });
+      }
+      await this.provisionarRegistrosAnalise(id);
     }
     if (!inicial_atualizado)
       throw new ForbiddenException('Erro ao atualizar processo');

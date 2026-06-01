@@ -154,7 +154,7 @@ export class UsuariosController {
     return this.usuariosService.buscarNovo(login);
   }
 
-  @Permissoes('ADM', 'SUP')
+  @Permissoes('ADM', 'SUP', 'TEC')
   @Get('buscar-administrativos')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ description: "Buscar administrativos.", summary: 'Busque administrativios.' })
@@ -164,7 +164,7 @@ export class UsuariosController {
     return this.usuariosService.buscarAdministrativos();
   }
 
-  @Permissoes('ADM', 'SUP', 'USR')
+  @Permissoes('ADM', 'SUP', 'USR', 'TEC')
   @Get('buscar-funcionarios')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ description: "Buscar funcionários.", summary: 'Busque funcionários.' })

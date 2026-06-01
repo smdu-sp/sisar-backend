@@ -30,6 +30,8 @@ export class CreateAlvaraTipoDto {
     @ApiProperty()
     prazo_analise_multi2: number;
     @ApiProperty()
+    prazo_emissao_alvara_multi: number;
+    @ApiProperty()
     prazo_comunique_se: number;
     @ApiProperty()
     prazo_encaminhar_coord: number;

@@ -4,7 +4,7 @@ import { CreateAdmissibilidadeDto } from './dto/create-admissibilidade.dto';
 import { UpdateAdmissibilidadeDto } from './dto/update-admissibilidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
-import { Admissibilidade, Inicial } from '@prisma/client';
+import { Admissibilidade, Inicial, Prisma } from '@prisma/client';
 import { AdmissibilidadePaginado, AdmissibilidadeResponseDTO, CreateResponseAdmissibilidadeDTO } from './dto/responses.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -22,7 +22,7 @@ export class AdmissibilidadeService {
   ): Promise<CreateResponseAdmissibilidadeDTO> {
     const { interfaces, tipo_processo, inicial_id } = createAdmissibilidadeDto;
     const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.create({
-      data: createAdmissibilidadeDto,
+      data: this.toAdmissibilidadeData(createAdmissibilidadeDto) as Prisma.AdmissibilidadeUncheckedCreateInput,
       include: { inicial: true }
     });
     if (tipo_processo) {
@@ -45,7 +45,7 @@ export class AdmissibilidadeService {
     }
     if (!admissibilidade)
       throw new InternalServerErrorException('Não foi possível criar a subprefeitura. Tente novamente.');
-    return admissibilidade;
+    return this.enriquecerDataEnvio(admissibilidade);
   }
 
   async listaCompleta(): Promise<AdmissibilidadeResponseDTO[]> {
@@ -172,7 +172,7 @@ export class AdmissibilidadeService {
     if (admissibilidades.length === 0)
       throw new ForbiddenException('Nenhum processo encontrado');
     return {
-      data: admissibilidades,
+      data: admissibilidades.map((adm) => this.enriquecerDataEnvio(adm)),
       total,
       pagina,
       limite
@@ -193,7 +193,7 @@ export class AdmissibilidadeService {
     });
     if (!admissibilidade)
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
-    return admissibilidade;
+    return this.enriquecerDataEnvio(admissibilidade);
   }
 
   async ultimaAtualizacao(id: number): Promise<Inicial> {
@@ -213,7 +213,7 @@ export class AdmissibilidadeService {
     const { interfaces, tipo_processo, inicial_id } = updateAdmissibilidadeDto;
     const admissibilidade: Admissibilidade = await this.prisma.admissibilidade.update({
       where: { inicial_id: id },
-      data: updateAdmissibilidadeDto
+      data: this.toAdmissibilidadeData(updateAdmissibilidadeDto, { omitInicialId: true }) as Prisma.AdmissibilidadeUncheckedUpdateInput
     });
     if (tipo_processo) {
       await this.prisma.inicial.update({
@@ -236,7 +236,11 @@ export class AdmissibilidadeService {
     if (!admissibilidade)
       throw new InternalServerErrorException('Nenhuma admissibilidade encontrada');
     this.ultimaAtualizacao(id)
-    return admissibilidade;
+    const admissibilidadeAtualizada = await this.prisma.admissibilidade.findUnique({
+      where: { inicial_id: id },
+      include: { inicial: true },
+    });
+    return this.enriquecerDataEnvio(admissibilidadeAtualizada ?? admissibilidade);
   }
 
   remove(id: number): string {
@@ -399,5 +403,69 @@ export class AdmissibilidadeService {
       };
     });
     return resultado;
+  }
+
+  private enriquecerDataEnvio<
+    T extends {
+      data_envio?: Date | null;
+      inicial?: { envio_admissibilidade?: Date | null } | null;
+    },
+  >(adm: T): T {
+    const dataEnvio =
+      adm.data_envio ?? adm.inicial?.envio_admissibilidade ?? null;
+    return {
+      ...adm,
+      data_envio: dataEnvio,
+      ...(adm.inicial
+        ? {
+            inicial: {
+              ...adm.inicial,
+              envio_admissibilidade:
+                adm.inicial.envio_admissibilidade ?? dataEnvio,
+            },
+          }
+        : {}),
+    };
+  }
+
+  private parseDataCampo(valor: Date | string | undefined | null): Date | undefined {
+    if (valor == null || valor === '') return undefined;
+    if (valor instanceof Date) return valor;
+    const texto = String(valor).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) return new Date(`${texto}T12:00:00.000Z`);
+    const data = new Date(texto);
+    if (Number.isNaN(data.getTime())) throw new ForbiddenException('Data inválida.');
+    return data;
+  }
+
+  private toAdmissibilidadeData(
+    dto: CreateAdmissibilidadeDto | UpdateAdmissibilidadeDto,
+    options?: { omitInicialId?: boolean }
+  ): Prisma.AdmissibilidadeUncheckedCreateInput | Prisma.AdmissibilidadeUncheckedUpdateInput {
+    const {
+      interfaces: _interfaces,
+      tipo_processo: _tipoProcesso,
+      inicial_id,
+      data_envio,
+      data_decisao_interlocutoria,
+      unidade_id,
+      subprefeitura_id,
+      categoria_id,
+      parecer_admissibilidade_id,
+      status,
+    } = dto;
+
+    return {
+      ...(options?.omitInicialId ? {} : inicial_id !== undefined ? { inicial_id } : {}),
+      ...(unidade_id !== undefined ? { unidade_id } : {}),
+      ...(subprefeitura_id !== undefined ? { subprefeitura_id } : {}),
+      ...(categoria_id !== undefined ? { categoria_id } : {}),
+      ...(parecer_admissibilidade_id !== undefined ? { parecer_admissibilidade_id } : {}),
+      ...(status !== undefined ? { status } : {}),
+      ...(data_envio !== undefined ? { data_envio: this.parseDataCampo(data_envio) } : {}),
+      ...(data_decisao_interlocutoria !== undefined
+        ? { data_decisao_interlocutoria: this.parseDataCampo(data_decisao_interlocutoria) }
+        : {}),
+    };
   }
 }

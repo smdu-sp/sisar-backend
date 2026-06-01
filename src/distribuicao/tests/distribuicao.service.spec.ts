@@ -76,7 +76,7 @@ describe('DistribuicaoService tests', () => {
     // Criando o objeto mockado de retorno da chamada "atualizar".
     const mockUpdateResult: UpdateDistribuicaoDto = { inicial_id: 123, tecnico_responsavel_id: 'tecnico_responsavel_id', administrativo_responsavel_id: 'administrativo_responsavel_id', processo_relacionado_incomum: "processo_relacionado_incomum", assunto_processo_relacionado_incomum: 'assunto_processo_relacionado_incomum', baixa_pagamento: 1, obs: null };
     // Configura o retorno do método mockado.
-    (prisma.distribuicao.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.distribuicao.findUnique as jest.Mock).mockResolvedValue(mockUpdateResult);
     (prisma.distribuicao.update as jest.Mock).mockResolvedValue(mockUpdateResult);
 
     // Chama o método do serviço, fornecendo o id do aviso e objeto UpdateAvisoDto.

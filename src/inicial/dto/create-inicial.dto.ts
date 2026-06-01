@@ -23,6 +23,10 @@ export class CreateInicialDto {
     alvara_tipo_id: string;
     @ApiProperty()
     tipo_processo: number;
+    @ApiProperty({ required: false })
+    etapa_analise?: number;
+    @ApiProperty({ required: false })
+    substatus_analise?: number;
     @ApiProperty()
     obs?: string;
     @ApiProperty()

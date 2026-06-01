@@ -17,12 +17,8 @@ export class FinalizacaoController {
   @ApiResponse({ status: 201, description: 'Retorna 201 se criar a finalização com sucesso.', type: FinalizacaoResponseDTO })
   @ApiResponse({ status: 401, description: 'Retorna 401 se não autorizado.' })
   @ApiOperation({ description: "Criar uma finalização.", summary: 'Crie finalizações.' })
-  create(
-    @Body() createFinalizacaoDto: CreateFinalizacaoDto,
-    @Query('conclusao') conclusao: string
-  ) {
-    const conclusaoBoolean = conclusao === 'true' ? true : false;
-    return this.finalizacaoService.criar(createFinalizacaoDto, conclusaoBoolean);
+  create(@Body() createFinalizacaoDto: CreateFinalizacaoDto) {
+    return this.finalizacaoService.criar(createFinalizacaoDto);
   }
 
   @Get('buscar-tudo')
